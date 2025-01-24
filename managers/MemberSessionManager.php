@@ -31,11 +31,6 @@ class MemberSessionManager
         \Yii::$app->session->set(self::head,null);
     }
 
-    public static function setAdministrators() {
-        \Yii::$app->session->set(self::place,"administrators");
-        \Yii::$app->session->set(self::head,null);
-    }
-
     public static function setHelps() {
         \Yii::$app->session->set(self::place,"helps");
         \Yii::$app->session->set(self::head,null);
@@ -53,7 +48,7 @@ class MemberSessionManager
     
 
     public static function isHome() {
-        return \Yii::$app->session->get(self::place) == "home";
+        return \Yii::$app->session->get(self::place) == "home" && \Yii::$app->session->get(self::head) == "home";
     }
 
     public static function isProfil() {
@@ -104,10 +99,6 @@ class MemberSessionManager
 
     public static function isSessions() {
         return \Yii::$app->session->get(self::head) == "sessions";
-    }
-
-    public static function isHeadChat() {
-        return \Yii::$app->session->get(self::head) == "chat";
     }
 
     public static function isExercices() {

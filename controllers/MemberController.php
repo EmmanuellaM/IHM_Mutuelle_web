@@ -437,7 +437,7 @@ class MemberController extends Controller
 
     public function actionTypesTontine()
     {
-        MemberSessionManager::setTontine();
+        MemberSessionManager::setHome("tontine");
         $tontineTypes = TontineType::find()->where(['active' => true])->all();
 
         return $this->render('tontine_types', compact('tontineTypes'));
@@ -457,6 +457,7 @@ class MemberController extends Controller
 /********************************ajouter une tontine ********************************************************** */
     public function actionAjouterTontine()
     {
+        MemberSessionManager::setHome("tontine");
         if (!Yii::$app->request->getIsPost()) {
             return RedirectionManager::abort($this);
         }
