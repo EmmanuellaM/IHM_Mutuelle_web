@@ -12,21 +12,34 @@ $users = \app\models\User::find()
 
 // Convertir les utilisateurs en format JSON pour JavaScript
 $usersJson = Json::encode(array_map(function($user) {
+    $member = \app\models\Member::findOne(['user_id' => $user->id]);
+    $administrator = \app\models\Administrator::findOne(['user_id' => $user->id]);
+    
     $name = '';
-    if ($user->type === 'ADMINISTRATOR') {
-        $administrator = \app\models\Administrator::findOne(['user_id' => $user->id]);
-        $name = $administrator ? $administrator->username : 'Administrateur';
-    } else {
-        $member = \app\models\Member::findOne(['user_id' => $user->id]);
-        $name = $member ? $member->username : 'Membre';
+    $avatarUrl = $user->avatar ? Yii::getAlias('@web/img/upload/') . $user->avatar : Yii::getAlias('@web/img/members.png');
+    
+    if ($user->type === 'ADMINISTRATOR' && $administrator) {
+        $name = $administrator->username;
+    } elseif ($user->type === 'MEMBER' && $member) {
+        $name = $member->username;
     }
+    
+    // Ne retourner l'utilisateur que si on a trouvé son nom
+    if (empty($name)) {
+        return null;
+    }
+    
     return [
         'id' => $user->id,
         'username' => $name,
-        'avatarUrl' => $user->avatar,
+        'avatarUrl' => $avatarUrl,
         'isOnline' => true, // À implémenter avec un vrai statut en ligne
     ];
 }, $users));
+
+// Filtrer les utilisateurs null
+$usersJson = Json::encode(array_values(array_filter(Json::decode($usersJson))));
+
 ?>
 
 <style>
@@ -43,12 +56,12 @@ $usersJson = Json::encode(array_map(function($user) {
 
 .mutuelle-chat {
     display: flex;
-    height: calc(100vh - 100px);
+    height: calc(100vh - 180px);
     background-color: var(--white);
     border-radius: 12px;
     box-shadow: var(--shadow);
     overflow: hidden;
-    margin: 20px;
+    margin: 80px 20px 20px 20px;
 }
 
 /* Sidebar styles */
@@ -360,7 +373,7 @@ $usersJson = Json::encode(array_map(function($user) {
     <div class="mutuelle-chat-sidebar">
         <!-- User Profile -->
         <div class="mutuelle-chat-user-profile">
-            <img src="<?= Yii::$app->user->identity->avatar ?>" alt="Profile">
+            <img src="<?= Yii::$app->user->identity->avatar ? Yii::getAlias('@web/img/upload/') . Yii::$app->user->identity->avatar : Yii::getAlias('@web/img/members.png') ?>" alt="Profile">
             <div class="mutuelle-chat-user-info">
                 <?php
                 $currentUserName = '';
@@ -386,17 +399,24 @@ $usersJson = Json::encode(array_map(function($user) {
         <div class="mutuelle-chat-users-list">
             <?php foreach ($users as $user): ?>
                 <?php
+                $member = \app\models\Member::findOne(['user_id' => $user->id]);
+                $administrator = \app\models\Administrator::findOne(['user_id' => $user->id]);
+                
                 $userName = '';
-                if ($user->type === 'ADMINISTRATOR') {
-                    $administrator = \app\models\Administrator::findOne(['user_id' => $user->id]);
-                    $userName = $administrator ? $administrator->username : 'Administrateur';
-                } else {
-                    $member = \app\models\Member::findOne(['user_id' => $user->id]);
-                    $userName = $member ? $member->username : 'Membre';
+                $avatarUrl = $user->avatar ? Yii::getAlias('@web/img/upload/') . $user->avatar : Yii::getAlias('@web/img/members.png');
+                
+                if ($user->type === 'ADMINISTRATOR' && $administrator) {
+                    $userName = $administrator->username;
+                } elseif ($user->type === 'MEMBER' && $member) {
+                    $userName = $member->username;
+                }
+                
+                if (empty($userName)) {
+                    continue;
                 }
                 ?>
                 <div class="mutuelle-chat-user-item" data-user-id="<?= $user->id ?>">
-                    <img src="<?= $user->avatar ?>" alt="<?= $userName ?>">
+                    <img src="<?= $avatarUrl ?>" alt="<?= $userName ?>">
                     <div class="user-info">
                         <h4><?= $userName ?></h4>
                         <p>Cliquez pour discuter</p>
@@ -411,7 +431,7 @@ $usersJson = Json::encode(array_map(function($user) {
         <!-- Chat Header -->
         <div class="mutuelle-chat-header">
             <div class="selected-user-info">
-                <img src="" alt="" id="selected-user-avatar">
+                <img src="" alt="" id="selected-user-avatar" style="display: none;">
                 <h3 id="selected-user-name">Sélectionnez un utilisateur</h3>
             </div>
         </div>
@@ -506,8 +526,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             selectedUserId = userId;
             selectedUserName.textContent = userName;
-            selectedUserAvatar.src = userAvatar;
-            selectedUserAvatar.alt = userName;
+            const avatarImg = document.getElementById('selected-user-avatar');
+            avatarImg.src = userAvatar;
+            avatarImg.style.display = 'block';
             
             // Activer les contrôles de chat
             messageInput.disabled = false;
