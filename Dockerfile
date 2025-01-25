@@ -31,6 +31,11 @@ RUN echo "display_errors = On" >> /usr/local/etc/php/conf.d/debug.ini \
     && echo "log_errors = On" >> /usr/local/etc/php/conf.d/debug.ini \
     && echo "error_log = /dev/stderr" >> /usr/local/etc/php/conf.d/debug.ini
 
+# Set default environment variables for database
+ENV DB_DSN="mysql:host=sql202.infinityfree.com;dbname=if0_38168993_mutuelle" \
+    DB_USERNAME="if0_38168993" \
+    DB_PASSWORD="ODyq34I3wKuGRRN"
+
 # Copy application files
 COPY . /app
 
@@ -42,16 +47,8 @@ RUN mkdir -p /app/runtime /app/web/assets \
 # Install composer dependencies
 RUN composer install --no-interaction --no-dev --prefer-dist
 
-# Create startup script that runs migrations and starts Apache
+# Create script to update Apache port and start server
 RUN echo '#!/bin/bash\n\
-# Wait for MySQL to be ready\n\
-echo "Waiting for MySQL to be ready..."\n\
-while ! php /app/yii migrate/up --interactive=0; do\n\
-    echo "MySQL is unavailable - sleeping 5 seconds"\n\
-    sleep 5\n\
-done\n\
-\n\
-# Configure and start Apache\n\
 PORT="${PORT:-80}"\n\
 echo "Listen $PORT" > /etc/apache2/ports.conf\n\
 echo "<VirtualHost *:$PORT>\n\
@@ -69,8 +66,6 @@ echo "<VirtualHost *:$PORT>\n\
     php_flag log_errors on\n\
     php_value error_log ${APACHE_LOG_DIR}/php_errors.log\n\
 </VirtualHost>" > /etc/apache2/sites-available/000-default.conf\n\
-\n\
-# Start Apache\n\
 exec apache2-foreground' > /usr/local/bin/docker-entrypoint.sh \
     && chmod +x /usr/local/bin/docker-entrypoint.sh
 
