@@ -27,17 +27,11 @@ $config = [
         'db' => $db,
     ],
     'params' => $params,
-    /*
-    'controllerMap' => [
-        'fixture' => [ // Fixture generation command line.
-            'class' => 'yii\faker\FixtureController',
-        ],
-    ],
-    */
 ];
 
-if (YII_ENV_DEV) {
-    // configuration adjustments for 'dev' environment
+// Only enable Gii in development environment
+defined('YII_ENV') or define('YII_ENV', 'prod');
+if (YII_ENV === 'dev') {
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
