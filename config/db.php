@@ -2,9 +2,9 @@
 
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => getenv('MYSQL_URL') ?: 'mysql:host=localhost;dbname=mutuelle',
-    'username' => getenv('MYSQLUSER'),
-    'password' => getenv('MYSQLPASSWORD'),
+    'dsn' => getenv('DB_DSN') ?: 'mysql:host=sql202.infinityfree.com;dbname=if0_38168993_mutuelle',
+    'username' => getenv('DB_USERNAME') ?: 'if0_38168993',
+    'password' => getenv('DB_PASSWORD') ?: 'ODyq34I3wKuGRRN',
     'charset' => 'utf8',
 
     // Schema cache options (for production environment)
