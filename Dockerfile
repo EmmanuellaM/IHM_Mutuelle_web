@@ -31,11 +31,6 @@ RUN echo "display_errors = On" >> /usr/local/etc/php/conf.d/debug.ini \
     && echo "log_errors = On" >> /usr/local/etc/php/conf.d/debug.ini \
     && echo "error_log = /dev/stderr" >> /usr/local/etc/php/conf.d/debug.ini
 
-# Set default environment variables for database
-ENV DB_DSN="mysql:host=sql202.infinityfree.com;dbname=if0_38168993_mutuelle" \
-    DB_USERNAME="if0_38168993" \
-    DB_PASSWORD="ODyq34I3wKuGRRN"
-
 # Copy application files
 COPY . /app
 
