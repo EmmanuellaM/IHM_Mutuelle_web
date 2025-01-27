@@ -32,7 +32,7 @@ RUN echo "display_errors = On" >> /usr/local/etc/php/conf.d/debug.ini \
     && echo "error_log = /dev/stderr" >> /usr/local/etc/php/conf.d/debug.ini
 
 # Set default environment variables for database
-ENV DB_DSN="mysql://if0_38168993:ODyq34I3wKuGRRN@sql202.infinityfree.com:3306/if0_38168993_mutuelle" \
+ENV DB_DSN="mysql:host=sql202.infinityfree.com;port=3306;dbname=if0_38168993_mutuelle" \
     DB_USERNAME="if0_38168993" \
     DB_PASSWORD="ODyq34I3wKuGRRN"
 
