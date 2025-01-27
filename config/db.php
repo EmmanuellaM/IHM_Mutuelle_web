@@ -2,9 +2,9 @@
 
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => getenv('DB_DSN') ?: 'mysql:host=sql202.infinityfree.com;port=3306;dbname=if0_38168993_mutuelle',
-    'username' => getenv('DB_USERNAME') ?: 'if0_38168993',
-    'password' => getenv('DB_PASSWORD') ?: 'ODyq34I3wKuGRRN',
+    'dsn' => getenv('DB_DSN') ?: 'mysql:host=sql.freedb.tech;port=3306;dbname=freedb_mutuelle',
+    'username' => getenv('DB_USERNAME') ?: 'freedb_wandji',
+    'password' => getenv('DB_PASSWORD') ?: 'AfC9zKpNmX2P%T$',
     'charset' => 'utf8',
 
     // Schema cache options (for production environment)
