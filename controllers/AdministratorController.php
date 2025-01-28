@@ -190,16 +190,19 @@ class AdministratorController extends Controller
                 }
 
                 // vérifier que la moi de la session actuelle est juste après la moi precedant pour plus de précision que la precedante condition 
+                $prevMonth = clone $submittedDate;
+                $prevMonth->modify('-1 month');
+                
                 $PrevExist = Session::find()
                     ->where([
                         'AND',
-                        ['>=', 'date', sprintf('%04d-%02d-01', $submittedDate->format('Y'), $submittedDate->format('m')-1)],
-                        ['<', 'date', sprintf('%04d-%02d-01', $submittedDate->format('Y'), $submittedDate->format('m'))],
+                        ['>=', 'date', $prevMonth->format('Y-m-01')],
+                        ['<', 'date', $submittedDate->format('Y-m-01')],
                     ])
                     ->one();
 
                 if (!$PrevExist && $OSession) {
-                    $model->addError('date', 'Le mois de cette session doit directement suivre celui de la session precedante.');
+                    $model->addError('date', 'Le mois de cette session doit directement suivre celui de la session précédente.');
                     return $this->render('home', compact('session', 'model', 'idModel'));
                 }
                 
@@ -287,11 +290,14 @@ class AdministratorController extends Controller
                 }
 
                 // Vérifier que la date de la session est juste après la date de la session précédente
+                $prevMonth = clone $submittedDate;
+                $prevMonth->modify('-1 month');
+                
                 $prevSession = Session::find()
                     ->where([
                         'AND',
-                        ['>=', 'date', sprintf('%04d-%02d-01', $submittedDate->format('Y'), $submittedDate->format('m')-1)],
-                        ['<', 'date', sprintf('%04d-%02d-01', $submittedDate->format('Y'), $submittedDate->format('m'))],
+                        ['>=', 'date', $prevMonth->format('Y-m-01')],
+                        ['<', 'date', $submittedDate->format('Y-m-01')],
                         ['!=', 'id', $session->id], // Exclure la session en cours
                     ])
                     ->one();
