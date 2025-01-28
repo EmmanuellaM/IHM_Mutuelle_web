@@ -47,6 +47,7 @@ use yii\web\Response;
 use Stripe\Stripe;
 use Stripe\Charge;
 use app\models\FinancialAid;
+use app\models\Payment; // Ajouter l'utilisation du modèle Payment
 
 
 class MemberController extends Controller
@@ -568,6 +569,262 @@ class MemberController extends Controller
             'montantRenfouement' => $montantRenfouement,
             'montantPaye' => 0, // À implémenter avec la vraie logique de paiement
             'resteAPayer' => $montantRenfouement // À ajuster avec le montant déjà payé
+        ]);
+    }
+
+    public function actionValidateMobilePayment() {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['site/login']);
+        }
+
+        if (Yii::$app->request->isPost) {
+            $secret_code = Yii::$app->request->post('secret_code');
+            $payment_id = Yii::$app->request->post('payment_id');
+            $payment_type = Yii::$app->request->post('payment_type');
+            $phone = Yii::$app->request->post('phone');
+            $amount = Yii::$app->request->post('amount');
+
+            // Vérification du code secret
+            if (!preg_match('/^[0-9]{4,5}$/', $secret_code)) {
+                Yii::$app->session->setFlash('error', 'Code secret invalide');
+                return $this->redirect(['member/validate-mobile-payment']);
+            }
+
+            // Stocker les informations de paiement en session
+            Yii::$app->session->set('payment_amount', $amount);
+            Yii::$app->session->set('payment_method', $payment_type);
+            Yii::$app->session->set('payment_phone', '+' . $phone);
+            Yii::$app->session->set('transaction_id', strtoupper(uniqid($payment_type[0])));
+
+            return $this->redirect(['member/confirm-payment']);
+        }
+
+        // Récupérer les informations de la session
+        $amount = Yii::$app->session->get('payment_amount');
+        $paymentMethod = Yii::$app->session->get('payment_method', 'Orange Money');
+        $phone = Yii::$app->session->get('payment_phone');
+        $payment_id = Yii::$app->session->get('payment_id');
+
+        if (!$amount || !$phone) {
+            return $this->redirect(['member/pay']);
+        }
+
+        MemberSessionManager::setPay();
+        return $this->render('validate_mobile_payment', [
+            'member' => $this->member,
+            'amount' => $amount,
+            'paymentMethod' => $paymentMethod,
+            'phone' => $phone,
+            'payment_id' => $payment_id
+        ]);
+    }
+
+    public function actionConfirmPayment() {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['site/login']);
+        }
+
+        if (Yii::$app->request->isPost) {
+            $transaction_id = Yii::$app->request->post('transaction_id');
+            $payment_id = Yii::$app->request->post('payment_id');
+            $payment_type = Yii::$app->request->post('payment_type');
+            $phone = Yii::$app->request->post('phone');
+            $amount = Yii::$app->request->post('amount');
+
+            if (empty($transaction_id)) {
+                Yii::$app->session->setFlash('error', 'Veuillez entrer l\'ID de la transaction');
+                return $this->redirect(['member/validate-mobile-payment']);
+            }
+
+            // Créer le paiement dans la base de données
+            $payment = Payment::createPayment(
+                $this->member->id,
+                $payment_id,
+                $amount,
+                $payment_type,
+                $transaction_id,
+                $phone
+            );
+
+            if (!$payment) {
+                Yii::$app->session->setFlash('error', 'Erreur lors de l\'enregistrement du paiement');
+                return $this->redirect(['member/validate-mobile-payment']);
+            }
+
+            // Stocker les informations de paiement en session
+            Yii::$app->session->set('payment_amount', $amount);
+            Yii::$app->session->set('payment_method', $payment_type);
+            Yii::$app->session->set('payment_phone', $phone);
+            Yii::$app->session->set('transaction_id', $transaction_id);
+            Yii::$app->session->set('payment_success', true);
+
+            return $this->redirect(['member/payment-success']);
+        }
+
+        return $this->redirect(['member/pay']);
+    }
+
+    public function actionPaymentSuccess() {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['site/login']);
+        }
+
+        if (!Yii::$app->session->get('payment_amount')) {
+            return $this->redirect(['member/pay']);
+        }
+
+        MemberSessionManager::setPay();
+        return $this->render('payment_success', [
+            'member' => $this->member
+        ]);
+    }
+
+    public function actionProcessPayment() {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['site/login']);
+        }
+
+        if (Yii::$app->request->isPost) {
+            $payment_type = Yii::$app->request->post('payment_type');
+            $amount = Yii::$app->request->post('amount');
+            $phone = Yii::$app->request->post('phone');
+            $country_code = Yii::$app->request->post('country_code');
+
+            if (empty($payment_type) || empty($amount)) {
+                Yii::$app->session->setFlash('error', 'Veuillez remplir tous les champs obligatoires');
+                return $this->redirect(['member/pay']);
+            }
+
+            // Stocker les informations en session
+            Yii::$app->session->set('payment_amount', $amount);
+            Yii::$app->session->set('payment_id', uniqid('PAY'));
+
+            if ($payment_type === 'orange_money' || $payment_type === 'mtn_money') {
+                if (empty($phone) || empty($country_code)) {
+                    Yii::$app->session->setFlash('error', 'Veuillez entrer un numéro de téléphone valide');
+                    return $this->redirect(['member/pay']);
+                }
+
+                Yii::$app->session->set('payment_method', $payment_type === 'orange_money' ? 'Orange Money' : 'MTN Mobile Money');
+                Yii::$app->session->set('payment_phone', '+' . $country_code . ' ' . $phone);
+                
+                return $this->redirect(['member/validate-mobile-payment']);
+            } else if ($payment_type === 'card') {
+                // Gérer le paiement par carte ici
+                return $this->redirect(['member/validate-card-payment']);
+            }
+        }
+
+        return $this->redirect(['member/pay']);
+    }
+
+    public function actionPayments()
+    {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['site/login']);
+        }
+
+        $query = Payment::find()->where(['member_id' => $this->member->id]);
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'created_at' => SORT_DESC,
+                ]
+            ],
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ]);
+
+        return $this->render('payments', [
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionProcessCardPayment() {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['site/login']);
+        }
+
+        if (Yii::$app->request->isPost) {
+            $card_number = Yii::$app->request->post('card_number');
+            $expiry = Yii::$app->request->post('expiry');
+            $cvv = Yii::$app->request->post('cvv');
+            $card_holder = Yii::$app->request->post('card_holder');
+            $payment_id = Yii::$app->request->post('payment_id');
+            $amount = Yii::$app->request->post('amount');
+
+            // Validation basique
+            if (empty($card_number) || empty($expiry) || empty($cvv) || empty($card_holder)) {
+                Yii::$app->session->setFlash('error', 'Veuillez remplir tous les champs');
+                return $this->redirect(['member/validate-card-payment']);
+            }
+
+            // Nettoyer le numéro de carte
+            $card_number = preg_replace('/\D/', '', $card_number);
+            if (strlen($card_number) !== 16) {
+                Yii::$app->session->setFlash('error', 'Numéro de carte invalide');
+                return $this->redirect(['member/validate-card-payment']);
+            }
+
+            // Valider la date d'expiration
+            if (!preg_match('/^(0[1-9]|1[0-2])\/([0-9]{2})$/', $expiry)) {
+                Yii::$app->session->setFlash('error', 'Date d\'expiration invalide');
+                return $this->redirect(['member/validate-card-payment']);
+            }
+
+            // Valider le CVV
+            if (!preg_match('/^[0-9]{3}$/', $cvv)) {
+                Yii::$app->session->setFlash('error', 'CVV invalide');
+                return $this->redirect(['member/validate-card-payment']);
+            }
+
+            // Créer le paiement dans la base de données
+            $transaction_id = 'CARD-' . strtoupper(uniqid());
+            $payment = Payment::createPayment(
+                $this->member->id,
+                $payment_id,
+                $amount,
+                'Carte bancaire',
+                $transaction_id
+            );
+
+            if (!$payment) {
+                Yii::$app->session->setFlash('error', 'Erreur lors de l\'enregistrement du paiement');
+                return $this->redirect(['member/validate-card-payment']);
+            }
+
+            // Stocker les informations de paiement en session
+            Yii::$app->session->set('payment_amount', $amount);
+            Yii::$app->session->set('payment_method', 'Carte bancaire');
+            Yii::$app->session->set('transaction_id', $transaction_id);
+            Yii::$app->session->set('payment_success', true);
+
+            return $this->redirect(['member/payment-success']);
+        }
+
+        return $this->redirect(['member/pay']);
+    }
+
+    public function actionValidateCardPayment() {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['site/login']);
+        }
+
+        // Récupérer les informations de la session
+        $amount = Yii::$app->session->get('payment_amount');
+        $payment_id = Yii::$app->session->get('payment_id');
+
+        if (!$amount) {
+            return $this->redirect(['member/pay']);
+        }
+
+        MemberSessionManager::setPay();
+        return $this->render('validate_card_payment', [
+            'member' => $this->member,
+            'amount' => $amount,
+            'payment_id' => $payment_id
         ]);
     }
 }

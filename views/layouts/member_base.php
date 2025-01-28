@@ -96,11 +96,13 @@ $this->title = "Mutuelle - ENSPY";
                         <li class="nav-item nav-separator">
                             <a href="<?= Yii::getAlias("@member.epargnes") ?>" class="nav-link waves-effect <?= MemberSessionManager::isEpargnes()?'blue-text':''?>" >Mes épargnes</a>
                         </li>
+                        <!-- Menu dettes temporairement désactivé
                         <li class="nav-item nav-separator">
                             <a href="<?= Yii::getAlias("@member.dettes") ?>" class="nav-link waves-effect <?= MemberSessionManager::isDettes()?'blue-text':''?>" >
                                 <i class="fas fa-hand-holding-usd mr-1"></i>Mes dettes
                             </a>
                         </li>
+                        -->
                         <li class="nav-item nav-separator">
                             <a href="<?= Yii::getAlias("@member.emprunts") ?>" class="nav-link waves-effect  <?= MemberSessionManager::isEmprunts()?'blue-text':''?>" >Mes emprunts</a>
                         </li>
@@ -108,11 +110,9 @@ $this->title = "Mutuelle - ENSPY";
                             <a href="<?= Yii::getAlias("@member.contributions") ?>" class="nav-link waves-effect  <?= MemberSessionManager::isContributions()?'blue-text':''?>" >Mes contributions</a>
                         </li>
 
-                        
                         <li class="nav-item nav-separator">
                             <a href="<?= yii\helpers\Url::to(['/member/dette']) ?>" class="nav-link waves-effect <?= MemberSessionManager::isDette() ? 'blue-text' : '' ?>">Ma Dette</a>
                         </li>
-
                         <li class="nav-item nav-separator">
                             <a class="nav-link waves-effect  <?= MemberSessionManager::isAides()?'blue-text':''?>" href="<?= Yii::getAlias("@member.helps") ?>">Aides</a>
                         </li>
@@ -159,22 +159,31 @@ $this->title = "Mutuelle - ENSPY";
                 <div class="side-menu">
                     <a href="<?= Yii::getAlias("@member.home") ?>" class="list-group-item list-group-item-action <?= MemberSessionManager::isHome()?'active':''?> waves-effect">
                         <i class="fas fa-chart-pie mr-3"></i>Tableau de bord
+                    </a>
                     <a href="<?= Yii::getAlias("@member.members") ?>" class="list-group-item list-group-item-action <?= MemberSessionManager::isMembers()?'active':''?> waves-effect">
-                        <i class="fas fa-users mr-3"></i>Membres</a>
-                    
+                        <i class="fas fa-users mr-3"></i>Membres
+                    </a>
+                    <a href="/member/payments" class="list-group-item list-group-item-action <?= MemberSessionManager::isPayments()?'active':''?> waves-effect">
+                        <i class="fas fa-money-bill-wave mr-3"></i>Mes Paiements
+                    </a>
                     <a href="<?= Yii::getAlias("@member.typesaide") ?>" class="list-group-item list-group-item-action <?= MemberSessionManager::isHelps()?'active':''?> waves-effect">
-                        <i class="fas fa-hand-holding-heart mr-3"></i>Type d'aides</a>
+                        <i class="fas fa-hand-holding-heart mr-3"></i>Type d'aides
+                    </a>
 
                     <a href="<?= Yii::getAlias("@member.tontine_types") ?>" class="list-group-item list-group-item-action <?= MemberSessionManager::isTontine()?'active':''?> waves-effect">
-                            <i class="fas fa-coins mr-3"></i>Les Tontines</a>
+                            <i class="fas fa-coins mr-3"></i>Les Tontines
+                    </a>
 
                     
                     <a href="<?= Yii::getAlias("@member.exercises") ?>" class="list-group-item list-group-item-action <?= MemberSessionManager::isExercices()?'active':''?> waves-effect">
-                        <i class="fas far fa-calendar mr-3"></i>Détails exercices</a>
+                        <i class="fas far fa-calendar mr-3"></i>Détails exercices
+                    </a>
                     <a href="<?= Yii::getAlias("@member.sessions") ?>" class="list-group-item list-group-item-action <?= MemberSessionManager::isSessions()?'active':''?> waves-effect">
-                        <i class="fas fa-table mr-3"></i>Sessions</a>
+                        <i class="fas fa-table mr-3"></i>Sessions
+                    </a>
                     <a href="<?= Yii::getAlias("@web").'/chat' ?>" class="list-group-item list-group-item-action <?= MemberSessionManager::isChat()?'active':''?> waves-effect">
-                        <i class="fas fa-comments mr-3"></i>Chat</a>
+                        <i class="fas fa-comments mr-3"></i>Chat
+                    </a>
                     <form action="<?= Yii::getAlias('@member.disconnection')?>" method="post" id="disconnection-form">
                         <input type="hidden" name="<?=Yii::$app->request->csrfParam?>" value="<?=Yii::$app->request->csrfToken?>"/>
                     </form>

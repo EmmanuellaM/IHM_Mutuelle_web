@@ -46,6 +46,10 @@ class MemberSessionManager
         \Yii::$app->session->set(self::head,null);
     }
     
+    public static function setPay() {
+        \Yii::$app->session->set(self::place,"pay");
+        \Yii::$app->session->set(self::head,null);
+    }
 
     public static function isHome() {
         return \Yii::$app->session->get(self::place) == "home" && \Yii::$app->session->get(self::head) == "home";
@@ -70,7 +74,11 @@ class MemberSessionManager
 
 
     public static function isHelps() {
-        return \Yii::$app->session->get(self::place) == "helps";
+        return Yii::$app->controller->action->id == "typesaide";
+    }
+
+    public static function isPayments(){
+        return Yii::$app->controller->action->id == "payments";
     }
 
     public static function isDettes() {
@@ -113,7 +121,7 @@ class MemberSessionManager
         return \Yii::$app->session->get(self::head) == "helps";
     }
     public  static  function isPay(){
-        return \Yii::$app->session->get(self::head) == "Pay";
+        return \Yii::$app->session->get(self::place) == "pay";
     }
     public  static  function isTontine(){
         return \Yii::$app->session->get(self::head) == "tontine";

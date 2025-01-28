@@ -104,8 +104,8 @@ $helpType = $help->helpType;
                                 <?php 
                                 $m = $contribution->member;
                                 $u = $m ? $m->user : null; // Vérification si member existe
-                                $administrator = $contribution->administrator;
-                                $adminUser = $administrator ? $administrator->user : null; // Vérification de l'administrateur
+                                $a = $contribution->member; // Utiliser member au lieu de administrator
+                                $adminUser = $a ? $a->user : null; // Même logique que pour member
                                 ?>
                                 <tr>
                                     <th scope="row"><?= $index + 1 ?></th>

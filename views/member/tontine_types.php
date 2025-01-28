@@ -1,11 +1,7 @@
-<<<<<<< HEAD
 <?php
 use app\models\Tontine;
 
 $this->beginBlock('title') ?>
-=======
-<?php $this->beginBlock('title') ?>
->>>>>>> 46a6216 (Il manque quelques détails à ajuster sinon c'est déja presque bon.)
 Type d'aide
 <?php $this->endBlock()?>
 <?php $this->beginBlock('style')?>
@@ -70,25 +66,18 @@ Type d'aide
                         <?=  $tontineType->amount ?> XAF
                     </div>
                     <div class="col-2">
-<<<<<<< HEAD
                         <?php if (!Tontine::isAlreadyRegistered(Yii::$app->user->identity->member->id, $tontineType->id)): ?>
                             <a href="<?= Yii::getAlias("@member.new_tontine")."?member_id=".Yii::$app->user->identity->member->id."&tontine_type_id=".$tontineType->id?>" class="btn btn-primary btn-sm">S'inscrire</a>
                         <?php else: ?>
                             <span class="badge badge-success">Déjà inscrit</span>
                         <?php endif; ?>
-=======
-                        <a href="<?= Yii::getAlias("@member.new_tontine")."?member_id=".Yii::$app->user->identity->member->id."&tontine_type_id=".$tontineType->id?>" class="btn btn-primary btn-sm">S'inscrire</a>
->>>>>>> 46a6216 (Il manque quelques détails à ajuster sinon c'est déja presque bon.)
                     </div>
                 </div>
             <?php endforeach;?>
         </div>
     </div>
 
-
-
 <?php else: ?>
-
     <br>
     <br>
     <div class="row">

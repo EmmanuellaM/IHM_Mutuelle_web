@@ -24,6 +24,7 @@ $config = [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'NPw5Q4QuH0MTkg7i1Bgrh_m1kdxAjz8v',
+            'trustedHosts' => ['*'],  // Permet l'accès depuis n'importe quelle adresse IP
         ],
         'i18n' =>[
             'translations' => [
