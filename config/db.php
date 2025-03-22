@@ -2,9 +2,9 @@
 
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=sql.freedb.tech;dbname=freedb_mutuelle',
-    'username' => 'freedb_wandji',
-    'password' => 'AfC9zKpNmX2P%T$',
+    'dsn' => 'mysql:host=127.0.0.1;dbname=mutuelle3',
+    'username' => 'root',
+    'password' => '',
     'charset' => 'utf8',
 
     // Schema cache options (for production environment)

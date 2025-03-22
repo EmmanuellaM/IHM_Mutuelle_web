@@ -6,10 +6,14 @@ class m241216_095804_create_registration_and_social_fund_tables extends Migratio
 {
     public function safeUp()
     {
+        // Drop tables if they already exist to prevent conflicts
+        $this->dropTableIfExists('registration');
+        $this->dropTableIfExists('social_fund');
+
         // Create registration table
         $this->createTable('registration', [
             'id' => $this->primaryKey(),
-            'member_id' => $this->integer()->notNull(),
+            'member_id' => $this->integer()->unsigned()->notNull(),
             'amount' => $this->decimal(10, 2)->notNull(),
             'registration_date' => $this->date()->notNull(),
             'payment_method' => $this->string(50)->notNull(),
@@ -21,7 +25,7 @@ class m241216_095804_create_registration_and_social_fund_tables extends Migratio
         // Create social_fund table
         $this->createTable('social_fund', [
             'id' => $this->primaryKey(),
-            'member_id' => $this->integer()->notNull(),
+            'member_id' => $this->integer()->unsigned()->notNull(),
             'amount' => $this->decimal(10, 2)->notNull(),
             'contribution_date' => $this->date()->notNull(),
             'payment_method' => $this->string(50)->notNull(),
@@ -32,8 +36,6 @@ class m241216_095804_create_registration_and_social_fund_tables extends Migratio
 
         // Add indexes
         $this->createIndex('idx-registration-member_id', 'registration', 'member_id');
-        // $this->createIndex('idx-registration-exercise_id', 'registration', 'exercise_id'); // Commenté car exercise_id n'existe pas
-        // $this->createIndex('idx-social_fund-exercise_id', 'social_fund', 'exercise_id'); // Commenté car exercise_id n'existe pas
         $this->createIndex('idx-social_fund-member_id', 'social_fund', 'member_id');
 
         // Add foreign keys
@@ -61,11 +63,26 @@ class m241216_095804_create_registration_and_social_fund_tables extends Migratio
     public function safeDown()
     {
         // Drop foreign keys first
-        $this->dropForeignKey('fk-registration-member_id', 'registration');
         $this->dropForeignKey('fk-social_fund-member_id', 'social_fund');
+        $this->dropForeignKey('fk-registration-member_id', 'registration');
+
+        // Drop indexes
+        $this->dropIndex('idx-social_fund-member_id', 'social_fund');
+        $this->dropIndex('idx-registration-member_id', 'registration');
 
         // Drop tables
-        $this->dropTable('registration');
         $this->dropTable('social_fund');
+        $this->dropTable('registration');
+    }
+
+    /**
+     * Safely drop table if it exists
+     */
+    protected function dropTableIfExists($table)
+    {
+        $tableSchema = $this->db->schema->getTableSchema($table);
+        if ($tableSchema !== null) {
+            $this->dropTable($table);
+        }
     }
 }

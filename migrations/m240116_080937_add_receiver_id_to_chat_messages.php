@@ -12,42 +12,22 @@ class m240116_080937_add_receiver_id_to_chat_messages extends Migration
      */
     public function safeUp()
     {
-        // Vérifier si la table chat_messages existe
-        if (!$this->db->schema->getTableSchema('chat_messages')) {
-            $this->createTable('chat_messages', [
-                'id' => $this->primaryKey(),
-                'sender_id' => $this->integer()->notNull(),
-                'receiver_id' => $this->integer()->notNull(),
-                'message' => $this->text()->notNull(),
-                'created_at' => $this->integer()->notNull(),
-                'updated_at' => $this->integer(),
-            ]);
-
-            // Ajouter les clés étrangères
+        // Add receiver_id column if it doesn't exist
+        if ($this->db->schema->getTableSchema('chat_messages') !== null &&
+            !$this->db->schema->getTableSchema('chat_messages')->getColumn('receiver_id')) {
+            
+            $this->addColumn('chat_messages', 'receiver_id', $this->integer()->notNull());
+            
+            // Add foreign key only if the column was just added
             $this->addForeignKey(
-                'fk-chat_messages-sender_id',
+                'fk-chat_messages-receiver_id',
                 'chat_messages',
-                'sender_id',
+                'receiver_id',
                 'user',
                 'id',
                 'CASCADE'
             );
-        } else {
-            // Si la table existe déjà, ajouter seulement la colonne receiver_id
-            if (!$this->db->schema->getTableSchema('chat_messages')->getColumn('receiver_id')) {
-                $this->addColumn('chat_messages', 'receiver_id', $this->integer()->notNull());
-            }
         }
-
-        // Ajouter la clé étrangère pour receiver_id
-        $this->addForeignKey(
-            'fk-chat_messages-receiver_id',
-            'chat_messages',
-            'receiver_id',
-            'user',
-            'id',
-            'CASCADE'
-        );
     }
 
     /**
@@ -55,9 +35,11 @@ class m240116_080937_add_receiver_id_to_chat_messages extends Migration
      */
     public function safeDown()
     {
-        if ($this->db->schema->getTableSchema('chat_messages')) {
-            $this->dropForeignKey('fk-chat_messages-receiver_id', 'chat_messages');
-            $this->dropColumn('chat_messages', 'receiver_id');
+        if ($this->db->schema->getTableSchema('chat_messages') !== null) {
+            if ($this->db->schema->getTableSchema('chat_messages')->getColumn('receiver_id')) {
+                $this->dropForeignKey('fk-chat_messages-receiver_id', 'chat_messages');
+                $this->dropColumn('chat_messages', 'receiver_id');
+            }
         }
     }
 }

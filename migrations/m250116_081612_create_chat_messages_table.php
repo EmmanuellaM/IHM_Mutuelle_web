@@ -12,22 +12,21 @@ class m250116_081612_create_chat_messages_table extends Migration
      */
     public function safeUp()
     {
-        // Supprimer l'ancienne table si elle existe
-        if ($this->db->schema->getTableSchema('chat_messages')) {
-            $this->dropTable('chat_messages');
-        }
+        // Drop table if it already exists to prevent conflicts
+        $this->dropTableIfExists('chat_messages');
 
-        // Créer la nouvelle table
+        // Create chat_messages table
         $this->createTable('chat_messages', [
             'id' => $this->primaryKey(),
-            'sender_id' => $this->integer()->notNull(),
-            'receiver_id' => $this->integer()->notNull(),
+            // Use unsigned integer to match user table
+            'sender_id' => $this->integer()->unsigned()->notNull(),
+            'receiver_id' => $this->integer()->unsigned()->notNull(),
             'message' => $this->text()->notNull(),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer(),
         ]);
 
-        // Créer les index
+        // Create indexes
         $this->createIndex(
             'idx-chat_messages-sender_id',
             'chat_messages',
@@ -40,12 +39,12 @@ class m250116_081612_create_chat_messages_table extends Migration
             'receiver_id'
         );
 
-        // Ajouter les clés étrangères
+        // Add foreign keys
         $this->addForeignKey(
             'fk-chat_messages-sender_id',
             'chat_messages',
             'sender_id',
-            'user',
+            'user', // Use non-prefixed name
             'id',
             'CASCADE',
             'CASCADE'
@@ -55,7 +54,7 @@ class m250116_081612_create_chat_messages_table extends Migration
             'fk-chat_messages-receiver_id',
             'chat_messages',
             'receiver_id',
-            'user',
+            'user', // Use non-prefixed name
             'id',
             'CASCADE',
             'CASCADE'
@@ -67,6 +66,26 @@ class m250116_081612_create_chat_messages_table extends Migration
      */
     public function safeDown()
     {
+        // Drop foreign keys first
+        $this->dropForeignKey('fk-chat_messages-receiver_id', 'chat_messages');
+        $this->dropForeignKey('fk-chat_messages-sender_id', 'chat_messages');
+
+        // Drop indexes
+        $this->dropIndex('idx-chat_messages-receiver_id', 'chat_messages');
+        $this->dropIndex('idx-chat_messages-sender_id', 'chat_messages');
+
+        // Drop table
         $this->dropTable('chat_messages');
+    }
+
+    /**
+     * Safely drop table if it exists
+     */
+    protected function dropTableIfExists($table)
+    {
+        $tableSchema = $this->db->schema->getTableSchema($table);
+        if ($tableSchema !== null) {
+            $this->dropTable($table);
+        }
     }
 }
