@@ -2,7 +2,7 @@
 
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=127.0.0.1;dbname=mutuelle3',
+    'dsn' => 'mysql:host=127.0.0.1;dbname=mutuelleenspy',
     'username' => 'root',
     'password' => '',
     'charset' => 'utf8',
