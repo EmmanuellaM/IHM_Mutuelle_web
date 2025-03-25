@@ -1,1 +1,5 @@
-{ "interest": "5", "social_crown": "150000", "inscription": "45000" }
+{
+    "interest": "10",
+    "social_crown": "1500",
+    "inscription": "4500"
+}

@@ -423,7 +423,16 @@ class MemberController extends Controller
 
     /************************************************* Action Dette ***************************************************************************************/
     public function actionDette(){
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['site/login']);
+        }
+        
         $member = Member::findOne(Yii::$app->user->id);
+        if (!$member) {
+            Yii::$app->session->setFlash('error', 'Membre non trouvé');
+            return $this->redirect(['site/login']);
+        }
+        
         $socialCrownTarget = SettingManager::getSocialCrown();
 
         return $this->render('dette', [

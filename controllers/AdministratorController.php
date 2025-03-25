@@ -1154,7 +1154,8 @@ class AdministratorController extends Controller
             ->offset($pagination->offset)
             ->limit($pagination->limit)
             ->all();
-        return $this->render("sessions", compact('exercises', 'pagination'));
+        $member = \app\models\Member::findOne(['user_id' => Yii::$app->user->id]);
+        return $this->render("sessions", compact('exercises', 'pagination', 'member'));
     }
 
     /****************************Details sur les sessions ****************************************************************** */
@@ -1184,7 +1185,8 @@ class AdministratorController extends Controller
             ->offset($pagination->offset)
             ->limit($pagination->limit)
             ->all();
-        return $this->render('exercises', compact('exercises', 'pagination'));
+        $member = \app\models\Member::findOne(['user_id' => Yii::$app->user->id]);
+        return $this->render('exercises', compact('exercises', 'pagination', 'member'));
     }
 
     /****************************dettes au cours des exercices******************************************* */

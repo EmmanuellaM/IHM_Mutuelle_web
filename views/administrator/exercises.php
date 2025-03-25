@@ -5,187 +5,389 @@ Exercices
 <?php $this->endBlock() ?>
 <?php $this->beginBlock('style') ?>
 <style>
-    .bl {
-        border: 3px solid;
-        padding: 5px 10px;
-        margin-bottom: 10px;
-        border-radius: 5px;
-    }
-    .bl h2 {
-        text-align: right;
-    }
-
-    .b-amount {
-        border-color: dodgerblue;
-        color: dodgerblue;
-        background-color: rgba(30, 144, 255, 0.17);
-    }
-    
-    .b-saved {
-        border-color: blueviolet;
-        color: blueviolet;
-        background-color: rgba(138, 43, 226, 0.22);
-    }
-    .b-borrowed {
-        border-color: darkviolet;
-        color: darkviolet;
-        background-color: rgba(148, 0, 211, 0.34);
-    }
-    .b-refunded {
-        border-color: mediumvioletred;
-        color: mediumvioletred;
-        background-color: rgba(199, 21, 133, 0.38);
-    }
-    .b-interest {
-        border-color: red;
-        color: red;
-        background-color: rgba(255, 0, 0, 0.3);
+    :root {
+        --primary-color: #2196F3;
+        --secondary-color: #607D8B;
+        --success-color: #4CAF50;
+        --danger-color: #f44336;
+        --warning-color: #FFC107;
+        --text-muted: #6c757d;
     }
 
-    .b-agape {
-        border-color: rgba(255, 47, 0, 0.8);
-        color: rgba(255, 47, 0, 0.89);
-        background-color: rgba(255, 47, 0, 0.51);
+    .white-block {
+        padding: 2rem;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 2rem;
     }
 
-
-    .b-fondsocial {
-        border-color: rgba(173, 225, 119, 0.87);
-        color: rgba(36, 65, 10, 0.89);
-        background-color: rgba(199, 236, 168, 0.86);
+    .white-block:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     }
 
+    .session-header {
+        text-align: center;
+        padding: 2rem 0;
+    }
+
+    .session-title {
+        font-size: 1.5rem;
+        color: var(--secondary-color);
+        margin-bottom: 1rem;
+    }
+
+    .session-amount {
+        font-size: 3rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin: 1rem 0;
+    }
+
+    .session-subtitle {
+        color: var(--text-muted);
+        font-size: 1.2rem;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .status-active {
+        background-color: var(--success-color);
+        color: white;
+    }
+
+    .status-inactive {
+        background-color: var(--secondary-color);
+        color: white;
+    }
+
+    .search-section {
+        background: linear-gradient(to right, #f8f9fa, #ffffff);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+
+    .search-title {
+        color: var(--secondary-color);
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .search-input {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+    }
+
+    .modern-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 1rem 0;
+    }
+
+    .modern-table thead th {
+        background-color: #f8f9fa;
+        color: var(--secondary-color);
+        font-weight: 600;
+        padding: 1rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .modern-table tbody tr {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .modern-table tbody tr:hover {
+        background-color: #f8f9fa;
+        transform: scale(1.01);
+    }
+
+    .modern-table td, .modern-table th {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+    }
+
+    .amount {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .remaining {
+        color: var(--warning-color);
+        font-weight: 600;
+    }
+
+    .btn-floating {
+        position: fixed !important;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 1000;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    .btn-floating:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-content {
+        border-radius: 12px;
+        border: none;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+    }
+
+    .btn {
+        border-radius: 8px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .info-card {
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-align: center;
+    }
+
+    .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .info-card h5 {
+        font-size: 1.1rem;
+        color: var(--secondary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .info-card h2 {
+        font-size: 1.8rem;
+        color: var(--primary-color);
+        margin-bottom: 0;
+    }
+
+    .info-card i {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .chart-container {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .chart-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .chart-title {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
 </style>
 <?php $this->endBlock() ?>
+
 <div class="container mt-5 mb-5">
     <div class="row">
-        <?php
-        $labels = [];
-
-        $data = [];
-        $colors = [];
-        ?>
-        <?php if(count($exercises)):?>
+        <?php if(count($exercises)): ?>
             <?php
             $exercise = $exercises[0];
             $members = \app\models\Member::find()->all();  ?>
-            <div class="col-12 white-block mb-2">
-                <h1 class="text-muted text-center">Exercice de l'année <span class="blue-text"><?= $exercises[0]->year ?></span></h1>
-                <h3 class="text-secondary text-center"><?= $exercises[0]->active?"En cours":"Terminé" ?></h3>
+            <div class="col-12 white-block">
+                <div class="session-header">
+                    <div class="session-title">
+                        Exercice de l'année
+                        <span class="status-badge <?= $exercise->active ? 'status-active' : 'status-inactive' ?>">
+                            <?= $exercise->active ? 'En cours' : 'Terminé' ?>
+                        </span>
+                    </div>
+                    <div class="session-amount">
+                        <?= number_format($exercise->exerciseAmount() ?: 0, 0, ',', ' ') ?> XAF
+                    </div>
+                    <div class="session-subtitle">Fond total</div>
+                </div>
             </div>
 
             <div class="col-12 mb-2">
                 <div class="row">
-                    <?php
-                    if (count($members)):
-                    ?>
-                    <!-- <div class="col-md-8 p-1">
-                        <div class="white-block">
-                            <h3 class="my-3 text-center">Répartion des intérêts</h3>
+                    <?php if (count($members)): ?>
+                    <div class="col-md-8 p-1">
+                        <div class="chart-container">
+                            <h3 class="chart-title">Répartition des intérêts</h3>
                             <canvas id="pieChart"></canvas>
                         </div>
-                        <div class="white-block mt-2">
-                            <h3 class="my-3 text-center">Evolution des entrées durant l'exercice</h3>
+                        <div class="chart-container mt-2">
+                            <h3 class="chart-title">Évolution des entrées durant l'exercice</h3>
                             <canvas id="lineChart"></canvas>
                         </div>
-                    </div> -->
-                    <?php
-                    endif;
-                    ?>
-                    <div class="col-md-4 p-1 d-flex ">
-                        <div class="white-block d-flex flex-row">
-                            <div class="bl b-amount ml-4 mr-4">
+                    </div>
+                    <?php endif; ?>
+                    <div class="col-md-4 p-1">
+                        <div class="info-grid">
+                            <div class="info-card">
+                                <i class="fas fa-wallet"></i>
                                 <h5>Fond total</h5>
-                                <h2><?= ($t=$exercise->exerciseAmount())?$t:0 ?> XAF</h2>
+                                <h2><?= number_format($exercise->exerciseAmount() ?: 0, 0, ',', ' ') ?> XAF</h2>
                             </div>
-                            
-                            <div class="bl b-saved ml-4 mr-4">
+                            <div class="info-card">
+                                <i class="fas fa-piggy-bank"></i>
                                 <h5>Montant épargné</h5>
-                                <h2><?= ($t=$exercise->totalSavedAmount())?$t:0 ?> XAF</h2>
+                                <h2><?= number_format($exercise->totalSavedAmount() ?: 0, 0, ',', ' ') ?> XAF</h2>
                             </div>
-                            <div class="bl b-borrowed ml-4 mr-4">
+                            <div class="info-card">
+                                <i class="fas fa-hand-holding-usd"></i>
                                 <h5>Montant emprunté</h5>
-                                <h2><?= ($t=$exercise->totalBorrowedAmount())?$t:0 ?> XAF</h2>
+                                <h2><?= number_format($exercise->totalBorrowedAmount() ?: 0, 0, ',', ' ') ?> XAF</h2>
                             </div>
-                            <div class="bl b-refunded ml-4 mr-4">
+                            <div class="info-card">
+                                <i class="fas fa-undo-alt"></i>
                                 <h5>Montant remboursé</h5>
-                                <h2><?= ($t=$exercise->totalRefundedAmount()) ?$t:0 ?> XAF</h2>
+                                <h2><?= number_format($exercise->totalRefundedAmount() ?: 0, 0, ',', ' ') ?> XAF</h2>
                             </div>
-                            <div class="bl b-interest ml-4 mr-4">
+                            <div class="info-card">
+                                <i class="fas fa-percentage"></i>
                                 <h5>Intérêt produit</h5>
-                                <h2><?= ($t=$exercise->interest())?$t:0 ?> XAF</h2>
+                                <h2><?= number_format($exercise->interest() ?: 0, 0, ',', ' ') ?> XAF</h2>
                             </div>
-                            <div class="bl b-agape ml-4 mr-4">
+                            <div class="info-card">
+                                <i class="fas fa-gift"></i>
                                 <h5>Montant Agapè</h5>
-                                <h2><?= ($t=$exercise->totalAgapeAmount()) ?$t:0 ?> XAF</h2>
+                                <h2><?= number_format($exercise->totalAgapeAmount() ?: 0, 0, ',', ' ') ?> XAF</h2>
                             </div>
-                            <?php if($exercise && \app\managers\FinanceManager::numberOfSession() == 12):?>
-                            <div class="bl b-fondsocial ml-4 mr-4">
-                                <h5>Le montant d'Inscription pour le prochain Exercice est :</h5>
-                                <h2><?= ($t=$exercise->renflouementAmount()) ?$t:0 ?> XAF</h2>
+                            <?php if($exercise && \app\managers\FinanceManager::numberOfSession() == 12): ?>
+                            <div class="info-card">
+                                <i class="fas fa-money-check-alt"></i>
+                                <h5>Inscription pour le prochain Exercice</h5>
+                                <h2><?= number_format($exercise->renflouementAmount() ?: 0, 0, ',', ' ') ?> XAF</h2>
                             </div>
                             <?php endif; ?>
                         </div>
                     </div>
-
                 </div>
             </div>
 
-
-
-            <?php if ( count($members) ):?>
+            <?php if (count($members)): ?>
                 <div class="col-12 white-block">
-
                     <h3 class="text-center my-4 blue-text">Bilan de l'exercice</h3>
-
-                    <table class="table table-hover">
-                        <thead class="blue-grey lighten-4">
-                        <tr>
-                            <th>Membre</th>
-                            <th>Montant épargné</th>
-                            <th>Montant emprunté</th>
-                            <th>Dette remboursée</th>
-                            <th>Intérêt sur les dettes</th>
-                            <th>Fond Social</th>
-                            <th>Inscription</th>
-                            <th>Renflouement</th>
-
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($members as $member): ?>
-                            <?php
-                            $user = $member->user();
-                            $savedAmount = $member->savedAmount($exercise);
-                            $borrowedAmount = $member->borrowedAmount($exercise);
-                            $refundedAmount = $member->refundedAmount($exercise);
-                            $interest = $member->interest($exercise);
-                            $sc = $member->social_crown;
-                            $insc = $member->inscription;
-
-                            $labels[] = $user->name . " " . $user->first_name;
-                            $data[] = $interest?$interest:0;
-                            $colors[] = \app\managers\ColorManager::getColor();
-                            ?>
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
                             <tr>
-                                <td class="text-capitalize"><?= $user->name . " " . $user->first_name ?></td>
-                                <td><?= $savedAmount?$savedAmount:0 ?> XAF</td>
-                                <td><?= $borrowedAmount?$borrowedAmount:0 ?> XAF</td>
-                                <td><?= $refundedAmount?$refundedAmount:0 ?> XAF</td>
-                                <td class="blue-text"><?= $interest ?> XAF</td>
-                                <td class="blue-text"><?= $insc ?> XAF</td>
-                                <td class="blue-text"><?= $sc ?> XAF</td>
-                                <td class="blue-text"><?= \app\managers\SettingManager::getSocialCrown()-$sc ?> XAF</td>
-                                </tr>
-                        <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php endif;?>
+                                <th>Membre</th>
+                                <th>Montant épargné</th>
+                                <th>Montant emprunté</th>
+                                <th>Dette remboursée</th>
+                                <th>Intérêt sur les dettes</th>
+                                <th>Fond Social</th>
+                                <th>Inscription</th>
+                                <th>Renflouement</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($members as $member): ?>
+                                <?php
+                                $user = $member->user();
+                                $savedAmount = $member->savedAmount($exercise);
+                                $borrowedAmount = $member->borrowedAmount($exercise);
+                                $refundedAmount = $member->refundedAmount($exercise);
+                                $interest = $member->interest($exercise);
+                                $sc = $member->social_crown;
+                                $insc = $member->inscription;
 
-            <div class="col-12 p-2">
-                <nav aria-label="Page navigation example">
-                    <?= LinkPager::widget(['pagination' => $pagination,
+                                $labels[] = $user->name . " " . $user->first_name;
+                                $data[] = $interest ?: 0;
+                                $colors[] = \app\managers\ColorManager::getColor();
+                                ?>
+                                <tr>
+                                    <td class="text-capitalize"><?= $user->name . " " . $user->first_name ?></td>
+                                    <td><?= number_format($savedAmount ?: 0, 0, ',', ' ') ?> XAF</td>
+                                    <td><?= number_format($borrowedAmount ?: 0, 0, ',', ' ') ?> XAF</td>
+                                    <td><?= number_format($refundedAmount ?: 0, 0, ',', ' ') ?> XAF</td>
+                                    <td class="blue-text"><?= number_format($interest ?: 0, 0, ',', ' ') ?> XAF</td>
+                                    <td class="blue-text"><?= number_format($insc ?: 0, 0, ',', ' ') ?> XAF</td>
+                                    <td class="blue-text"><?= number_format($sc ?: 0, 0, ',', ' ') ?> XAF</td>
+                                    <td class="blue-text"><?= number_format(\app\managers\SettingManager::getSocialCrown() - $sc, 0, ',', ' ') ?> XAF</td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <div class="col-12">
+                <nav aria-label="Navigation des pages">
+                    <?= LinkPager::widget([
+                        'pagination' => $pagination,
                         'options' => [
                             'class' => 'pagination pagination-circle justify-content-center pg-blue mb-0',
                         ],
@@ -198,22 +400,18 @@ Exercices
                         'linkOptions' => ['class' => 'page-link']
                     ]) ?>
                 </nav>
-
             </div>
-
         <?php else: ?>
-            <div class="col-12 white-block">
-                <h1 class="text-center text-muted">Aucun exercice créé.</h1>
+            <div class="col-12 white-block empty-state">
+                <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                <h4>Aucun exercice créé</h4>
             </div>
-
         <?php endif; ?>
     </div>
 </div>
 
-
 <?php $this->beginBlock('script') ?>
 <script>
-
     <?php
 
     $lLabels = [];

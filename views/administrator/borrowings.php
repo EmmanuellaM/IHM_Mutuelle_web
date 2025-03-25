@@ -18,6 +18,50 @@ Epargnes
         z-index: 1000;
         font-size: 0.8rem;
         padding: 10px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    #btn-add:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .white-block {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .white-block h3 {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .white-block h1 {
+        font-size: 2.5rem;
+        color: var(--secondary-color);
+        margin-bottom: 0;
+    }
+
+    .modal-content {
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .form-group button {
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .form-group button:hover {
+        transform: translateY(-2px);
     }
 </style>
 <?php $this->endBlock() ?>
@@ -33,9 +77,9 @@ Epargnes
 
             <!-- Dropdown to select other sessions -->
             <div class="col-12 mb-3">
-                <p>Rechercher une Session</p>
+                <p class="text-muted">Rechercher une Session</p>
                 <form method="get" action="<?= Yii::getAlias('@administrator.borrowings') ?>">
-                    <div class="input-group">
+                    <div class="input-group mb-3">
                         <select name="session_id" class="form-control">
                             <?php foreach ($allSessions as $session) : ?>
                                 <option value="<?= Html::encode($session->id) ?>" <?= $selectedSession && $session->id == $selectedSession->id ? 'selected' : '' ?>>
@@ -52,11 +96,11 @@ Epargnes
 
             <?php if ($selectedSession): ?>
                 <?php $borrowingAmount = \app\models\Borrowing::find()->where(['session_id' => $selectedSession->id])->sum('amount'); ?>
-                <div class="col-12 white-block text-center mb-5">
+                <div class="col-12 white-block">
                     <h3>Session <?= $selectedSession->active ? '<span class="text-success">(active)</span>' : '<span class="text-danger">(inactive)</span>' ?></h3>
-                    <h1 class="blue-text"><?= $borrowingAmount ? $borrowingAmount : 0 ?> XAF</h1>
+                    <h1><?= number_format($borrowingAmount ?: 0, 0, ',', ' ') ?> XAF</h1>
                     <h3>empruntés</h3>
-                    
+
                     <?php if (\app\managers\FinanceManager::numberOfSession() == 12): ?>
                         <p class="mt-4 text-secondary">
                             Aucun nouvel emprunt ne peut être fait car nous sommes à la dernière session de l'exercice.

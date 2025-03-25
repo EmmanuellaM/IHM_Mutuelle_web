@@ -1,32 +1,211 @@
-<?php $this->beginBlock('title') ?>
-Accueil
-<?php $this->endBlock() ?>
 <?php $this->beginBlock('style') ?>
 <style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #2193b0, #6dd5ed);
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+        --radius-md: 12px;
+        --radius-lg: 20px;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
     #saving-amount-title {
-        font-size: 5rem;
-        color: white;
+        font-size: 4.5rem;
+        font-weight: 700;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        transition: transform 0.3s ease;
+    }
+
+    #saving-amount-title:hover {
+        transform: translateY(-5px);
     }
 
     .img-bravo {
         width: 100px;
         height: 100px;
-        border-radius: 100px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.51);
+        border-radius: 50%;
+        box-shadow: var(--shadow-md);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .img-bravo:hover {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: var(--shadow-lg);
     }
 
     .media {
-        border-bottom: 1px solid #ededed;
+        border-bottom: 2px solid #f0f0f0;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .media:hover {
+        transform: translateX(5px);
     }
 
     #social-crown {
-        font-size: 5rem;
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        transition: transform 0.3s ease;
+    }
+
+    #social-crown:hover {
+        transform: scale(1.05);
+    }
+
+    .white-block {
+        height: 100%;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background-color: #ffffff;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .white-block:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .white-block h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+
+    .white-block h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn {
+        border-radius: 30px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background: var(--primary-gradient);
+        border: none;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .modal-content {
+        border-radius: var(--radius-lg);
+        border: none;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .blue-gradient {
+        background: var(--primary-gradient);
+        color: white;
+        border-radius: var(--radius-md);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stats-grid .white-block {
+        margin: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 200px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .info-block {
+        background: white;
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        height: 100%;
+    }
+
+    .info-block-title {
+        font-size: 1.25rem;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .media-list {
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    .media-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .media-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .media-list::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+
+    .media-list::-webkit-scrollbar-thumb:hover {
+        background: #555;
     }
 </style>
 <?php $this->endBlock() ?>
+
 <div class="container mt-5 mb-5">
-    <div class="row mb-2">
-        <div class="col-12 white-block text-center blue-gradient ">
+    <div class="row mb-4">
+        <div class="col-12 white-block blue-gradient">
             <?php if ($session) : ?>
                 <?php
                 $exercise = \app\models\Exercise::findOne(['active' => true]);
@@ -162,7 +341,9 @@ Accueil
                 $exercise = \app\models\Exercise::findOne(['active' => true]);
 
                 ?>
-                <h3 class="mb-3 text-white">Aucune session en activité</h3>
+                <div class="white-block">
+                    <h3 class="text-muted">Aucune session active</h3>
+                </div>
                 <button class="btn btn-primary <?= $model->hasErrors() ? 'in' : '' ?>" data-toggle="modal" data-target="#modalLRFormDemo">
                     <?php if ($exercise) : ?>
                         Commencer une nouvelle session
@@ -206,28 +387,35 @@ Accueil
             <?php endif; ?>
         </div>
     </div>
-    <div class="row">
-        <?php
-        ?>
-        <div class="col-md-12  pr-4">
-            <div class="row">
-                <div class="col-5 white-block mr-2">
-                    <h3 class="text-center text-muted">Inscriptions</h3>
-                    <h1 id="social-crown" class="blue-text text-center"><?= ($t = \app\managers\FinanceManager::socialCrown()) ? ($t > 0 ? $t : 0) : 0 ?> XAF</h1>
 
-                    <h3 class="text-center text-muted">Evènements de la mutuelle</h3>
+    <div class="stats-grid">
+        <div class="white-block">
+            <h3 class="text-muted">Inscriptions</h3>
+            <h1 id="social-crown"><?= ($t = \app\managers\FinanceManager::socialCrown()) ? ($t > 0 ? $t : 0) : 0 ?> XAF</h1>
+        </div>
+        <div class="white-block">
+            <h3 class="text-muted">Épargnes</h3>
+            <h1 id="saving-amount-title"><?= ($t = \app\managers\FinanceManager::totalSavedAmount()) ? ($t > 0 ? $t : 0) : 0 ?> XAF</h1>
+        </div>
+        <div class="white-block">
+            <h3 class="text-muted">Emprunts</h3>
+            <h1><?= ($t = \app\managers\FinanceManager::totalBorrowedAmount()) ? ($t > 0 ? $t : 0) : 0 ?> XAF</h1>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="white-block h-100">
+                <h3 class="info-block-title">Aides</h3>
+                <div class="media-list">
                     <?php
                     $helps = \app\models\Help::findAll(['state' => true]);
-                    ?>
-                    <?php
                     if (count($helps)) :
-                    ?>
-                        <?php
                         foreach ($helps as $help) :
                             $member = $help->member();
                             $user = $member->user();
                             $helpType = $help->helpType();
-                        ?>
+                    ?>
                             <div class="media">
                                 <img class="d-flex mr-3" width="60" height="60" src="<?= \app\managers\FileManager::loadAvatar($user) ?>" alt="Generic placeholder image">
                                 <div class="media-body">
@@ -242,124 +430,61 @@ Accueil
                                     </div>
                                 </div>
                             </div>
-
-                        <?php
-                        endforeach;
-                        ?>
                     <?php
-                    else :
+                        endforeach;
+                    else:
                     ?>
                         <p class="text-center text-primary">Aucune aide active</p>
                     <?php
                     endif;
                     ?>
-                    <p class="text-center"><a href="<?= Yii::getAlias("@administrator.new_help") ?>" class="btn btn-primary">Créer une nouvelle aide</a></p>
-
-
-                </div>
-
-                <div class="col-6 white-block ml-2">
-                    <h3 class="text-center text-muted">Evènements de la mutuelle</h3>
-                    <?php
-                    $tontines = \app\models\Tontine::findAll(['state' => true]);
-                    ?>
-                    <?php
-                    if (count($tontines)) :
-                    ?>
-                        <?php
-                        foreach ($tontines as $tontine) :
-                            $member = $tontine->member();
-                            $user = $member->user();
-                            $tontineType = $tontine->TontineType();
-                        ?>
-                            <div class="media">
-                                <img class="d-flex mr-3" width="60" height="60" src="<?= \app\managers\FileManager::loadAvatar($user) ?>" alt="Generic placeholder image">
-                                <div class="media-body">
-                                    <h5 class="mt-0 font-weight-bold"><?= $tontineType->title ?></h5>
-                                    <span class="blue-text"><b><?= $user->name . ' ' . $user->first_name ?></b></span>
-                                    <br>
-                                    <?= $tontine->comments ?>
-                                    <br>
-                                    <span style="font-size: 1.5rem" class="text-secondary"><?= ($t = $tontine->contributedAmount()) ? $t : 0 ?> / <?= $tontine->amount ?> XAF</span>
-                                    <div class="text-right">
-                                        <a href="<?= Yii::getAlias("@administrator.tontine_details") . "?q=" . $tontine->id ?>" class="btn btn-primary p-2">Détails</a>
-                                    </div>
-                                </div>
-                            </div>
-
-                        <?php
-                        endforeach;
-                        ?>
-                    <?php
-                    else :
-                    ?>
-                        <p class="text-center text-primary">Aucune tontine active</p>
-                    <?php
-                    endif;
-                    ?>
-                    <p class="text-center"><a href="<?= Yii::getAlias("@administrator.new_tontine") ?>" class="btn btn-primary">Créer une nouvelle Tontine</a></p>
-
-
+                    <p class="text-center mt-3">
+                        <a href="<?= Yii::getAlias("@administrator.new_help") ?>" class="btn btn-primary">Créer une nouvelle aide</a>
+                    </p>
                 </div>
             </div>
-            <!-- <div class="col-m-auto mt-4 ">
-            
-            </div> -->
         </div>
 
-
-
-
-        <?php
-        if ($session) :
-        ?>
-            <?php
-            $borrowings = $exercise->borrowings();
-            ?>
-            <?php
-            if (count($borrowings)) :
-            ?>
-                <div class="white-block mt-2">
-                    <h5 class="text-muted text-center mt-3">Emprunts actifs</h5>
-                    <div class="d-flex flex-row justify-content-between">
-                        <?php
-                        foreach ($borrowings as $borrowing) :
-                            $member = $borrowing->member();
-                            $user = $member->user();
-
-                            $intendedAmount = $borrowing->intendedAmount();
-                            $refundedAmount = $borrowing->refundedAmount();
-                            $rest = $intendedAmount - $refundedAmount;
-
-                        ?>
-                            <div class="media white-block m-2">
-                                <img class="d-flex mr-3" width="50" height="50" src="<?= \app\managers\FileManager::loadAvatar($user) ?>" alt="Generic placeholder image">
-                                <div class="media-body">
-                                    <h5 class="mt-0 font-weight-bold"><?= $user->name . ' ' . $user->first_name ?></h5>
-                                    Date : <span class="blue-text"><?= $borrowing->created_at ?> </span>
-                                    <br>
-                                    Dette : <span class="blue-text"><?= $intendedAmount ?> XAF</span>
-                                    <br>
-                                    Total remboursé : <span class="blue-text"><?= $borrowing->refundedAmount() ?> XAF</span>
-                                    <br>
-                                    Reste : <span class="text-secondary"><?= $rest ?> XAF</span>
-                                    <br>
-
-
+        <div class="col-md-6">
+            <div class="white-block h-100">
+                <h3 class="info-block-title">Emprunts actifs</h3>
+                <div class="media-list">
+                    <?php
+                    if ($session && isset($exercise)) :
+                        $borrowings = $exercise->borrowings();
+                        if (count($borrowings)) :
+                            foreach ($borrowings as $borrowing) :
+                                $member = $borrowing->member();
+                                $user = $member->user();
+                                $intendedAmount = \app\managers\FinanceManager::intendedAmountFromBorrowing($borrowing);
+                                $refundedAmount = $borrowing->refundedAmount();
+                                $rest = $intendedAmount - $refundedAmount;
+                    ?>
+                                <div class="media">
+                                    <img class="d-flex mr-3" width="50" height="50" src="<?= \app\managers\FileManager::loadAvatar($user) ?>" alt="Generic placeholder image">
+                                    <div class="media-body">
+                                        <h5 class="mt-0 font-weight-bold"><?= $user->name . ' ' . $user->first_name ?></h5>
+                                        <span class="text-secondary">Montant emprunté : <?= $borrowing->amount ?> XAF</span>
+                                        <br>
+                                        <span class="text-secondary">Intérêt : <?= $borrowing->interest ?> %</span>
+                                        <br>
+                                        <span style="font-size: 1.5rem" class="text-secondary"><?= $refundedAmount ?> / <?= $intendedAmount ?> XAF</span>
+                                        <div class="text-right">
+                                            <a href="<?= Yii::getAlias("@administrator.borrowing_details") . "?q=" . $borrowing->id ?>" class="btn btn-primary p-2">Détails</a>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        <?php
-                        endforeach;
-                        ?>
-                    </div>
+                    <?php
+                            endforeach;
+                        else:
+                    ?>
+                            <p class="text-center text-primary">Aucun emprunt actif</p>
+                    <?php
+                        endif;
+                    endif;
+                    ?>
                 </div>
-            <?php
-            endif;
-            ?>
-        <?php
-        endif;
-        ?>
+            </div>
+        </div>
     </div>
-
-
 </div>
