@@ -2,45 +2,96 @@
 Nouvel administrateur
 <?php $this->endBlock()?>
 <?php $this->beginBlock('style') ?>
-<style>
-
-    .form-block {
-        padding: 20px;
-        background-color: white;
-        border-radius: 5px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.49);
-    }
-</style>
+<link rel="stylesheet" href="<?= Yii::getAlias('@web/css/admin-styles.css') ?>">
 <?php $this->endBlock()?>
 
+<div class="page-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10 col-12">
+                <div class="form-block">
+                    <h2 class="section-title">Nouvel administrateur</h2>
+                    
+                    <?php $form = \yii\widgets\ActiveForm::begin([
+                        'method' => 'post',
+                        'action' => '@administrator.add_administrator',
+                        'scrollToError' => true,
+                        'errorCssClass' => 'text-danger',
+                        'options' => ['enctype' => 'multipart/form-data'],
+                    ]); ?>
 
-<div class="container mt-5 mb-5">
-    <div class="row justify-content-center">
-        <h3 class="col-12 text-center text-muted">
-            Nouvel administrateur
-        </h3>
-        <?php $form = \yii\widgets\ActiveForm::begin([
-            'method' => 'post',
-            'action' => '@administrator.add_administrator',
-            'scrollToError' => true,
-            'errorCssClass' =>'text-secondary',
-            'options' => ['enctype' => 'multipart/form-data','class' => 'col-md-8 col-12 form-block'],
-        ]); ?>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <?= $form->field($model, 'username')
+                                ->textInput(['class' => 'form-control', 'placeholder' => 'Entrez le nom d\'utilisateur'])
+                                ->label('Nom d\'utilisateur') ?>
+                        </div>
+                        <div class="col-md-6">
+                            <?= $form->field($model, 'first_name')
+                                ->textInput(['class' => 'form-control', 'placeholder' => 'Entrez le prénom'])
+                                ->label('Prénom') ?>
+                        </div>
+                    </div>
 
-        <?= $form->field($model,'username')->label('Nom d\'utilisateur') ?>
-        <?= $form->field($model,'first_name')->label('Prénom') ?>
-        <?= $form->field($model,'name')->label('Nom') ?>
-        <?= $form->field($model,'tel')->input('tel')->label('Téléphone') ?>
-        <?= $form->field($model,'email')->input('email')->label('Email') ?>
-        <?= $form->field($model,'address')->input('address')->label('Adresse') ?>
-        <?= $form->field($model,'avatar')->fileInput();?>
-        <?= $form->field($model,'password')->input('password')->label('Mot de passe') ?>
-        <?= $form->field($model,'confirm_password')->input('password')->label('Conformer Mot de passe') ?>
-        <div class="form-group text-right">
-            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <?= $form->field($model, 'name')
+                                ->textInput(['class' => 'form-control', 'placeholder' => 'Entrez le nom'])
+                                ->label('Nom') ?>
+                        </div>
+                        <div class="col-md-6">
+                            <?= $form->field($model, 'tel')
+                                ->textInput(['class' => 'form-control', 'placeholder' => 'Entrez le numéro de téléphone'])
+                                ->label('Téléphone') ?>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <?= $form->field($model, 'email')
+                                ->textInput(['class' => 'form-control', 'type' => 'email', 'placeholder' => 'Entrez l\'adresse email'])
+                                ->label('Email') ?>
+                        </div>
+                        <div class="col-md-6">
+                            <?= $form->field($model, 'address')
+                                ->textInput(['class' => 'form-control', 'placeholder' => 'Entrez l\'adresse'])
+                                ->label('Adresse') ?>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <?= $form->field($model, 'avatar')
+                                ->fileInput(['class' => 'form-control'])
+                                ->label('Photo de profil') ?>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <?= $form->field($model, 'password')
+                                ->passwordInput(['class' => 'form-control', 'placeholder' => 'Entrez le mot de passe'])
+                                ->label('Mot de passe') ?>
+                        </div>
+                        <div class="col-md-6">
+                            <?= $form->field($model, 'confirm_password')
+                                ->passwordInput(['class' => 'form-control', 'placeholder' => 'Confirmez le mot de passe'])
+                                ->label('Confirmer le mot de passe') ?>
+                        </div>
+                    </div>
+
+                    <div class="form-group text-end mt-4">
+                        <a href="<?= Yii::getAlias('@administrator.administrators') ?>" class="btn btn-secondary me-2">
+                            <i class="fas fa-times me-2"></i>Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Enregistrer
+                        </button>
+                    </div>
+
+                    <?php \yii\widgets\ActiveForm::end() ?>
+                </div>
+            </div>
         </div>
-        <?php \yii\widgets\ActiveForm::end()?>
-
     </div>
-
 </div>
