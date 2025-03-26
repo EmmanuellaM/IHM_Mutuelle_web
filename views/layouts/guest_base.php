@@ -29,8 +29,8 @@ $this->title = "Mutuelle - ENSPY"
 
         <style>
             :root {
-                --primary-color: #ff6b00;
-                --primary-dark: #e65100;
+                --primary-color: #2a5298;
+                --primary-dark: #1e3c72;
                 --text-light: #ffffff;
                 --bg-light: #f8f9fa;
             }
@@ -40,7 +40,7 @@ $this->title = "Mutuelle - ENSPY"
             }
 
             .modern-navbar {
-                background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+                background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
                 padding: 1rem 2rem;
                 box-shadow: 0 2px 15px rgba(0,0,0,0.1);
             }

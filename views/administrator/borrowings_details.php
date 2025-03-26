@@ -7,11 +7,230 @@ use yii\widgets\ActiveForm;
 $this->title = 'Borrowings Details';
 ?>
 
+<?php $this->beginBlock('style') ?>
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --secondary-color: #1e40af;
+        --success-color: #16a34a;
+        --danger-color: #dc2626;
+        --text-dark: #1f2937;
+        --text-muted: #6b7280;
+        --background-light: #f8fafc;
+        --border-radius: 12px;
+        --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    }
+
+    body {
+        background-color: var(--background-light);
+        color: var(--text-dark);
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .white-block {
+        background-color: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        transition: transform 0.3s ease;
+    }
+
+    .white-block h3 {
+        font-size: 1.75rem;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .white-block h4 {
+        font-size: 1.25rem;
+        color: var(--primary-color);
+        margin-bottom: 2rem;
+        font-weight: 500;
+    }
+
+    .table {
+        border-collapse: separate;
+        border-spacing: 0 12px;
+        margin-top: -12px;
+        width: 100%;
+    }
+
+    .table thead th {
+        border: none;
+        background-color: var(--background-light);
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 1.25rem 1rem;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table tbody tr {
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+        border-radius: var(--border-radius);
+        transition: transform 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .table tbody td, .table tbody th {
+        border: none;
+        padding: 1.25rem 1rem;
+        vertical-align: middle;
+        color: var(--text-dark);
+        font-size: 1rem;
+    }
+
+    .table tbody td:first-child, .table tbody th:first-child {
+        border-top-left-radius: var(--border-radius);
+        border-bottom-left-radius: var(--border-radius);
+    }
+
+    .table tbody td:last-child {
+        border-top-right-radius: var(--border-radius);
+        border-bottom-right-radius: var(--border-radius);
+    }
+
+    .btn {
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--secondary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-danger {
+        background-color: var(--danger-color);
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background-color: #b91c1c;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+    }
+
+    .btn-success {
+        background-color: var(--success-color);
+        border: none;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background-color: #15803d;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+    }
+
+    /* Style pour les montants */
+    .amount {
+        font-family: 'SF Mono', 'Roboto Mono', monospace;
+        font-weight: 600;
+    }
+
+    /* Style pour les badges */
+    .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .badge-success {
+        background-color: rgba(22, 163, 74, 0.1);
+        color: var(--success-color);
+    }
+
+    /* Style pour les modals */
+    .modal-content {
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1.5rem;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-title {
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .close {
+        font-size: 1.5rem;
+        color: var(--text-muted);
+        opacity: 1;
+        transition: all 0.2s ease;
+    }
+
+    .close:hover {
+        color: var(--text-dark);
+        opacity: 1;
+    }
+
+    /* Style pour les formulaires */
+    .form-control {
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+        padding: 0.875rem 1.25rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        color: var(--text-dark);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+
+    .form-group label {
+        color: var(--text-dark);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+</style>
+<?php $this->endBlock() ?>
+
 <div class="container mt-5 mb-5">
     <div class="row">
         <div class="col-12 white-block">
             <h3><?= Html::encode($memberUser->name . " " . $memberUser->first_name) ?></h3>
-            <h4>Emprunts Total de la Session: <?= Html::encode($totalBorrowings ? $totalBorrowings : 0) ?> XAF</h4>
+            <h4>Emprunts Total de la Session: <span class="amount"><?= number_format($totalBorrowings ? $totalBorrowings : 0, 0, ',', ' ') ?> XAF</span></h4>
             <table class="table table-hover">
                 <thead class="blue-grey lighten-4">
                     <tr>

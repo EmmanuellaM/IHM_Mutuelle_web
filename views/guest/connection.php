@@ -9,12 +9,12 @@ Connexion
 <style>
 .login-section {
     padding: 4rem 0;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
     min-height: calc(100vh - 76px);
 }
 
 .role-card {
-    background: url('/web/img/background.jpeg') no-repeat center;
+    background: white;
     border: none;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
