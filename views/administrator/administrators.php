@@ -41,7 +41,7 @@
                             
                             <?php if ($administrator->id != 1): ?>
                                 <div class="admin-actions">
-                                    <a href="<?= Yii::getAlias("@administrator.administrator") ?>?administrator=<?= $administrator->id ?>"
+                                    <a href="<?= Yii::$app->urlManager->createUrl(['/administrator/administrator', 'administrator' => $administrator->id]) ?>"
                                        class="btn btn-primary">
                                         <i class="fas fa-eye me-2"></i>Voir
                                     </a>
@@ -68,7 +68,7 @@
 
         <?php if ($this->params['administrator']->root): ?>
             <div class="d-flex justify-content-end mt-4">
-                <a href="<?= Yii::getAlias("@administrator.new_administrator") ?>" 
+                <a href="<?= Yii::$app->urlManager->createUrl(['/administrator/new-administrator']) ?>" 
                    class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Ajouter un Administrateur
                 </a>

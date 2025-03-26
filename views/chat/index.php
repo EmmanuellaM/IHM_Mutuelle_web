@@ -44,100 +44,143 @@ $usersJson = Json::encode(array_values(array_filter(Json::decode($usersJson))));
 
 <style>
 :root {
-    --primary-color: #2563eb;
-    --secondary-color: #f3f4f6;
-    --text-primary: #1f2937;
-    --text-secondary: #6b7280;
-    --border-color: #e5e7eb;
+    --primary-color: #3498db;
+    --primary-dark: #2980b9;
+    --secondary-color: #f8fafc;
+    --text-primary: #2c3e50;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
     --success-color: #10b981;
     --white: #ffffff;
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
 }
 
 .mutuelle-chat {
     display: flex;
     height: calc(100vh - 180px);
     background-color: var(--white);
-    border-radius: 12px;
+    border-radius: 20px;
     box-shadow: var(--shadow);
     overflow: hidden;
     margin: 80px 20px 20px 20px;
+    transition: var(--transition);
 }
 
 /* Sidebar styles */
 .mutuelle-chat-sidebar {
-    width: 300px;
+    width: 320px;
     background-color: var(--white);
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
+    transition: var(--transition);
 }
 
 .mutuelle-chat-user-profile {
-    padding: 20px;
+    padding: 24px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
+    background: linear-gradient(to right, var(--primary-color), var(--primary-dark));
+    color: var(--white);
 }
 
 .mutuelle-chat-user-profile img {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid var(--white);
+    transition: var(--transition);
+}
+
+.mutuelle-chat-user-profile img:hover {
+    transform: scale(1.1);
 }
 
 .mutuelle-chat-user-info h3 {
     margin: 0;
-    color: var(--text-primary);
-    font-size: 16px;
+    color: var(--white);
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .mutuelle-chat-user-info p {
-    margin: 0;
-    color: var(--success-color);
-    font-size: 12px;
+    margin: 4px 0 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
 }
 
 .mutuelle-chat-search {
-    padding: 16px;
+    padding: 20px;
     border-bottom: 1px solid var(--border-color);
+    background-color: var(--secondary-color);
 }
 
 .mutuelle-chat-search input {
     width: 100%;
-    padding: 8px 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 20px;
+    padding: 12px 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 25px;
     outline: none;
     font-size: 14px;
+    transition: var(--transition);
+    background-color: var(--white);
+}
+
+.mutuelle-chat-search input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
 
 .mutuelle-chat-users-list {
     flex: 1;
     overflow-y: auto;
+    padding: 10px 0;
+}
+
+.mutuelle-chat-users-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.mutuelle-chat-users-list::-webkit-scrollbar-track {
+    background: var(--secondary-color);
+}
+
+.mutuelle-chat-users-list::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 3px;
 }
 
 .mutuelle-chat-user-item {
-    padding: 12px 16px;
+    padding: 15px 20px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: var(--transition);
+    border-left: 3px solid transparent;
 }
 
 .mutuelle-chat-user-item:hover,
 .mutuelle-chat-user-item.active {
     background-color: var(--secondary-color);
+    border-left: 3px solid var(--primary-color);
 }
 
 .mutuelle-chat-user-item img {
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.mutuelle-chat-user-item:hover img {
+    border-color: var(--primary-color);
 }
 
 .mutuelle-chat-user-item .user-info {
@@ -146,13 +189,14 @@ $usersJson = Json::encode(array_values(array_filter(Json::decode($usersJson))));
 
 .mutuelle-chat-user-item h4 {
     margin: 0;
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-primary);
+    font-weight: 600;
 }
 
 .mutuelle-chat-user-item p {
     margin: 4px 0 0;
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-secondary);
 }
 
@@ -161,210 +205,243 @@ $usersJson = Json::encode(array_values(array_filter(Json::decode($usersJson))));
     flex: 1;
     display: flex;
     flex-direction: column;
-    background-color: var(--white);
+    background-color: var(--secondary-color);
 }
 
 .mutuelle-chat-header {
-    padding: 16px;
+    padding: 20px;
+    background-color: var(--white);
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
 }
 
 .mutuelle-chat-header img {
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid var(--primary-color);
 }
 
 .mutuelle-chat-header h3 {
     margin: 0;
-    font-size: 16px;
+    font-size: 18px;
     color: var(--text-primary);
+    font-weight: 600;
 }
 
 .mutuelle-chat-messages {
     flex: 1;
-    padding: 20px;
+    padding: 30px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    background-color: var(--secondary-color);
+    gap: 20px;
+    background: linear-gradient(135deg, #f6f9fc 0%, #f1f5f9 100%);
+    position: relative;
+}
+
+.mutuelle-chat-messages::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to bottom, rgba(246, 249, 252, 0.9) 0%, rgba(246, 249, 252, 0) 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.mutuelle-chat-messages::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to top, rgba(241, 245, 249, 0.9) 0%, rgba(241, 245, 249, 0) 100%);
+    pointer-events: none;
+    z-index: 1;
 }
 
 .mutuelle-chat-message {
-    max-width: 70%;
+    max-width: 75%;
     display: flex;
     flex-direction: column;
+    gap: 5px;
+    animation: messageAppear 0.3s ease;
+    position: relative;
+    z-index: 2;
 }
 
-.mutuelle-chat-message.sent {
-    align-self: flex-end;
+.message-content {
+    padding: 15px 20px;
+    border-radius: 18px;
+    font-size: 15px;
+    line-height: 1.6;
+    position: relative;
+    transition: var(--transition);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.mutuelle-chat-message .message-content {
-    padding: 12px 16px;
-    border-radius: 16px;
+.message-sent .message-content {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: var(--white);
+    border-bottom-right-radius: 5px;
+    margin-right: 15px;
+}
+
+.message-received .message-content {
     background-color: var(--white);
     color: var(--text-primary);
-    box-shadow: var(--shadow);
+    border-bottom-left-radius: 5px;
+    margin-left: 15px;
 }
 
-.mutuelle-chat-message.sent .message-content {
-    background-color: var(--primary-color);
-    color: var(--white);
+.message-sent .message-content::before,
+.message-received .message-content::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 12px;
+    height: 12px;
 }
 
-.mutuelle-chat-message .message-time {
-    font-size: 12px;
-    color: var(--text-secondary);
-    align-self: flex-end;
+.message-sent .message-content::before {
+    right: -6px;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-dark) 50%, transparent 50%, transparent 100%);
+    transform: rotate(-45deg);
+}
+
+.message-received .message-content::before {
+    left: -6px;
+    background: var(--white);
+    transform: rotate(45deg);
 }
 
 .mutuelle-chat-input {
-    padding: 16px;
-    border-top: 1px solid var(--border-color);
+    padding: 25px 30px;
     background-color: var(--white);
+    border-top: 1px solid var(--border-color);
+    position: relative;
+}
+
+.mutuelle-chat-input::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: linear-gradient(to top, var(--white) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
 .mutuelle-chat-input form {
     display: flex;
-    gap: 12px;
+    gap: 20px;
+    align-items: center;
+    background: var(--secondary-color);
+    border-radius: 30px;
+    padding: 8px;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .mutuelle-chat-input input {
     flex: 1;
-    padding: 12px 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 24px;
+    min-height: 50px;
+    padding: 12px 25px;
+    border: none;
+    background: transparent;
+    font-size: 15px;
+    color: var(--text-primary);
+    transition: var(--transition);
+}
+
+.mutuelle-chat-input input:focus {
     outline: none;
-    font-size: 14px;
+}
+
+.mutuelle-chat-input input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
 }
 
 .mutuelle-chat-input button {
-    padding: 12px 24px;
-    background-color: var(--primary-color);
+    padding: 15px 35px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: var(--white);
     border: none;
-    border-radius: 24px;
+    border-radius: 25px;
+    font-size: 15px;
+    font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: var(--transition);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+}
+
+.mutuelle-chat-input button i {
+    font-size: 18px;
 }
 
 .mutuelle-chat-input button:hover {
-    background-color: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
 }
 
-.mutuelle-chat-placeholder {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    color: var(--text-secondary);
-    font-size: 16px;
-    text-align: center;
-    padding: 20px;
+.mutuelle-chat-input button:active {
+    transform: translateY(0);
 }
 
-.mutuelle-chat-placeholder i {
-    font-size: 48px;
-    color: var(--primary-color);
+@keyframes messageAppear {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.mutuelle-chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-    background-color: var(--secondary-color);
+.message-sent {
+    align-self: flex-end;
 }
 
-.chat-message {
-    margin-bottom: 15px;
-    display: flex;
-    flex-direction: column;
-}
-
-.chat-message.sent {
-    align-items: flex-end;
-}
-
-.chat-message.received {
-    align-items: flex-start;
+.message-received {
+    align-self: flex-start;
 }
 
 .message-content {
-    max-width: 70%;
-    padding: 10px 15px;
+    padding: 12px 18px;
     border-radius: 15px;
-    background-color: var(--white);
-    box-shadow: var(--shadow);
+    font-size: 14px;
+    line-height: 1.5;
+    position: relative;
+    transition: var(--transition);
 }
 
-.chat-message.sent .message-content {
-    background-color: var(--primary-color);
+.message-sent .message-content {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: var(--white);
+    border-bottom-right-radius: 5px;
 }
 
-.message-sender {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-bottom: 5px;
-}
-
-.message-text {
-    margin-bottom: 5px;
+.message-received .message-content {
+    background-color: var(--white);
+    color: var(--text-primary);
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .message-time {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-secondary);
-}
-
-.chat-message.sent .message-time,
-.chat-message.sent .message-sender {
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.mutuelle-chat-input {
-    display: flex;
-    padding: 20px;
-    background-color: var(--white);
-    border-top: 1px solid var(--border-color);
-}
-
-.mutuelle-chat-input input {
-    flex: 1;
-    padding: 10px 15px;
-    border: 1px solid var(--border-color);
-    border-radius: 25px;
-    margin-right: 10px;
-}
-
-.mutuelle-chat-input input:disabled {
-    background-color: var(--secondary-color);
-    cursor: not-allowed;
-}
-
-.mutuelle-chat-input button {
-    padding: 10px 20px;
-    background-color: var(--primary-color);
-    color: var(--white);
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-}
-
-.mutuelle-chat-input button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+    margin-top: 4px;
 }
 </style>
 

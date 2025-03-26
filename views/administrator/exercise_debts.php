@@ -3,13 +3,119 @@
 <?php $this->endBlock() ?>
 <?php $this->beginBlock('style') ?>
     <style>
+        .white-block {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
 
         .warning-block {
-            border : 2px solid darkorange;
-            color: #c76c00;
-            background-color: rgba(255, 140, 0, 0.17);
-            padding: 10px;
+            border: none;
+            color: #e67e22;
+            background-color: #fff3e0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(230, 126, 34, 0.1);
+        }
+
+        .section-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: #3498db;
+            border-radius: 3px;
+        }
+
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .table thead {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .table th {
+            font-weight: 500;
+            border: none;
+            padding: 15px;
+        }
+
+        .table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: none;
             border-radius: 5px;
+            padding: 8px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+
+        .modal-content h3 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .blue-text {
+            color: #3498db !important;
+            font-weight: 600;
+        }
+
+        .red-text {
+            color: #e74c3c !important;
+            font-weight: 600;
+        }
+
+        .text-muted {
+            color: #7f8c8d !important;
         }
     </style>
 <?php $this->endBlock() ?>
@@ -21,7 +127,7 @@ $refunds = \app\models\Refund::find()->where(['is not','exercise_id',null])->all
 
         <div class="row mb-2">
             <div class="col-12 white-block">
-                <h3 class="text-center text-muted">Inscriptions</h3>
+                <h3 class="text-center section-title">Inscriptions</h3>
                 <hr>
 
                 <?php
@@ -107,7 +213,7 @@ $refunds = \app\models\Refund::find()->where(['is not','exercise_id',null])->all
 
         <div class="row mb-2">
             <div class="col-12 white-block">
-                <h3 class="text-center text-muted">Fond Social</h3>
+                <h3 class="text-center section-title">Fond Social</h3>
                 <hr>
 
                 <?php
@@ -188,7 +294,7 @@ $refunds = \app\models\Refund::find()->where(['is not','exercise_id',null])->all
 
     <div class="row">
         <div class="col-12 white-block">
-            <h3 class="text-muted text-center">Dettes d'exercices</h3>
+            <h3 class="text-muted text-center section-title">Dettes d'exercices</h3>
             <hr>
             <p class="warning-block text-center">
                 Attention ! Il s'agit des dettes d'exercices qui n'ont pas été remboursées.
@@ -273,8 +379,6 @@ $refunds = \app\models\Refund::find()->where(['is not','exercise_id',null])->all
             });
         });
     });
-<<<<<<< HEAD
-=======
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('form[data-max-fund]').forEach(form => {
             form.addEventListener('submit', event => {
@@ -288,5 +392,4 @@ $refunds = \app\models\Refund::find()->where(['is not','exercise_id',null])->all
             });
         });
     });
->>>>>>> 46a6216 (Il manque quelques détails à ajuster sinon c'est déja presque bon.)
 </script>

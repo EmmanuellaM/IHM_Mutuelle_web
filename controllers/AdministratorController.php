@@ -1186,7 +1186,20 @@ class AdministratorController extends Controller
             ->limit($pagination->limit)
             ->all();
         $member = \app\models\Member::findOne(['user_id' => Yii::$app->user->id]);
-        return $this->render('exercises', compact('exercises', 'pagination', 'member'));
+
+        // Données pour le graphique en camembert
+        $labels = [];
+        $data = [];
+        $colors = [
+            '#FF6384',
+            '#36A2EB',
+            '#FFCE56',
+            '#4BC0C0',
+            '#9966FF',
+            '#FF9F40'
+        ];
+
+        return $this->render('exercises', compact('exercises', 'pagination', 'member', 'labels', 'data', 'colors'));
     }
 
     /****************************dettes au cours des exercices******************************************* */
