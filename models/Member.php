@@ -88,7 +88,10 @@ class Member extends ActiveRecord
      */
     public function getRegistrationAmount($exercise)
     {
-        $registration = Registration::findOne(['member_id' => $this->id, 'exercise_id' => $exercise->id]);
+        $registration = Registration::find()
+            ->where(['member_id' => $this->id])
+            ->andWhere(['YEAR(registration_date)' => $exercise->year])
+            ->one();
         return $registration ? $registration->amount : 0;
     }
 
@@ -99,7 +102,10 @@ class Member extends ActiveRecord
      */
     public function getSocialFundAmount($exercise)
     {
-        $socialFund = SocialFund::findOne(['member_id' => $this->id, 'exercise_id' => $exercise->id]);
+        $socialFund = SocialFund::find()
+            ->where(['member_id' => $this->id])
+            ->andWhere(['YEAR(contribution_date)' => $exercise->year])
+            ->one();
         return $socialFund ? $socialFund->amount : 0;
     }
 
