@@ -23,41 +23,186 @@ $this->title = "Mutuelle - ENSPY";
         </title>
 
         <style>
-            .profile-icon {
-                width: 30px;
-                height: 30px;
-                border-radius: 50px;
-            }
-            #btn-disconnect {
-                margin: 5px;
-                position: fixed;
-                bottom: 10px;
-
+            :root {
+                --sidebar-width: 250px;
+                --header-height: 60px;
+                --primary: #4e73df;
+                --primary-dark: #224abe;
+                --secondary: #858796;
+                --light: #f8f9fc;
+                --white: #fff;
             }
 
-            ul li {
-            padding: 5px;
-            margin: 5px;
-            border-radius: 50px;
-            border-width: 2px;
-            background-color: whitesmoke;
-            color: black;
+            body {
+                background: #f5f7fa;
             }
 
-            .side-wrapper {
+            /* Navbar Styles */
+            .navbar {
+                background: var(--white);
+                box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+                padding: 0 1.5rem;
+                height: var(--header-height);
+            }
+
+            .navbar-brand {
                 display: flex;
-                flex-direction: column;
-                height: 100%;
+                align-items: center;
+                padding: 0.5rem 0;
             }
 
-            .side-menu {
-                flex: 1;
+            .nav-link {
+                color: var(--secondary);
+                padding: 0.75rem 1.25rem;
+                border-radius: 50px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                margin: 0 0.3rem;
+                font-size: 1rem;
             }
 
-            .contact_admin {
-                padding: 15px;
+            .nav-link:hover {
+                color: var(--primary);
+                background: rgba(78, 115, 223, 0.1);
+            }
+
+            .nav-link.active {
+                color: var(--white);
+                background: linear-gradient(45deg, var(--primary) 0%, var(--primary-dark) 100%);
+            }
+
+            .nav-link i {
+                font-size: 1.2rem;
+                margin-right: 0.75rem;
+                width: 25px;
                 text-align: center;
-                margin-top: 150px;
+            }
+
+            .dropdown-menu {
+                border: none;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                border-radius: 15px;
+                padding: 0.5rem;
+                min-width: 200px;
+            }
+
+            .dropdown-item {
+                padding: 0.75rem 1rem;
+                color: var(--secondary);
+                font-weight: 500;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                transition: all 0.3s ease;
+            }
+
+            .dropdown-item:hover {
+                color: var(--primary);
+                background: rgba(78, 115, 223, 0.1);
+            }
+
+            .dropdown-item i {
+                margin-right: 0.75rem;
+                font-size: 1rem;
+                color: var(--primary);
+            }
+
+            /* Sidebar Styles */
+            .admin-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: var(--sidebar-width);
+                height: 100vh;
+                background: linear-gradient(45deg, var(--primary) 0%, var(--primary-dark) 100%);
+                color: var(--white);
+                z-index: 1040;
+                padding: 1rem;
+                overflow-y: auto;
+            }
+
+            .admin-sidebar .logo-wrapper {
+                padding: 1.5rem 1rem;
+                text-align: center;
+                margin-bottom: 1rem;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+
+            .admin-sidebar .logo-title {
+                color: white;
+                font-size: 1.8rem;
+                font-weight: 800;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                text-decoration: none;
+            }
+
+            .admin-sidebar .menu-section {
+                margin-bottom: 2rem;
+            }
+
+            .admin-sidebar .menu-title {
+                color: rgba(255,255,255,0.6);
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: 0.5rem;
+                padding: 0 1rem;
+            }
+
+            .admin-sidebar .menu-item {
+                display: flex;
+                align-items: center;
+                padding: 0.75rem 1rem;
+                color: rgba(255,255,255,0.8);
+                text-decoration: none;
+                border-radius: 10px;
+                transition: all 0.3s ease;
+                margin-bottom: 0.25rem;
+                font-weight: 500;
+                font-size: 1rem;
+            }
+
+            .admin-sidebar .menu-item:hover {
+                color: var(--white);
+                background: rgba(255,255,255,0.1);
+                transform: translateX(5px);
+            }
+
+            .admin-sidebar .menu-item.active {
+                color: var(--white);
+                background: rgba(255,255,255,0.2);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }
+
+            .admin-sidebar .menu-item i {
+                font-size: 1.2rem;
+                margin-right: 1rem;
+                width: 20px;
+                text-align: center;
+            }
+
+            /* Main Content Adjustment */
+            .main-content {
+                margin-left: var(--sidebar-width);
+                padding: 2rem;
+                padding-top: calc(2rem + var(--header-height));
+            }
+
+            /* Mobile Responsive */
+            @media (max-width: 992px) {
+                .admin-sidebar {
+                    transform: translateX(-100%);
+                    transition: transform 0.3s ease;
+                }
+
+                .admin-sidebar.show {
+                    transform: translateX(0);
+                }
+
+                .main-content {
+                    margin-left: 0;
+                }
             }
         </style>
 
@@ -71,152 +216,218 @@ $this->title = "Mutuelle - ENSPY";
     <!--Main Navigation-->
     <header>
         <!-- Navbar -->
-        <nav class="navbar fixed-top navbar-expand-lg navbar-light  scrolling-navbar blue-gradient">
+        <nav class="navbar navbar-expand-lg">
             <div class="container-fluid">
-
-                <!-- Brand -->
-                <a class="navbar-brand waves-effect" href="<?= Yii::getAlias("@member.home")?>">
-                    <img src="/img/icon.png" alt="ENSP" style="width: 40px; height: 40px;" class="d-md-none">
+                <a class="navbar-brand waves-effect" href="<?= Yii::getAlias('@member.home')?>">
+                    <img src="/img/icon.png" alt="ENSP" style="width: 40px; height: 40px; margin-right: 10px;">
+            
                 </a>
 
-                <!-- Collapse -->
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <!-- Links -->
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-
-                    <!-- Left -->
-                    <ul class="navbar-nav mr-auto navbar-custom">
-                        <li class="nav-item nav-separator">
-                            <a class="nav-link waves-effect <?= MemberSessionManager::isAccueil()?'blue-text':'' ?>" href="<?= Yii::getAlias("@member.home")?>">Accueil</a>
-                        </li>
-                        <li class="nav-item nav-separator">
-                            <a href="<?= Yii::getAlias("@member.epargnes") ?>" class="nav-link waves-effect <?= MemberSessionManager::isEpargnes()?'blue-text':''?>" >Mes épargnes</a>
-                        </li>
-                        <!-- Menu dettes temporairement désactivé
-                        <li class="nav-item nav-separator">
-                            <a href="<?= Yii::getAlias("@member.dettes") ?>" class="nav-link waves-effect <?= MemberSessionManager::isDettes()?'blue-text':''?>" >
-                                <i class="fas fa-hand-holding-usd mr-1"></i>Mes dettes
-                            </a>
-                        </li>
-                        -->
-                        <li class="nav-item nav-separator">
-                            <a href="<?= Yii::getAlias("@member.emprunts") ?>" class="nav-link waves-effect  <?= MemberSessionManager::isEmprunts()?'blue-text':''?>" >Mes emprunts</a>
-                        </li>
-                        <li class="nav-item nav-separator">
-                            <a href="<?= Yii::getAlias("@member.contributions") ?>" class="nav-link waves-effect  <?= MemberSessionManager::isContributions()?'blue-text':''?>" >Mes contributions</a>
-                        </li>
-
-                        <li class="nav-item nav-separator">
-                            <a href="<?= yii\helpers\Url::to(['/member/dette']) ?>" class="nav-link waves-effect <?= MemberSessionManager::isDette() ? 'blue-text' : '' ?>">Ma Dette</a>
-                        </li>
-                        <li class="nav-item nav-separator">
-                            <a class="nav-link waves-effect  <?= MemberSessionManager::isAides()?'blue-text':''?>" href="<?= Yii::getAlias("@member.helps") ?>">Aides</a>
-                        </li>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
-                            <a class="nav-link waves-effect  <?= MemberSessionManager::isPay()?'blue-text':''?>" href="<?= Yii::getAlias("@member.payer")?>" >Payer</a>
-                        </li>
-                    </ul>
-                </div>
-                    </ul>
-
-                    <!-- Right -->
-                    <ul class="navbar-nav nav-flex-icons">
-                        <li class="nav-item mr-auto">
-                            <a class="nav-link waves-effect" href="<?= Yii::getAlias("@member.profil") ?>">
-                                <img src="<?= \app\managers\FileManager::loadAvatar($this->params['user']) ?>" class="profile-icon" alt="<?= $this->params['member']->username ?>">
-                                <span><?= $this->params['member']->username ?></span>
+                            <a class="nav-link <?= MemberSessionManager::isHome() ? 'active' : '' ?>" href="<?= Yii::getAlias('@member.home') ?>">
+                                <i class="fas fa-home"></i> Accueil
                             </a>
                         </li>
                         <li class="nav-item">
-                            <form action="<?= Yii::getAlias('@member.disconnection')?>" method="post" id="disconnection-form">
-                                <input type="hidden" name="<?=Yii::$app->request->csrfParam?>" value="<?=Yii::$app->request->csrfToken?>"/>
-                            </form>
-                            <a class="nav-link waves-effect" href="#" onclick="event.preventDefault(); document.getElementById('disconnection-form')>
-                                <i class="fas fa-sign-out-alt" data-toggle="modal" data-target="#btn-disconnect"></i> Déconnexion
+                            <a class="nav-link <?= MemberSessionManager::isEpargnes() ? 'active' : '' ?>" href="<?= Yii::getAlias('@member.epargnes') ?>">
+                                <i class="fas fa-piggy-bank"></i> Mes épargnes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?= MemberSessionManager::isEmprunts() ? 'active' : '' ?>" href="<?= Yii::getAlias('@member.emprunts') ?>">
+                                <i class="fas fa-hand-holding-usd"></i> Mes emprunts
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?= MemberSessionManager::isContributions() ? 'active' : '' ?>" href="<?= Yii::getAlias('@member.contributions') ?>">
+                                <i class="fas fa-donate"></i> Mes contributions
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?= MemberSessionManager::isDette() ? 'active' : '' ?>" href="<?= yii\helpers\Url::to(['/member/dette']) ?>">
+                                <i class="fas fa-file-invoice-dollar"></i> Ma dette
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?= MemberSessionManager::isAides() ? 'active' : '' ?>" href="<?= Yii::getAlias('@member.helps') ?>">
+                                <i class="fas fa-hands-helping"></i> Aides
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?= MemberSessionManager::isPay() ? 'active' : '' ?>" href="<?= Yii::getAlias('@member.payer') ?>">
+                                <i class="fas fa-money-bill-wave"></i> Payer
                             </a>
                         </li>
                     </ul>
-                </div>
 
+                    <ul class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-user"></i> <?= Yii::$app->user->identity->name ?>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="<?= Yii::getAlias('@member.profil') ?>">
+                                    <i class="fas fa-user-cog"></i> Mon Profil
+                                </a>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#btn-disconnect">
+                                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </nav>
+
+        <style>
+            :root {
+                --primary: #4e73df;
+                --primary-dark: #2e59d9;
+                --white: #fff;
+            }
+
+            .navbar {
+                background: var(--white);
+                box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+                padding: 0 1.5rem;
+                height: var(--header-height);
+                padding-left: calc(var(--sidebar-width) + 1rem);
+            }
+
+            .navbar-brand {
+                display: flex;
+                align-items: center;
+                padding: 0.5rem 0;
+                color: #2c3e50;
+                font-weight: bold;
+                gap: 10px;
+            }
+
+            .navbar-brand img {
+                height: 40px;
+                width: 40px;
+            }
+
+            .nav-link {
+                color: #2c3e50 !important;
+                margin: 0 0.5rem;
+                padding: 0.5rem 1rem;
+                border-radius: 4px;
+                transition: all 0.3s ease;
+            }
+
+            .nav-link:hover {
+                color: var(--primary) !important;
+            }
+
+            .nav-link.active {
+                background-color: var(--primary);
+                color: var(--white) !important;
+            }
+
+            .nav-link i {
+                margin-right: 0.5rem;
+            }
+
+            .dropdown-menu {
+                background-color: var(--white);
+            }
+
+            .dropdown-item {
+                color: #2c3e50 !important;
+            }
+
+            .dropdown-item:hover {
+                background-color: rgba(78, 115, 223, 0.1);
+            }
+
+            .navbar-toggler {
+                border: none;
+                padding: 0.5rem;
+            }
+
+            .navbar-toggler-icon {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(44, 62, 80, 0.5)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+            }
+        </style>
         <!-- Navbar -->
 
         <!-- Sidebar -->
-        <div class="sidebar-fixed position-fixed">
-            <div class="text-center">
-                <a class="logo-wrapper waves-effect" href="<?= Yii::getAlias("@member.home") ?>">
-                    <img src="<?= Yii::getAlias("@web")."/img/icon.png"?>" class="img-fluid" alt="ENSP">
+        <div class="admin-sidebar">
+            <div class="logo-wrapper">
+                <a href="<?= Yii::getAlias("@member.home") ?>" class="logo-title">
+                    MUTUELLE
                 </a>
             </div>
 
-
-            <div class="side-wrapper">
-                <div class="side-menu">
-                    <a href="<?= Yii::getAlias("@member.home") ?>" class="list-group-item list-group-item-action <?= MemberSessionManager::isHome()?'active':''?> waves-effect">
-                        <i class="fas fa-chart-pie mr-3"></i>Tableau de bord
-                    </a>
-                    <a href="<?= Yii::getAlias("@member.members") ?>" class="list-group-item list-group-item-action <?= MemberSessionManager::isMembers()?'active':''?> waves-effect">
-                        <i class="fas fa-users mr-3"></i>Membres
-                    </a>
-                    <a href="/member/payments" class="list-group-item list-group-item-action <?= MemberSessionManager::isPayments()?'active':''?> waves-effect">
-                        <i class="fas fa-money-bill-wave mr-3"></i>Mes Paiements
-                    </a>
-                    <a href="<?= Yii::getAlias("@member.typesaide") ?>" class="list-group-item list-group-item-action <?= MemberSessionManager::isHelps()?'active':''?> waves-effect">
-                        <i class="fas fa-hand-holding-heart mr-3"></i>Type d'aides
-                    </a>
-
-                    <a href="<?= Yii::getAlias("@member.tontine_types") ?>" class="list-group-item list-group-item-action <?= MemberSessionManager::isTontine()?'active':''?> waves-effect">
-                            <i class="fas fa-coins mr-3"></i>Les Tontines
-                    </a>
-
-                    
-                    <a href="<?= Yii::getAlias("@member.exercises") ?>" class="list-group-item list-group-item-action <?= MemberSessionManager::isExercices()?'active':''?> waves-effect">
-                        <i class="fas far fa-calendar mr-3"></i>Détails exercices
-                    </a>
-                    <a href="<?= Yii::getAlias("@member.sessions") ?>" class="list-group-item list-group-item-action <?= MemberSessionManager::isSessions()?'active':''?> waves-effect">
-                        <i class="fas fa-table mr-3"></i>Sessions
-                    </a>
-                    <a href="<?= Yii::getAlias("@web").'/chat' ?>" class="list-group-item list-group-item-action <?= MemberSessionManager::isChat()?'active':''?> waves-effect">
-                        <i class="fas fa-comments mr-3"></i>Chat
-                    </a>
-                    <form action="<?= Yii::getAlias('@member.disconnection')?>" method="post" id="disconnection-form">
-                        <input type="hidden" name="<?=Yii::$app->request->csrfParam?>" value="<?=Yii::$app->request->csrfToken?>"/>
-                    </form>
-                    <a class="nav-link waves-effect" href="#" data-toggle="modal" data-target="#btn-disconnect" onclick="event.preventDefault(); document.getElementById('disconnection-form')>
-                        <i class="fas fa-sign-out-alt" ></i> Déconnexion</a>
-                    <!-- Add the Contact Admin button here -->
-                    <div class="contact_admin" style="background-color: #f5f5f5;">
-                        <!-- <a href="mailto:root@root.root" class="btn btn-primary btn-sm">Contacter Admin</a> -->
-                        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=root@root.root" target="_blank" class="list-group-item list-group-item-action waves-effect">
-                            <i class="fas fa-envelope mr-3"></i>Contacter Admin
-                        </a>
-                    </div>
-                </div>
+            <div class="menu-section">
+                <div class="menu-title">Menu Principal</div>
+                <a href="<?= Yii::getAlias("@member.home") ?>" class="menu-item <?= MemberSessionManager::isHome()?'active':''?>">
+                    <i class="fas fa-home"></i>Tableau de bord
+                </a>
+                <a href="<?= Yii::getAlias("@member.members") ?>" class="menu-item <?= MemberSessionManager::isMembers()?'active':''?>">
+                    <i class="fas fa-users"></i>Membres
+                </a>
+                <a href="/member/payments" class="menu-item <?= MemberSessionManager::isPayments()?'active':''?>">
+                    <i class="fas fa-money-bill-wave"></i>Mes Paiements
+                </a>
+                <a href="<?= Yii::getAlias('@member.typesaide') ?>" class="menu-item <?= MemberSessionManager::isHelps()?'active':''?>">
+                    <i class="fas fa-hand-holding-heart"></i>Type d'aides
+                </a>
+                <a href="<?= Yii::getAlias("@member.tontine_types") ?>" class="menu-item <?= MemberSessionManager::isTontine()?'active':''?>">
+                    <i class="fas fa-coins"></i>Les Tontines
+                </a>
+                <a href="<?= Yii::getAlias("@member.exercises") ?>" class="menu-item <?= MemberSessionManager::isExercices()?'active':''?>">
+                    <i class="fas fa-calendar"></i>Détails exercices
+                </a>
+                <a href="<?= Yii::getAlias("@member.sessions") ?>" class="menu-item <?= MemberSessionManager::isSessions()?'active':''?>">
+                    <i class="fas fa-table"></i>Sessions
+                </a>
+                <a href="<?= Yii::getAlias("@web").'/chat' ?>" class="menu-item <?= MemberSessionManager::isChat()?'active':''?>">
+                    <i class="fas fa-comments"></i>Chat
+                </a>
             </div>
-            <div class="modal  fade" id="btn-disconnect" tabindex="-1" role="dialog"
-                 aria-labelledby="myModalLabel"
-                 aria-hidden="true">
+
+            <div class="menu-section">
+                <div class="menu-title">Compte</div>
+                <a class="menu-item" href="#" data-toggle="modal" data-target="#btn-disconnect">
+                    <i class="fas fa-sign-out-alt"></i>Déconnexion
+                </a>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">Contact</div>
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=root@root.root" target="_blank" class="menu-item">
+                    <i class="fas fa-envelope"></i>Contacter Admin
+                </a>
+            </div>
+            <form action="<?= Yii::getAlias('@web') . '/member/deconnexion' ?>" method="post" id="disconnection-form">
+                <input type="hidden" name="_csrf-frontend" value="<?= Yii::$app->request->getCsrfToken() ?>" />
+            </form>
+            <div class="modal fade" id="btn-disconnect" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="myModalLabel">Confirmation de déconnexion</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
                         <div class="modal-body">
-
-                            <p class="text-center">Êtes-vous sûr(e) de vouloir vous déconnecter?
-                            </p>
-
-                            <div class="form-group text-center">
-                                <button type="button" class="btn btn-danger" data-dismiss="modal">Non</button>
-                                <button class="btn btn-success" onclick="$('#disconnection-form').submit()">oui</button>
-
-                            </div>
+                            <p class="text-center">Êtes-vous sûr(e) de vouloir vous déconnecter?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('disconnection-form').submit()">Oui</button>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
         </div>
