@@ -128,7 +128,6 @@ class Member extends ActiveRecord
      */
     public function getRegistrationAmount($exercise)
     {
-<<<<<<< HEAD
         if (!$exercise) {
             return 0;
         }
@@ -142,13 +141,6 @@ class Member extends ActiveRecord
             \Yii::error("Erreur lors de la récupération du montant d'inscription: " . $e->getMessage());
             return 0;
         }
-=======
-        $registration = Registration::find()
-            ->where(['member_id' => $this->id])
-            ->andWhere(['YEAR(registration_date)' => $exercise->year])
-            ->one();
-        return $registration ? $registration->amount : 0;
->>>>>>> 83bd1e86d3effa35cf5d1ef01900e6621fdf585c
     }
 
     /**
@@ -158,7 +150,6 @@ class Member extends ActiveRecord
      */
     public function getSocialFundAmount($exercise)
     {
-<<<<<<< HEAD
         if (!$exercise) {
             return 0;
         }
@@ -172,13 +163,6 @@ class Member extends ActiveRecord
             \Yii::error("Erreur lors de la récupération du montant du fond social: " . $e->getMessage());
             return 0;
         }
-=======
-        $socialFund = SocialFund::find()
-            ->where(['member_id' => $this->id])
-            ->andWhere(['YEAR(contribution_date)' => $exercise->year])
-            ->one();
-        return $socialFund ? $socialFund->amount : 0;
->>>>>>> 83bd1e86d3effa35cf5d1ef01900e6621fdf585c
     }
 
     public function administrator() {
