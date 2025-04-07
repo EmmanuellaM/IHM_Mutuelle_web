@@ -41,8 +41,25 @@ class Member extends ActiveRecord
     }
 
     public function borrowedAmount(Exercise $exercise) {
-        $sessions = Session::find()->select('id')->where(['exercise_id' => $exercise->id])->column();
-        return Borrowing::find()->where(['session_id' => $sessions,'member_id' => $this->id])->sum("amount");
+        if (!$exercise) {
+            return 0;
+        }
+        try {
+            $sessions = Session::find()
+                ->select('id')
+                ->where(['exercise_id' => $exercise->id])
+                ->column();
+            if (empty($sessions)) {
+                return 0;
+            }
+            return Borrowing::find()
+                ->where(['member_id' => $this->id])
+                ->andWhere(['session_id' => $sessions])
+                ->sum('amount') ?? 0;
+        } catch (\Exception $e) {
+            \Yii::error("Erreur lors de la récupération du montant emprunté: " . $e->getMessage());
+            return 0;
+        }
     }
 
     public function exerciseBorrowings(Exercise $exercise) {
@@ -51,9 +68,32 @@ class Member extends ActiveRecord
     }
 
     public function refundedAmount(Exercise $exercise) {
-        $sessions = Session::find()->select('id')->where(['exercise_id' => $exercise->id])->column();
-        $borrowings = Borrowing::find()->select('id')->where(['member_id' => $this->id,'session_id' => $sessions])->column();
-        return Refund::find()->where(['borrowing_id' => $borrowings ])->sum("amount");
+        if (!$exercise) {
+            return 0;
+        }
+        try {
+            $sessions = Session::find()
+                ->select('id')
+                ->where(['exercise_id' => $exercise->id])
+                ->column();
+            if (empty($sessions)) {
+                return 0;
+            }
+            $borrowings = Borrowing::find()
+                ->select('id')
+                ->where(['member_id' => $this->id])
+                ->andWhere(['session_id' => $sessions])
+                ->column();
+            if (empty($borrowings)) {
+                return 0;
+            }
+            return Refund::find()
+                ->where(['borrowing_id' => $borrowings])
+                ->sum('amount') ?? 0;
+        } catch (\Exception $e) {
+            \Yii::error("Erreur lors de la récupération du montant remboursé: " . $e->getMessage());
+            return 0;
+        }
     }
 
     public function calculateTotalBorrowingSavings($borrowingSavings)
@@ -88,8 +128,19 @@ class Member extends ActiveRecord
      */
     public function getRegistrationAmount($exercise)
     {
-        $registration = Registration::findOne(['member_id' => $this->id, 'exercise_id' => $exercise->id]);
-        return $registration ? $registration->amount : 0;
+        if (!$exercise) {
+            return 0;
+        }
+        try {
+            $registration = Registration::find()
+                ->where(['member_id' => $this->id])
+                ->andWhere(['exercise_id' => $exercise->id])
+                ->one();
+            return $registration ? $registration->amount : 0;
+        } catch (\Exception $e) {
+            \Yii::error("Erreur lors de la récupération du montant d'inscription: " . $e->getMessage());
+            return 0;
+        }
     }
 
     /**
@@ -99,8 +150,19 @@ class Member extends ActiveRecord
      */
     public function getSocialFundAmount($exercise)
     {
-        $socialFund = SocialFund::findOne(['member_id' => $this->id, 'exercise_id' => $exercise->id]);
-        return $socialFund ? $socialFund->amount : 0;
+        if (!$exercise) {
+            return 0;
+        }
+        try {
+            $socialFund = SocialFund::find()
+                ->where(['member_id' => $this->id])
+                ->andWhere(['exercise_id' => $exercise->id])
+                ->one();
+            return $socialFund ? $socialFund->amount : 0;
+        } catch (\Exception $e) {
+            \Yii::error("Erreur lors de la récupération du montant du fond social: " . $e->getMessage());
+            return 0;
+        }
     }
 
     public function administrator() {
