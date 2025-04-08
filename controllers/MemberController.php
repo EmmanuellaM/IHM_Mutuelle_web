@@ -426,16 +426,24 @@ class MemberController extends Controller
             return $this->redirect(['site/login']);
         }
         
-        $member = Member::findOne(Yii::$app->user->id);
+        // Récupérer le membre connecté
+        $member = $this->member;
         if (!$member) {
-            Yii::$app->session->setFlash('error', 'Membre non trouvé');
-            return $this->redirect(['site/login']);
+            throw new \yii\web\NotFoundHttpException('Membre non trouvé.');
         }
-        
+
+        // Récupérer l'exercice actif
+        $exercise = Exercise::findOne(['active' => true]);
+        if (!$exercise) {
+            throw new \yii\web\NotFoundHttpException('Aucun exercice actif trouvé.');
+        }
+
+        // Récupérer le montant cible du fond social depuis les paramètres
         $socialCrownTarget = SettingManager::getSocialCrown();
 
         return $this->render('dette', [
             'member' => $member,
+            'exercise' => $exercise,
             'socialCrownTarget' => $socialCrownTarget,
         ]);
     }
