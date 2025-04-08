@@ -33,7 +33,7 @@ class MemberSessionManager
 
     public static function setHelps() {
         \Yii::$app->session->set(self::place,"helps");
-        \Yii::$app->session->set(self::head,null);
+        \Yii::$app->session->set(self::head,"types-aide");
     }
 
     public static function setTontine() {
@@ -74,7 +74,7 @@ class MemberSessionManager
 
 
     public static function isHelps() {
-        return Yii::$app->controller->action->id == "typesaide";
+        return \Yii::$app->session->get(self::head) == "types-aide";
     }
 
     public static function isPayments(){
@@ -120,14 +120,21 @@ class MemberSessionManager
     public static function isAides() {
         return \Yii::$app->session->get(self::head) == "helps";
     }
-    public  static  function isPay(){
-        return \Yii::$app->session->get(self::place) == "pay";
+ 
+    public static function isTypesAide() {
+        return \Yii::$app->session->get(self::head) == "types-aide";
     }
-    public  static  function isTontine(){
+
+    public static function isPay() {
+        $controller = \Yii::$app->controller;
+        $action = $controller ? $controller->action->id : null;
+        return 
+            \Yii::$app->session->get(self::place) == "pay" || 
+            \Yii::$app->session->get(self::head) == "pay" ||
+            in_array($action, ['payer', 'pay']);
+    }
+
+    public static function isTontine(){
         return \Yii::$app->session->get(self::head) == "tontine";
     }
-    // public static function isTontine()
-    // {
-    //     return \Yii::$app->controller->id === 'member' && \Yii::$app->controller->action->id === 'tontine_types';
-    // }
 }

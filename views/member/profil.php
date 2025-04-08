@@ -4,79 +4,177 @@ Mon profil
 
 <?php $this->beginBlock('style')?>
 <style>
+    .profile-container {
+        padding: 2rem;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+        min-height: 100vh;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
     .img-container {
         display: inline-block;
         width: 200px;
         height: 200px;
+        margin: 0 auto;
+        position: relative;
     }
-    .img-container img{
+
+    .img-container img {
         width: 100%;
         height: 100%;
         border-radius: 1000px;
-    }
-    .white-block {
-        padding: 20px;
-        background-color: white;
-        border-radius: 5px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.49);
+        object-fit: cover;
+        border: 4px solid #4e73df;
     }
 
-    .labels .col-7 {
-        color: dodgerblue;
+    .profile-info {
+        margin-top: 2rem;
+    }
+
+    .info-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+        background: #f8f9fc;
+    }
+
+    .info-label {
+        flex: 1;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .info-value {
+        flex: 2;
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
+
+    .info-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #4e73df;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+
+    .edit-btn {
+        background: #4e73df;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .edit-btn:hover {
+        background: #2e59d9;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
+    }
+
+    .edit-section {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .profile-card {
+            padding: 1rem;
+        }
+
+        .info-row {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .info-label {
+            margin-bottom: 0.5rem;
+        }
+
+        .info-icon {
+            margin-bottom: 0.5rem;
+        }
     }
 </style>
 <?php $this->endBlock()?>
 
-<div class="container mt-5 mb-5">
-    <div class="row">
-        <div class="col-md-4 text-center">
-            <div class="img-container">
-                <img src="<?= \app\managers\FileManager::loadAvatar($this->params['user'],"512")?>" alt="">
-            </div>
-            <h2 class="mt-2 text-capitalize"><?= $this->params['member']->username?></h2>
-        </div>
-        <div class="col-md-8 white-block">
-            <div class="row labels">
-                <div class="col-5">
-                    Nom
-                </div>
-                <div class="col-7">
-                    <?= $this->params['user']->name ?>
-                </div>
-                <div class="col-5">
-                    Prénom
-                </div>
-                <div class="col-7">
-                    <?= $this->params['user']->first_name ?>
-                </div>
-                <div class="col-5">
-                    Téléphone
-                </div>
-                <div class="col-7">
-                    <?= $this->params['user']->tel ?>
-                </div>
-                <div class="col-5">
-                    Email
-                </div>
-                <div class="col-7">
-                    <?= $this->params['user']->email ?>
-                </div>
-                <div class="col-5">
-                    Adresse
-                </div>
-                <div class="col-7">
-                    <?= $this->params['user']->address ?>
-                </div>
-                <div class="col-5">
-                    Date d'inscription
-                </div>
-                <div class="col-7">
-                    <?= $this->params['user']->created_at ?>
-                </div>
-            </div>
-            <div class="row mt-5">
-                <div class="col-12 text-center">
-                    <a href="<?= Yii::getAlias("@member.modifier_profil") ?>" class="btn btn-primary">Modifier</a>
+<div class="profile-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="img-container">
+                            <img src="<?= \app\managers\FileManager::loadAvatar($this->params['user'], "512") ?>" alt="">
+                        </div>
+                        <h2 class="mt-3 text-capitalize"><?= $this->params['member']->username ?></h2>
+                        <p class="text-muted mb-0"><?= $this->params['user']->type ?></p>
+                    </div>
+
+                    <div class="profile-info">
+                        <div class="info-row">
+                            <div class="info-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="info-label">Nom complet</div>
+                            <div class="info-value"><?= $this->params['user']->name ?> <?= $this->params['user']->first_name ?></div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="info-label">Téléphone</div>
+                            <div class="info-value"><?= $this->params['user']->tel ?></div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="info-label">Email</div>
+                            <div class="info-value"><?= $this->params['user']->email ?></div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="info-label">Adresse</div>
+                            <div class="info-value"><?= $this->params['user']->address ?></div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-icon">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                            <div class="info-label">Date d'inscription</div>
+                            <div class="info-value"><?= $this->params['user']->created_at ?></div>
+                        </div>
+                    </div>
+
+                    <div class="edit-section">
+                        <a href="<?= Yii::getAlias("@member.modifier_profil") ?>" class="btn edit-btn">Modifier mon profil</a>
+                    </div>
                 </div>
             </div>
         </div>

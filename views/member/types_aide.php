@@ -74,7 +74,7 @@ Types d'aide
         <h2>Types d'aide disponibles</h2>
     </div>
 
-    <?php if (count($helptype)):?>
+    <?php if (count($helpTypes)):?>
         <div class="white-block">
             <table class="table">
                 <thead>
@@ -85,7 +85,7 @@ Types d'aide
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($helptype as $index => $ht): ?>
+                    <?php foreach ($helpTypes as $index => $ht): ?>
                         <tr>
                             <th scope="row"><?= $index + 1 ?></th>
                             <td><?= $ht->title ?></td>

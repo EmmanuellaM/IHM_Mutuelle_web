@@ -1,137 +1,246 @@
 <?php
 $this->beginBlock('title') ?>
-Session 
-<?php $this->endBlock() ?>
-<?php $this->beginBlock('style') ?>
-    <style>
-    </style>
-<?php $this->endBlock() ?>
+Détails de la session
+<?php $this->endBlock()?>
 
-<div class="container mt-5 mb-5">
-    <?php $savingAmount = \app\models\Saving::find()->where(['session_id' => $session->id])->sum('amount'); ?>
-    <?php $refundAmount = \app\models\Refund::find()->where(['session_id' => $session->id])->sum('amount'); ?>
-    <?php $borrowingAmount = \app\models\Borrowing::find()->where(['session_id' => $session->id])->sum('amount'); ?>
-    <?php $transac = $savingAmount+$refundAmount-$borrowingAmount ?>
+<?php $this->beginBlock('style')?>
+<style>
+    .details-container {
+        padding: 2rem;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+        min-height: 100vh;
+    }
 
-    <div class="row">
-        <div class="col-12 white-block mb-3">
-            <h3 class="text-center">Session du <?= (new DateTime($session->date))->format("d-m-Y") ?> <?= $session->active ? '(active)' : '' ?></h3>
-            <h1 class="text-center text-secondary"><?= $transac ?> XAF</h1>
-            <h3 class="text-center">transactés</h3>
-        </div>
+    .session-info {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
 
-        <div class="col-12 white-block mb-3">
-            <?php $savings = \app\models\Saving::findAll(['session_id' => $session->id]) ?>
-            <h3 class="text-center">Epargnes : <span class="blue-text"><?= $savingAmount ? $savingAmount : 0 ?> XAF</span></h3>
-            <?php if (count($savings)): ?>
-                <table class="table table-hover">
-                    <thead class="blue-grey lighten-4">
-                    <tr>
-                        <th>#</th>
-                        <th>Membre</th>
-                        <th>Montant</th>
-                        <th>Administrateur</th>
-                    </tr>
+    .session-info h1 {
+        font-size: 2rem;
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+    }
 
-                    </thead>
-                    <tbody>
-                    <?php foreach ($savings as $index => $saving): ?>
-                        <?php $member = \app\models\Member::findOne($saving->member_id);
-                        $memberUser = \app\models\User::findOne($member->user_id);
-                        $administrator = \app\models\Administrator::findOne($saving->administrator_id);
-                        $administratorUser = \app\models\User::findOne($administrator->id);
-                        ?>
-                        <tr>
-                            <th scope="row"><?= $index + 1 ?></th>
-                            <td class="text-capitalize"><?= $memberUser->name . " " . $memberUser->first_name ?></td>
-                            <td class="blue-text"><?= $saving->amount ?> XAF</td>
-                            <td class="text-capitalize"><?= $administratorUser->name . " " . $administratorUser->first_name ?></td>
-                        </tr>
+    .session-info .info-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: #f8f9fc;
+        border-radius: 8px;
+    }
+
+    .session-info .info-label {
+        flex: 0 0 150px;
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .session-info .info-value {
+        flex: 1;
+        color: #2c3e50;
+    }
+
+    .amount-box {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .amount-box h4 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+
+    .amount-box .amount-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .amount-box .amount-label {
+        color: #495057;
+        font-size: 0.9rem;
+    }
+
+    .member-list {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .member-list h4 {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+    }
+
+    .member-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .member-item:last-child {
+        border-bottom: none;
+    }
+
+    .member-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 1rem;
+        background: #4e73df;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+    .member-info {
+        flex: 1;
+    }
+
+    .member-name {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .member-role {
+        color: #4e73df;
+        font-size: 0.9rem;
+    }
+
+    .no-content {
+        text-align: center;
+        padding: 3rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+        background-color: #4e73df;
+        border-color: #4e73df;
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #2e59d9;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .session-info {
+            padding: 1.5rem;
+        }
+
+        .info-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .info-label {
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-primary {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+<?php $this->endBlock()?>
+
+<div class="details-container">
+    <div class="container">
+        <?php if($session):?>
+
+            <div class="session-info">
+                <h1>Détails de la session</h1>
+
+                <div class="info-row">
+                    <div class="info-label">Numéro de session</div>
+                    <div class="info-value"><?= $session->number() ?></div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-label">Date</div>
+                    <div class="info-value"><?= (new DateTime($session->date))->format("d-m-Y") ?></div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-label">Statut</div>
+                    <div class="info-value"><?= $session->active ? "Active" : "Terminée" ?></div>
+                </div>
+            </div>
+
+            <div class="amount-box">
+                <h4>Total des montants</h4>
+                
+                <?php $savingAmount = \app\models\Saving::find()->where(['session_id' => $session->id])->sum('amount'); ?>
+                <div class="amount-value"><?= $savingAmount ? $savingAmount : 0 ?> XAF</div>
+                <div class="amount-label">Total des épargnes</div>
+
+                <?php $refundAmount = \app\models\Refund::find()->where(['session_id' => $session->id])->sum('amount'); ?>
+                <div class="amount-value"><?= $refundAmount ? $refundAmount : 0 ?> XAF</div>
+                <div class="amount-label">Total des remboursements</div>
+
+                <?php $borrowingAmount = \app\models\Borrowing::find()->where(['session_id' => $session->id])->sum('amount'); ?>
+                <div class="amount-value"><?= $borrowingAmount ? $borrowingAmount : 0 ?> XAF</div>
+                <div class="amount-label">Total des emprunts</div>
+            </div>
+
+            <div class="member-list">
+                <h4>Membres présents</h4>
+
+                <?php $savings = \app\models\Saving::find()->where(['session_id' => $session->id])->all() ?>
+                <?php $members = array_unique(array_map(function($saving) { return $saving->member_id; }, $savings)); ?>
+
+                <?php if(count($members)): ?>
+                    <?php foreach($members as $memberId): ?>
+                        <?php $member = \app\models\Member::findOne($memberId); ?>
+                        <?php $user = $member->user(); ?>
+                        <?php $administrator = $member->administrator(); ?>
+                        <div class="member-item">
+                            <div class="member-avatar">
+                                <?= substr($user->name, 0, 1) . substr($user->first_name, 0, 1) ?>
+                            </div>
+                            <div class="member-info">
+                                <div class="member-name"><?= $user->name . ' ' . $user->first_name ?></div>
+                                <div class="member-role"><?= $administrator ? "Administrateur" : "Membre" ?></div>
+                            </div>
+                        </div>
                     <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php else: ?>
-                <h3 class="text-center text-muted">Aucune épargne à cette session</h3>
-            <?php endif; ?>
+                <?php else: ?>
+                    <div class="no-content">
+                        <h1 class="text-muted">Aucun membre présent</h1>
+                    </div>
+                <?php endif; ?>
+            </div>
 
-        </div>
+            <div class="text-center mt-4">
+                <a href="<?= Yii::getAlias("@member.sessions") ?>" class="btn btn-primary">Retour aux sessions</a>
+            </div>
 
-        <div class="col-12 white-block mb-3">
-            <?php $refunds = \app\models\Refund::findAll(['session_id' => $session->id]) ?>
-            <h3 class="text-center">Remboursement : <span class="blue-text"><?= $refundAmount ? $refundAmount : 0 ?> XAF</span></h3>
-
-            <?php if (count($refunds)): ?>
-                <table class="table table-hover">
-                    <thead class="blue-grey lighten-4">
-                    <tr>
-                        <th>#</th>
-                        <th>Membre</th>
-                        <th>Montant</th>
-                        <th>Administrateur</th>
-                    </tr>
-
-                    </thead>
-                    <tbody>
-                    <?php foreach ($refunds as $index => $refund): ?>
-                        <?php $member = \app\models\Member::findOne((\app\models\Borrowing::findOne($refund->borrowing_id))->member_id);
-                        $memberUser = \app\models\User::findOne($member->user_id);
-                        $administrator = \app\models\Administrator::findOne($refund->administrator_id);
-                        $administratorUser = \app\models\User::findOne($administrator->id);
-                        ?>
-                        <tr>
-                            <th scope="row"><?= $index + 1 ?></th>
-                            <td class="text-capitalize"><?= $memberUser->name . " " . $memberUser->first_name ?></td>
-                            <td class="blue-text"><?= $refund->amount ?> XAF</td>
-                            <td class="text-capitalize"><?= $administratorUser->name . " " . $administratorUser->first_name ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
-
-            <?php else: ?>
-                <h3 class="text-center text-muted">Aucun remboursement à cette session</h3>
-            <?php endif; ?>
-
-        </div>
-
-
-        <div class="col-12 white-block mb-3">
-            <?php $borrowings = \app\models\Borrowing::findAll(['session_id' => $session->id]) ?>
-            <h3 class="text-center">Emprunt : <span class="blue-text"><?= $borrowingAmount ? $borrowingAmount : 0 ?> XAF</span></h3>
-
-            <?php if (count($borrowings)): ?>
-                <table class="table table-hover">
-                    <thead class="blue-grey lighten-4">
-                    <tr>
-                        <th>#</th>
-                        <th>Membre</th>
-                        <th>Montant</th>
-                        <th>Administrateur</th>
-                    </tr>
-
-                    </thead>
-                    <tbody>
-                    <?php foreach ($borrowings as $index => $borrowing): ?>
-                        <?php $member = \app\models\Member::findOne($borrowing->member_id);
-                        $memberUser = \app\models\User::findOne($member->user_id);
-                        $administrator = \app\models\Administrator::findOne($borrowing->administrator_id);
-                        $administratorUser = \app\models\User::findOne($administrator->id);
-                        ?>
-                        <tr>
-                            <th scope="row"><?= $index + 1 ?></th>
-                            <td class="text-capitalize"><?= $memberUser->name . " " . $memberUser->first_name ?></td>
-                            <td class="blue-text"><?= $borrowing->amount ?> XAF</td>
-                            <td class="text-capitalize"><?= $administratorUser->name . " " . $administratorUser->first_name ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
-
-            <?php else: ?>
-                <h3 class="text-center text-muted">Aucun emprunt à cette session</h3>
-            <?php endif; ?>
-
-        </div>
+        <?php else: ?>
+            <div class="no-content">
+                <h1 class="text-muted">Session non trouvée</h1>
+            </div>
+        <?php endif; ?>
     </div>
-
 </div>

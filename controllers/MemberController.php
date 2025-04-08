@@ -99,13 +99,8 @@ class MemberController extends Controller
     }
 /*********************************action de deconnexion à modifier ************************************************* */
     public function actionDeconnexion() {
-        if (\Yii::$app->request->post()) {
-            \Yii::$app->user->logout();
-            return $this->redirect('@guest.connection');
-        }
-        {
-            return $this->redirect('@member.home');
-        }
+        Yii::$app->user->logout();
+        return $this->redirect('@guest.connection');
     }
 /********************************action profil *************************************************** */
     public function actionProfil() {
@@ -158,8 +153,12 @@ class MemberController extends Controller
             'address' => $this->user->address,
         ];
 
-        return $this->render('modifier_profil',compact('socialModel','passwordModel'));
-        
+        return $this->render('modifier_profil', [
+            'socialModel' => $socialModel,
+            'passwordModel' => $passwordModel,
+            'user' => $user,
+            'member' => $member
+        ]);
     }
 /*****************************Enregister les modifications du profil ****************************************************** */
     public function actionEnregistrerModifierProfil() {
@@ -240,8 +239,8 @@ class MemberController extends Controller
 /****************************action sur les types d'aide niveau ******************************************************* */
     public function actionTypesAide() {
         MemberSessionManager::setHelps();
-        $helptype = Help_type::find()->all();
-        return $this->render('types_aide',compact('helptype'));
+        $helpTypes = Help_type::find()->where(['active' => true])->all();
+        return $this->render('types_aide', ['helpTypes' => $helpTypes]);
     }
 /***************************par rapport au membre ********************************************* */
     public function actionMembres() {
@@ -445,7 +444,7 @@ class MemberController extends Controller
     /*******************************************Type de Tontine********************************************************************************************/
 
 
-    public function actionTypesTontine()
+    public function actionTontineTypes()
     {
         MemberSessionManager::setHome("tontine");
         $tontineTypes = TontineType::find()->where(['active' => true])->all();

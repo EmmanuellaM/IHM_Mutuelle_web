@@ -17,6 +17,8 @@ return [
             'member/payment-success' => 'member/payment-success',
             'member/confirm-payment' => 'member/confirm-payment',
             'member/payments' => 'member/payments',
+            'member/types-aide' => 'member/types-aide',
+            'member/tontines' => 'member/types-tontine',
         ]
     ],
 ];

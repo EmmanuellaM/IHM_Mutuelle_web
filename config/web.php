@@ -8,6 +8,7 @@ Yii::setAlias('@member.dette', '/member/dette');
 Yii::setAlias('@member.dettes', '/member/dettes'); // Remplace '/member/dettes' par l'URL réelle de ton action
 Yii::setAlias('@chat', '/chat/index');
 Yii::setAlias('@administrator.borrowing_details', '/administrator/emprunt-detail');
+Yii::setAlias('@member.helps', '/member/types_aide');
 
 $config = [
     'id' => 'ensp-m',
@@ -79,6 +80,8 @@ $config = [
             'showScriptName' => false,
             'rules' => [
                 '@administrator/update-agape/<id:\d+>' => 'administrator/update-agape',
+                'member/types-aide' => 'member/types-aide',
+                'member/tontines' => 'member/tontine-types',
             ],
         ],
 

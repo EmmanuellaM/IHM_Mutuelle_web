@@ -218,7 +218,7 @@ $this->title = "Mutuelle - ENSPY";
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg">
             <div class="container-fluid">
-                <a class="navbar-brand waves-effect" href="<?= Yii::getAlias('@member.home')?>">
+                <a class="navbar-brand waves-effect" href="<?= Yii::getAlias("@member.home") ?>">
                     <img src="/img/icon.png" alt="ENSP" style="width: 40px; height: 40px; margin-right: 10px;">
             
                 </a>
@@ -250,18 +250,8 @@ $this->title = "Mutuelle - ENSPY";
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link <?= MemberSessionManager::isDette() ? 'active' : '' ?>" href="<?= yii\helpers\Url::to(['/member/dette']) ?>">
-                                <i class="fas fa-file-invoice-dollar"></i> Ma dette
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link <?= MemberSessionManager::isAides() ? 'active' : '' ?>" href="<?= Yii::getAlias('@member.helps') ?>">
                                 <i class="fas fa-hands-helping"></i> Aides
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?= MemberSessionManager::isPay() ? 'active' : '' ?>" href="<?= Yii::getAlias('@member.payer') ?>">
-                                <i class="fas fa-money-bill-wave"></i> Payer
                             </a>
                         </li>
                     </ul>
@@ -269,7 +259,7 @@ $this->title = "Mutuelle - ENSPY";
                     <ul class="navbar-nav">
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-user"></i> <?= Yii::$app->user->identity->name ?>
+                                <i class="fas fa-user"></i> <?= $this->params['member']->user()->name . ' ' . $this->params['member']->user()->first_name ?>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                                 <a class="dropdown-item" href="<?= Yii::getAlias('@member.profil') ?>">
@@ -361,36 +351,40 @@ $this->title = "Mutuelle - ENSPY";
         <!-- Sidebar -->
         <div class="admin-sidebar">
             <div class="logo-wrapper">
-                <a href="<?= Yii::getAlias("@member.home") ?>" class="logo-title">
+                <a href="/member/home" class="logo-title">
                     MUTUELLE
                 </a>
             </div>
 
             <div class="menu-section">
-                <div class="menu-title">Menu Principal</div>
-                <a href="<?= Yii::getAlias("@member.home") ?>" class="menu-item <?= MemberSessionManager::isHome()?'active':''?>">
-                    <i class="fas fa-home"></i>Tableau de bord
-                </a>
-                <a href="<?= Yii::getAlias("@member.members") ?>" class="menu-item <?= MemberSessionManager::isMembers()?'active':''?>">
-                    <i class="fas fa-users"></i>Membres
-                </a>
-                <a href="/member/payments" class="menu-item <?= MemberSessionManager::isPayments()?'active':''?>">
-                    <i class="fas fa-money-bill-wave"></i>Mes Paiements
-                </a>
-                <a href="<?= Yii::getAlias('@member.typesaide') ?>" class="menu-item <?= MemberSessionManager::isHelps()?'active':''?>">
+                <div class="menu-title">Navigation</div>
+                <a href="/member/types-aide" class="menu-item <?= MemberSessionManager::isTypesAide()?'active':''?>">
                     <i class="fas fa-hand-holding-heart"></i>Type d'aides
                 </a>
-                <a href="<?= Yii::getAlias("@member.tontine_types") ?>" class="menu-item <?= MemberSessionManager::isTontine()?'active':''?>">
+                <a href="/member/tontines" class="menu-item <?= MemberSessionManager::isTontine()?'active':''?>">
                     <i class="fas fa-coins"></i>Les Tontines
                 </a>
-                <a href="<?= Yii::getAlias("@member.exercises") ?>" class="menu-item <?= MemberSessionManager::isExercices()?'active':''?>">
+                <a href="/member/exercises" class="menu-item <?= MemberSessionManager::isExercices()?'active':''?>">
                     <i class="fas fa-calendar"></i>Détails exercices
                 </a>
-                <a href="<?= Yii::getAlias("@member.sessions") ?>" class="menu-item <?= MemberSessionManager::isSessions()?'active':''?>">
+                <a href="/member/sessions" class="menu-item <?= MemberSessionManager::isSessions()?'active':''?>">
                     <i class="fas fa-table"></i>Sessions
                 </a>
-                <a href="<?= Yii::getAlias("@web").'/chat' ?>" class="menu-item <?= MemberSessionManager::isChat()?'active':''?>">
+                <a href="/chat" class="menu-item <?= MemberSessionManager::isChat()?'active':''?>">
                     <i class="fas fa-comments"></i>Chat
+                </a>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">Gestion Financière</div>
+                <a href="/member/pay" class="menu-item <?= MemberSessionManager::isPay()?'active':''?>">
+                    <i class="fas fa-money-bill-wave"></i>Payer
+                </a>
+                <a href="/member/dette" class="menu-item <?= MemberSessionManager::isDette()?'active':''?>">
+                    <i class="fas fa-wallet"></i>Ma dette
+                </a>
+                <a href="/member/payments" class="menu-item <?= MemberSessionManager::isPayments()?'active':''?>">
+                    <i class="fas fa-credit-card"></i>Mes paiements
                 </a>
             </div>
 
@@ -430,36 +424,25 @@ $this->title = "Mutuelle - ENSPY";
                 </div>
             </div>
         </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <?= $content ?>
         </div>
-        <!-- Sidebar -->
 
-    </header>
-    <!--Main Navigation-->
+        <?php include Yii::getAlias("@app") . "/includes/scripts.php"; ?>
 
-    <!--Main layout-->
-    <main class="pt-5 mx-lg-5">
-        <?= $content ?>
-    </main>
-    <!--Main layout-->
+        <!-- Initializations -->
+        <script type="text/javascript">
+            // Animations initialization
+            new WOW().init();
+        </script>
 
-    <?php include Yii::getAlias("@app") . "/includes/scripts.php"; ?>
+        <?php if (isset($this->blocks['script'])): ?>
+            <?= $this->blocks['script'] ?>
+        <?php endif; ?>
 
-    <!-- Initializations -->
-    <script type="text/javascript">
-        // Animations initialization
-        new WOW().init();
-
-    </script>
-
-
-
-
-    <?php if (isset($this->blocks['script'])): ?>
-        <?= $this->blocks['script'] ?>
-    <?php endif; ?>
-
-    <?php $this->endBody(); ?>
+        <?php $this->endBody(); ?>
     </body>
-
     </html>
 <?php $this->endPage(); ?>

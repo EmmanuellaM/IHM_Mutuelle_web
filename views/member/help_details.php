@@ -1,158 +1,203 @@
 <?php
 
 $this->beginBlock('title') ?>
-    Aides
+    Détails de l'Aide
 <?php $this->endBlock() ?>
+
 <?php $this->beginBlock('style') ?>
-    <style>
-        .img-container {
-            display: inline-block;
-            width: 200px;
-            height: 200px;
-        }
-        .img-container img{
-            width: 100%;
-            height: 100%;
-            border-radius: 1000px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.51);
-        }
-
-        .objective {
-            font-size: 2rem;
-            margin: 0px;
-        }
-
-        .contributed {
-            font-size: 2rem;
-            margin: 0px;
-        }
-
-        .comments {
-            background: rgba(128, 128, 128, 0.33);
-            color: gray;
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        .contribution {
-            border-radius: 5px;
-            border: 2px solid blueviolet;
-            color: blueviolet;
-            background-color: rgba(138, 43, 226, 0.16);
-            padding: 5px;
-            font-size: 1.1rem;
-        }
-
-        .contribution img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50px;
-        }
-        .contribution span {
-            margin-left: 5px;
-        }
-    </style>
+<style>
+    .help-details-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        padding: 2rem 0;
+    }
+    .help-card {
+        background-color: white;
+        border-radius: 1.5rem;
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+    .help-card:hover {
+        transform: translateY(-10px);
+    }
+    .help-header {
+        background: linear-gradient(135deg, #2193b0, #6dd5ed);
+        color: white;
+        text-align: center;
+        padding: 2rem;
+    }
+    .help-avatar {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2);
+    }
+    .help-info-section {
+        padding: 2rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .help-progress-container {
+        background-color: #f0f0f0;
+        border-radius: 10px;
+        height: 15px;
+        margin-top: 1rem;
+    }
+    .help-progress-bar {
+        background: linear-gradient(135deg, #2193b0, #6dd5ed);
+        height: 100%;
+        border-radius: 10px;
+    }
+    .help-contribution-card {
+        background-color: #f8f9fa;
+        border-radius: 1rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        transition: transform 0.3s ease;
+    }
+    .help-contribution-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    }
+    .help-contribution-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 1rem;
+        object-fit: cover;
+    }
+    .pending-member-card {
+        display: flex;
+        align-items: center;
+        background-color: #f8f9fa;
+        border-radius: 1rem;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    .pending-member-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 1rem;
+        object-fit: cover;
+    }
+</style>
 <?php $this->endBlock() ?>
+
 <?php
 $member = $help->member;  // Sans parenthèses
 $user = $member ? $member->user : null;  // Vérification de l'existence de $member
 $helpType = $help->helpType;
 ?>
-<div class="container mb-5 mt-5">
-    <div class="row">
-        <div class="col-12 white-block">
 
-            <div class="row mb-5 justify-content-center">
-                <div class="col-md-4 text-center">
-                    <h3 class="mb-2">Membre</h3>
-                    <div class="img-container mb-2">
-                        <img src="<?= $user ? \app\managers\FileManager::loadAvatar($user,"512") : 'default-avatar.jpg' ?>" alt="">
+<div class="help-details-container">
+    <div class="container">
+        <div class="help-card">
+            <div class="help-header">
+                <h2><?= $helpType->title ?></h2>
+            </div>
+
+            <div class="help-info-section">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <img src="<?= $user ? \app\managers\FileManager::loadAvatar($user,"512") : 'default-avatar.jpg' ?>" alt="Avatar" class="help-avatar mb-3">
+                        <h3 class="text-primary"><?= $user ? $user->name." ".$user->first_name : 'Utilisateur non trouvé' ?></h3>
                     </div>
-                    <h2 class="text-primary"><?= $user ? $user->name." ".$user->first_name : 'Utilisateur non trouvé' ?></h2>
-                </div>
-                <div class="col-md-8 text-center">
-                    <h4 class="text-center text-muted"><?= $helpType->title ?></h4>
-                    <p class="comments text-left"><?= $help->comments ?></p>
-                    <h6>Créée le : <?= $help->created_at ?></h6>
-                    <p class="objective text-primary">Montant de l'aide : <?= $help->amount ?> XAF</p>
-                    <h4 class="text-primary">Montant contribution : <?= $help->unit_amount ?> XAF / membre</h4>
-                    <h4 class="text-secondary m-0 mt-4">Montant contributions perçus : </h4>
-                    <p class="contributed text-secondary"><?= $help->getContributedAmount() ?: 0 ?> XAF</p>
+                    <div class="col-md-8">
+                        <p class="text-muted mb-4"><?= $help->comments ?></p>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="text-muted">Montant de l'aide</small>
+                                <h4 class="text-primary mb-3"><?= $help->amount ?> XAF</h4>
+                                
+                                <small class="text-muted">Contribution par membre</small>
+                                <h5 class="text-secondary"><?= $help->unit_amount ?> XAF</h5>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted">Contributions reçues</small>
+                                <?php 
+                                $contributedAmount = $help->getContributedAmount() ?: 0;
+                                $progressPercentage = $help->amount ? round(($contributedAmount / $help->amount) * 100) : 0;
+                                ?>
+                                <h4 class="text-secondary mb-2"><?= $contributedAmount ?> XAF</h4>
+                                
+                                <div class="help-progress-container">
+                                    <div class="help-progress-bar" style="width: <?= $progressPercentage ?>%"></div>
+                                </div>
+                                <small class="text-muted"><?= $progressPercentage ?>% collecté</small>
+                            </div>
+                        </div>
+                        
+                        <div class="text-right mt-3">
+                            <small class="text-muted">Créée le : <?= $help->created_at ?></small>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-12">
-                    <h3 class="text-muted text-center">Détails</h3>
-                    <?php
-                    $contributions = $help->contributions;
-                    if (count($contributions)):
-                    ?>
-
-                        <table class="table table-hover">
-                            <thead class="blue-grey lighten-4">
-                            <tr>
-                                <th>#</th>
-                                <th>Membre</th>
-                                <th>Date</th>
-                                <th>Administrateur</th>
-                            </tr>
-
-                            </thead>
-                            <tbody>
-                            <?php foreach ($contributions as $index => $contribution): ?>
-                                <?php 
-                                $m = $contribution->member;
-                                $u = $m ? $m->user : null; // Vérification si member existe
-                                $a = $contribution->member; // Utiliser member au lieu de administrator
-                                $adminUser = $a ? $a->user : null; // Même logique que pour member
-                                ?>
-                                <tr>
-                                    <th scope="row"><?= $index + 1 ?></th>
-                                    <td class="text-capitalize"><?= $u ? $u->name . " " . $u->first_name : 'Membre non trouvé' ?></td>
-                                    <td class="blue-text"><?= (new DateTime($contribution->date))->format("d-m-Y")  ?></td>
-                                    <td class="text-capitalize"><?= $adminUser ? $adminUser->name . ' ' . $adminUser->first_name : 'Administrateur inconnu' ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                            </tbody>
-                        </table>
-
-                    <?php
-                    else:?>
-                    <p class="text-center">Aucune contribution</p>
-                    <?php
-                    endif;
-                    ?>
-
-                    <?php
-                    if ($help->state):
-                    ?>
-                        <h3 class="text-muted text-center mb-3">Membres n'ayant pas contribué</h3>
-                        <div class="row">
-                            <?php
-                            foreach ($help->waitedContributions as $contribution ):
-                            $member = $contribution->member;
-                            $user = $member ? $member->user() : null; // Vérification de membre et user
+            <div class="help-info-section">
+                <h4 class="text-center text-muted mb-4">Détails des Contributions</h4>
+                <?php
+                $contributions = $help->contributions;
+                if (count($contributions)):
+                ?>
+                    <div class="row">
+                        <?php foreach ($contributions as $index => $contribution): ?>
+                            <?php 
+                            $m = $contribution->member;
+                            $u = $m ? $m->user : null;
+                            $a = $contribution->member;
+                            $adminUser = $a ? $a->user : null;
                             ?>
+                            <div class="col-md-6">
+                                <div class="help-contribution-card">
+                                    <img src="<?= $u ? \app\managers\FileManager::loadAvatar($u) : 'default-avatar.jpg' ?>" 
+                                         alt="Avatar" class="help-contribution-avatar">
+                                    <div>
+                                        <h6 class="mb-1"><?= $u ? $u->name . " " . $u->first_name : 'Membre non trouvé' ?></h6>
+                                        <small class="text-muted">
+                                            <?= (new DateTime($contribution->date))->format("d-m-Y") ?> 
+                                            | <?= $adminUser ? $adminUser->name . ' ' . $adminUser->first_name : 'Administrateur inconnu' ?>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center text-muted p-4">
+                        <i class="fas fa-info-circle fa-3x mb-3"></i>
+                        <p>Aucune contribution pour le moment</p>
+                    </div>
+                <?php endif; ?>
+            </div>
 
-                            <div class="col-3">
-                                <div class="contribution">
-                                    <img src="<?= $user ? \app\managers\FileManager::loadAvatar($user) : 'default-avatar.jpg' ?>" alt="<?= $user ? $user->name.' '.$user->first_name : 'Utilisateur inconnu' ?>">
+            <?php if ($help->state): ?>
+                <div class="help-info-section">
+                    <h4 class="text-center text-muted mb-4">Membres en Attente de Contribution</h4>
+                    <div class="row">
+                        <?php
+                        foreach ($help->waitedContributions as $contribution):
+                            $member = $contribution->member;
+                            $user = $member ? $member->user() : null;
+                        ?>
+                            <div class="col-md-3 col-6 mb-3">
+                                <div class="pending-member-card">
+                                    <img src="<?= $user ? \app\managers\FileManager::loadAvatar($user) : 'default-avatar.jpg' ?>" 
+                                         alt="Avatar" class="pending-member-avatar">
                                     <span><?= $user ? $user->name.' '.$user->first_name : 'Utilisateur inconnu' ?></span>
                                 </div>
                             </div>
-
-                            <?php
-                            endforeach;
-                            ?>
-                        </div>
-
-                    <?php
-                    endif;
-                    ?>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-            </div>
-
+            <?php endif; ?>
         </div>
     </div>
 </div>

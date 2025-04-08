@@ -1,81 +1,127 @@
 <?php
 use app\managers\MemberSessionManager;
 use app\managers\SettingManager;
-use yii\helpers\Url; // Import pour générer des URLs
+use yii\helpers\Url;
+
 /** @var $member app\models\Member */
 /** @var $socialCrownTarget int */
 $this->title = 'Ma Dette | Fond Social';
 ?>
 
 <?php $this->beginBlock('style'); ?>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-        }
-
-        .card-container {
-            margin-top: 50px;
-        }
-
-        .debt-card {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border: none;
-            border-radius: 10px;
-            overflow: hidden;
-            background-color: #ffffff;
-        }
-
-        .debt-header {
-            background-color: #007bff;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .debt-body {
-            padding: 20px;
-            text-align: center;
-        }
-
-        .debt-amount {
-            font-size: 2rem;
-            color: #dc3545;
-            font-weight: bold;
-        }
-
-        .btn-pay {
-            margin-top: 20px;
-        }
-    </style>
+<style>
+    .debt-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 200px);
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+    .debt-card {
+        width: 100%;
+        max-width: 500px;
+        background-color: white;
+        border-radius: 1.5rem;
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+    .debt-card:hover {
+        transform: translateY(-10px);
+    }
+    .debt-header {
+        background: linear-gradient(135deg, #2193b0, #6dd5ed);
+        color: white;
+        text-align: center;
+        padding: 2rem;
+    }
+    .debt-body {
+        padding: 2rem;
+        text-align: center;
+    }
+    .debt-section {
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 1.5rem;
+    }
+    .debt-amount {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-top: 0.5rem;
+    }
+    .debt-total {
+        color: #dc3545;
+    }
+    .debt-paid {
+        color: #28a745;
+    }
+    .debt-remaining {
+        color: #007bff;
+    }
+    .progress-container {
+        background-color: #f0f0f0;
+        border-radius: 10px;
+        height: 15px;
+        margin-top: 1rem;
+    }
+    .progress-bar {
+        background: linear-gradient(135deg, #2193b0, #6dd5ed);
+        height: 100%;
+        border-radius: 10px;
+    }
+    .btn-pay {
+        background: linear-gradient(135deg, #2193b0, #6dd5ed);
+        border: none;
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: bold;
+        transition: transform 0.3s ease;
+    }
+    .btn-pay:hover {
+        transform: scale(1.05);
+    }
+</style>
 <?php $this->endBlock(); ?>
 
-<div class="container card-container">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card debt-card">
-                <div class="debt-header">
-                    <h3>Ma Situation de Renflouement</h3>
+<div class="debt-container">
+    <div class="debt-card">
+        <div class="debt-header">
+            <h2>Situation du Fond Social</h2>
+        </div>
+        <div class="debt-body">
+            <div class="debt-section">
+                <p class="text-muted">Bonjour <strong><?= htmlspecialchars($member->user()->name) ?></strong>,</p>
+                <p class="text-muted">Voici votre situation de renflouement.</p>
+            </div>
+
+            <div class="debt-section">
+                <h5 class="text-muted">Montant Total</h5>
+                <div class="debt-amount debt-total"><?= number_format($socialCrownTarget, 0, ',', ' ') ?> XAF</div>
+                <div class="progress-container">
+                    <?php 
+                    $progressPercentage = $socialCrownTarget ? 
+                        round(($member->social_crown / $socialCrownTarget) * 100) : 0;
+                    ?>
+                    <div class="progress-bar" style="width: <?= $progressPercentage ?>%"></div>
                 </div>
-                <div class="debt-body">
-                    <p class="mb-4">Bonjour <strong><?= htmlspecialchars($member->user()->name) ?></strong>,</p>
-                    
-                    <p>Le montant total à payer pour le <strong>Fond Social</strong> est :</p>
-                    <div class="debt-amount"><?= number_format($socialCrownTarget, 0, ',', ' ') ?> XAF</div>
+            </div>
 
-                    <p>Montant déjà réglé :</p>
-                    <div class="debt-amount text-success">
-                        <?= number_format($member->social_crown, 0, ',', ' ') ?> XAF
+            <div class="debt-section">
+                <div class="row">
+                    <div class="col-6">
+                        <h5 class="text-muted">Déjà Réglé</h5>
+                        <div class="debt-amount debt-paid"><?= number_format($member->social_crown, 0, ',', ' ') ?> XAF</div>
                     </div>
-
-                    <p class="mt-4">Montant restant :</p>
-                    <div class="debt-amount">
-                        <?= number_format($socialCrownTarget - $member->social_crown, 0, ',', ' ') ?> XAF
+                    <div class="col-6">
+                        <h5 class="text-muted">Reste à Payer</h5>
+                        <div class="debt-amount debt-remaining"><?= number_format($socialCrownTarget - $member->social_crown, 0, ',', ' ') ?> XAF</div>
                     </div>
-
-                    <!-- Bouton pour diriger vers un paiement -->
-                    <a href="#" class="btn btn-primary btn-lg btn-pay">Régler ma dette</a>
                 </div>
+            </div>
+
+            <div class="text-center">
+                <a href="#" class="btn btn-pay">Régler ma dette</a>
             </div>
         </div>
     </div>

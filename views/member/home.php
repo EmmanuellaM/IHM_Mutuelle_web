@@ -1,86 +1,130 @@
 <?php $this->beginBlock('title') ?>
 Accueil
 <?php $this->endBlock() ?>
+
 <?php $this->beginBlock('style') ?>
 <style>
-    #saving-amount-title {
-        font-size: 5rem;
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+    .news-card {
+        background-color: white;
+        border-radius: 1rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: transform 0.3s ease;
+        min-height: 250px; /* Augmentation de la hauteur minimale */
+        display: flex;
+        flex-direction: column;
+    }
+    .news-card:hover {
+        transform: translateY(-5px);
+    }
+    .news-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .news-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        margin-right: 1rem;
+        object-fit: cover;
+    }
+    .progress-container {
+        background-color: #f0f0f0;
+        border-radius: 10px;
+        height: 10px;
+        margin-top: 0.5rem;
+    }
+    .progress-bar {
+        background-color: #2193b0;
+        height: 100%;
+        border-radius: 10px;
+    }
+    .dashboard-card {
+        background: linear-gradient(135deg, #2193b0, #6dd5ed);
         color: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
     }
-    .img-bravo {
-        width: 100px;
-        height: 100px;
-        border-radius: 100px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.51);
+    .news-details-container {
+        margin-top: auto; /* Pousse le bouton en bas de la carte */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
-    .media {
-        border-bottom: 1px solid #ededed;
+    .btn-details {
+        background-color: #2193b0;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.3s ease;
     }
-    #social-crown {
-        font-size: 5rem;
+    .btn-details:hover {
+        background-color: #6dd5ed;
     }
 </style>
 <?php $this->endBlock() ?>
+
 <div class="container mt-5 mb-5">
-
-    <div class="col-md-8  pr-4">
-
-        <div class="row">
-            <div class="col-12 white-block">
-                <?php
-                $exercise = \app\models\Exercise::findOne(['active' => true]);
-
-                ?>
-                    
-                <h3 class="text-center text-muted">Actualité de la mutuelle</h3>
+    <div class="dashboard-grid">
+        <div>
+            <div class="white-block">
+                <h3 class="text-center text-muted mb-4">Actualités de la Mutuelle</h3>
                 <?php
                 $helps = \app\models\Help::findAll(['state' => true]);
-                ?>
-                <?php
                 if (count($helps)):
-                ?>
-                    <?php
                     foreach ($helps as $help):
                         $member = $help->member;
                         $user = $member->user;
                         $helpType = $help->helpType;
-                        
-                    ?>
-                        <div class="media">
-                            <img class="d-flex mr-3" width="60" height="60" src="<?= \app\managers\FileManager::loadAvatar($user)?>" alt="Generic placeholder image">
-                            <div class="media-body">
-                                <h5 class="mt-0 font-weight-bold"><?= $helpType->title ?></h5>
-                                <span class="blue-text"><b><?= $user->name.' '.$user->first_name?></b></span>
-                                <br>
-                                <?= $help->comments ?>
-                                <br>
-                                <span style="font-size: 1.5rem" class="text-secondary"><?= $help->getContributedAmount() ?: 0 ?> / <?= $help->amount?>  XAF</span>
-                                <div class="text-right">
-                                    <a href="<?= Yii::getAlias("@member.help_details")."?q=".$help->id?>" class="btn btn-primary p-2">Details</a>
-                                </div>
+                        $progressPercentage = $help->getContributedAmount() ? 
+                            round(($help->getContributedAmount() / $help->amount) * 100) : 0;
+                ?>
+                    <div class="news-card">
+                        <div class="news-header">
+                            <img class="news-avatar" src="<?= \app\managers\FileManager::loadAvatar($user)?>" alt="Avatar">
+                            <div>
+                                <h5 class="mb-1 font-weight-bold"><?= $helpType->title ?></h5>
+                                <span class="text-muted"><?= $user->name.' '.$user->first_name?></span>
                             </div>
                         </div>
-
-                    <?php
-                    endforeach;
-                    ?>
-
+                        <p class="text-muted mb-3"><?= $help->comments ?></p>
+                        <div class="progress-container mb-2">
+                            <div class="progress-bar" style="width: <?= $progressPercentage ?>%"></div>
+                        </div>
+                        <div class="news-details-container">
+                            <small class="text-muted"><?= $help->getContributedAmount() ?: 0 ?> / <?= $help->amount?> XAF</small>
+                            <a href="<?= Yii::getAlias("@member.help_details")."?q=".$help->id?>" class="btn-details">Détails</a>
+                        </div>
+                    </div>
                 <?php
+                    endforeach;
                 else:
                 ?>
-                    <p class="text-center text-primary">Aucune aide active</p>
+                    <div class="text-center text-muted p-4">
+                        <i class="fas fa-info-circle fa-3x mb-3"></i>
+                        <p>Aucune aide active pour le moment</p>
+                    </div>
                 <?php
                 endif;
                 ?>
-
-
-
-
-
-
-
+            </div>
+        </div>
+        <div>
+            <div class="dashboard-card">
+                <h4>Votre Compte</h4>
+                <i class="fas fa-wallet fa-3x mb-3"></i>
+                <h2 id="social-crown"><?= $member->social_crown ?> XAF</h2>
+                <p>Fonds Social Disponible</p>
             </div>
         </div>
     </div>
-        
 </div>
