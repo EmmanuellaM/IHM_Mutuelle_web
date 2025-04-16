@@ -390,7 +390,7 @@ $this->title = "Mutuelle - ENSPY";
 
             <div class="menu-section">
                 <div class="menu-title">Compte</div>
-                <a class="menu-item" href="#" data-toggle="modal" data-target="#btn-disconnect">
+                <a class="menu-item" href="#" data-toggle="modal" data-target="#btn-disconnect" data-bs-toggle="modal" data-bs-target="#btn-disconnect" id="sidebar-disconnect-btn" style="z-index:3000; position:relative;">
                     <i class="fas fa-sign-out-alt"></i>Déconnexion
                 </a>
             </div>
@@ -401,28 +401,7 @@ $this->title = "Mutuelle - ENSPY";
                     <i class="fas fa-envelope"></i>Contacter Admin
                 </a>
             </div>
-            <form action="<?= Yii::getAlias('@web') . '/member/deconnexion' ?>" method="post" id="disconnection-form">
-                <input type="hidden" name="_csrf-frontend" value="<?= Yii::$app->request->getCsrfToken() ?>" />
-            </form>
-            <div class="modal fade" id="btn-disconnect" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="myModalLabel">Confirmation de déconnexion</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <p class="text-center">Êtes-vous sûr(e) de vouloir vous déconnecter?</p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
-                            <button type="button" class="btn btn-primary" onclick="document.getElementById('disconnection-form').submit()">Oui</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
         </div>
 
         <!-- Main Content -->
@@ -431,6 +410,43 @@ $this->title = "Mutuelle - ENSPY";
         </div>
 
         <?php include Yii::getAlias("@app") . "/includes/scripts.php"; ?>
+        <style>
+        /* Ne surcharge pas le z-index du modal, laisse Bootstrap gérer */
+        .admin-sidebar {
+            z-index: 3000 !important;
+        }
+        #sidebar-disconnect-btn {
+            z-index: 3300 !important;
+            position: relative;
+        }
+        </style>
+        <script>
+        // Fix JS pour forcer l'ouverture du modal et la visibilité
+        document.addEventListener('DOMContentLoaded', function () {
+            var btn = document.getElementById('sidebar-disconnect-btn');
+            if(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var modal = document.getElementById('btn-disconnect');
+                    // Scroll en haut pour éviter qu’un overflow cache le modal
+                    window.scrollTo({top:0, behavior:'smooth'});
+                    setTimeout(function() {
+                        // Supprime tout backdrop en trop
+                        var backdrops = document.querySelectorAll('.modal-backdrop');
+                        if (backdrops.length > 1) {
+                            for (var i = 1; i < backdrops.length; i++) backdrops[i].remove();
+                        }
+                    }, 500);
+                    if (window.bootstrap && bootstrap.Modal) {
+                        var modalInstance = bootstrap.Modal.getOrCreateInstance(modal);
+                        modalInstance.show();
+                    } else if (window.$ && $(modal).modal) {
+                        $(modal).modal('show');
+                    }
+                });
+            }
+        });
+        </script>
 
         <!-- Initializations -->
         <script type="text/javascript">
@@ -442,7 +458,30 @@ $this->title = "Mutuelle - ENSPY";
             <?= $this->blocks['script'] ?>
         <?php endif; ?>
 
-        <?php $this->endBody(); ?>
+            <!-- Modal et formulaire de déconnexion placés juste avant la fin du body -->
+    <form action="<?= Yii::getAlias('@web') . '/member/deconnexion' ?>" method="post" id="disconnection-form">
+        <input type="hidden" name="_csrf-frontend" value="<?= Yii::$app->request->getCsrfToken() ?>" />
+    </form>
+    <div class="modal fade" id="btn-disconnect" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myModalLabel">Confirmation de déconnexion</h5>
+                    <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-center">Êtes-vous sûr(e) de vouloir vous déconnecter?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Non</button>
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('disconnection-form').submit()">Oui</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php $this->endBody(); ?>
     </body>
     </html>
 <?php $this->endPage(); ?>

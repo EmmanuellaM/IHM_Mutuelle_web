@@ -100,7 +100,7 @@ class MemberController extends Controller
 /*********************************action de deconnexion à modifier ************************************************* */
     public function actionDeconnexion() {
         Yii::$app->user->logout();
-        return $this->redirect('@guest.connection');
+        return $this->redirect(['site/login']); // Redirection fiable vers la page de connexion
     }
 /********************************action profil *************************************************** */
     public function actionProfil() {

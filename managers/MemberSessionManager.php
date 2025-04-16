@@ -51,12 +51,18 @@ class MemberSessionManager
         \Yii::$app->session->set(self::head,null);
     }
 
+    // Menu Accueil (navbar)
     public static function isHome() {
-        return \Yii::$app->session->get(self::place) == "home" && \Yii::$app->session->get(self::head) == "home";
+        $controller = \Yii::$app->controller;
+        $action = $controller ? $controller->action->id : null;
+        return ($controller && $controller->id === 'member' && $action === 'accueil');
     }
 
+    // Profil
     public static function isProfil() {
-        return \Yii::$app->session->get(self::place) == "profil";
+        $controller = \Yii::$app->controller;
+        $action = $controller ? $controller->action->id : null;
+        return ($controller && $controller->id === 'member' && in_array($action, ['profil', 'modifierprofil', 'enregistrermodifierprofil', 'modifiermotdepasse']));
     }
 
     public static function isMembers() {
@@ -68,8 +74,11 @@ class MemberSessionManager
     }
 
     /** Cette méthode retourne true si l’action en cours est dette, ce qui permet de surligner le lien en bleu lorsque l’utilisateur est sur cette page.**/
+    // Sidebar : Ma dette
     public static function isDette() {
-        return \Yii::$app->controller->action->id === 'dette';
+        $controller = \Yii::$app->controller;
+        $action = $controller ? $controller->action->id : null;
+        return ($controller && $controller->id === 'member' && $action === 'dette');
     }
 
 
@@ -77,8 +86,11 @@ class MemberSessionManager
         return \Yii::$app->session->get(self::head) == "types-aide";
     }
 
+    // Sidebar : Mes paiements
     public static function isPayments(){
-        return Yii::$app->controller->action->id == "payments";
+        $controller = \Yii::$app->controller;
+        $action = $controller ? $controller->action->id : null;
+        return ($controller && $controller->id === 'member' && $action === 'payments');
     }
 
     public static function isDettes() {
@@ -89,52 +101,87 @@ class MemberSessionManager
         \Yii::$app->session->set(self::place, "dettes");
         \Yii::$app->session->set(self::head, null);
     }
+    
+    public static function setDette() {
+        \Yii::$app->session->set(self::place, "dette");
+        \Yii::$app->session->set(self::head, null);
+    }
 
     public static function isAccueil() {
         return \Yii::$app->session->get(self::head) == "home";
     }
+    // Menu Mes épargnes (navbar)
     public static function isEpargnes() {
-        return \Yii::$app->session->get(self::head) == "epargnes";
+        $controller = \Yii::$app->controller;
+        $action = $controller ? $controller->action->id : null;
+        return ($controller && $controller->id === 'member' && $action === 'epargnes');
     }
 
+    // Menu Mes emprunts (navbar)
     public static function isEmprunts() {
-        return \Yii::$app->session->get(self::head) == "emprunts";
+        $controller = \Yii::$app->controller;
+        $action = $controller ? $controller->action->id : null;
+        return ($controller && $controller->id === 'member' && $action === 'emprunts');
     }
 
+    // Menu Mes contributions (navbar)
     public static function isContributions() {
-        return \Yii::$app->session->get(self::head) == "contributions";
+        $controller = \Yii::$app->controller;
+        $action = $controller ? $controller->action->id : null;
+        return ($controller && $controller->id === 'member' && $action === 'contributions');
     }
 
+    // Sidebar : Sessions
     public static function isSessions() {
-        return \Yii::$app->session->get(self::head) == "sessions";
+        $controller = \Yii::$app->controller;
+        $action = $controller ? $controller->action->id : null;
+        return ($controller && $controller->id === 'member' && $action === 'sessions');
     }
 
+    // Sidebar : Détails exercices
     public static function isExercices() {
-        return \Yii::$app->session->get(self::head) == "exercises";
+        $controller = \Yii::$app->controller;
+        $action = $controller ? $controller->action->id : null;
+        return ($controller && $controller->id === 'member' && $action === 'exercises');
     }
 
+    // Sidebar : Chat (uniquement si on est sur la page chat)
     public static function isChat() {
-        return \Yii::$app->session->get(self::place) == "chat";
+        $controller = \Yii::$app->controller;
+        $action = $controller ? $controller->action->id : null;
+        return ($controller && $controller->id === 'chat');
     }
 
+    // Menu Aides (navbar)
     public static function isAides() {
-        return \Yii::$app->session->get(self::head) == "helps";
+        $controller = \Yii::$app->controller;
+        $action = $controller ? $controller->action->id : null;
+        return ($controller && $controller->id === 'member' && $action === 'aides');
     }
  
+    // Sidebar : Type d'aides
     public static function isTypesAide() {
-        return \Yii::$app->session->get(self::head) == "types-aide";
+        $controller = \Yii::$app->controller;
+        $action = $controller ? $controller->action->id : null;
+        return ($controller && $controller->id === 'member' && $action === 'typesaide');
     }
 
+    // Sidebar : Payer
+    // Sidebar : Payer (toutes les actions liées au paiement)
     public static function isPay() {
         $controller = \Yii::$app->controller;
         $action = $controller ? $controller->action->id : null;
-        return 
-            \Yii::$app->session->get(self::place) == "pay" || 
-            \Yii::$app->session->get(self::head) == "pay" ||
-            in_array($action, ['payer', 'pay']);
+        return (
+            $controller && $controller->id === 'member' && in_array($action, [
+                'pay', 'success', 'error', 'validatemobilepayment', 'validate-mobile-payment'
+            ])
+        );
     }
 
+    // Sidebar : Les Tontines
     public static function isTontine(){
-        return \Yii::$app->session->get(self::head) == "tontine";
+        $controller = \Yii::$app->controller;
+        $action = $controller ? $controller->action->id : null;
+        return ($controller && $controller->id === 'member' && in_array($action, ['tontinetypes', 'nouvelletontine', 'ajoutertontine']));
     }
 }
