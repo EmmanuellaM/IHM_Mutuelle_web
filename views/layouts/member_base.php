@@ -404,6 +404,12 @@ $this->title = "Mutuelle - ENSPY";
 
         </div>
 
+        <?php if (Yii::$app->session->hasFlash('success')): ?>
+            <div class="alert alert-success alert-dismissible fade show white-block" role="alert" style="margin:20px 40px 0 40px;">
+                <?= Yii::$app->session->getFlash('success') ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+            </div>
+        <?php endif; ?>
         <!-- Main Content -->
         <div class="main-content">
             <?= $content ?>
@@ -460,7 +466,7 @@ $this->title = "Mutuelle - ENSPY";
 
             <!-- Modal et formulaire de déconnexion placés juste avant la fin du body -->
     <form action="<?= Yii::getAlias('@web') . '/member/deconnexion' ?>" method="post" id="disconnection-form">
-        <input type="hidden" name="_csrf-frontend" value="<?= Yii::$app->request->getCsrfToken() ?>" />
+        <input type="hidden" name="<?= Yii::$app->request->csrfParam ?>" value="<?= Yii::$app->request->csrfToken ?>" />
     </form>
     <div class="modal fade" id="btn-disconnect" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">

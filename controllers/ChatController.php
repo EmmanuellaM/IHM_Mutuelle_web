@@ -40,7 +40,7 @@ class ChatController extends Controller
                 $this->layout = 'administrator_base';
                 $administrator = Administrator::findOne(['user_id' => $user->id]);
                 $this->view->params['administrator'] = $administrator;
-                AdministratorSessionManager::setHome('chat');
+                AdministratorSessionManager::setChat();
             } else {
                 $this->layout = 'member_base';
                 $member = Member::findOne(['user_id' => $user->id]);

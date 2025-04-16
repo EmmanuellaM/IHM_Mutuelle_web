@@ -331,7 +331,7 @@ $this->title = "Mutuelle - ENSPY";
 
         <div class="menu-section">
             <div class="menu-title">Communication</div>
-            <a href="<?= Yii::getAlias("@chat") ?>" class="menu-item <?= AdministratorSessionManager::isHeadChat() ? 'active' : '' ?>">
+            <a href="<?= Yii::getAlias("@chat") ?>" class="menu-item <?= AdministratorSessionManager::isChat() ? 'active' : '' ?>">
                 <i class="fas fa-comments"></i>Chat
             </a>
         </div>

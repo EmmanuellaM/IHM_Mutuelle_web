@@ -11,6 +11,14 @@ namespace app\managers;
 
 class AdministratorSessionManager
 {
+    // ...
+    public static function setChat() {
+        \Yii::$app->session->set(self::place, "chat");
+        \Yii::$app->session->set(self::head, null);
+    }
+    public static function isChat() {
+        return \Yii::$app->session->get(self::place) == "chat";
+    }
 
     const place = "adminPlace";
     const head = "adminHead";

@@ -97,10 +97,16 @@ class MemberController extends Controller
         $model = new NewSessionForm();
         return $this->render('home',compact('session','model','idModel'));
     }
-/*********************************action de deconnexion à modifier ************************************************* */
+/*********************************action de deconnexion ************************************************* */
     public function actionDeconnexion() {
-        Yii::$app->user->logout();
-        return $this->redirect(['site/login']); // Redirection fiable vers la page de connexion
+        if (\Yii::$app->request->isPost) {
+            \Yii::$app->user->logout();
+            \Yii::$app->session->setFlash('success', 'Vous avez été déconnecté(e) avec succès.');
+            // Redirection explicite vers la page de connexion membre
+            return $this->redirect(['/guest/connexion']);
+        } else {
+            return RedirectionManager::abort($this);
+        }
     }
 /********************************action profil *************************************************** */
     public function actionProfil() {
