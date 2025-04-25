@@ -245,6 +245,19 @@ $this->title = "Mutuelle - ENSPY";
             border-radius: 3px;
         }
 
+        /* Modal overrides to ensure modals appear above sidebar/navbar */
+        .modal-backdrop,
+        .modal-backdrop.show { z-index: 1050 !important; }
+        .modal.fade .modal-dialog { transform: none !important; }
+        .modal.show { z-index: 1060 !important; }
+        .modal-dialog { z-index: 1061 !important; }
+
+        /* Prevent white-block hover moves when a modal is open */
+        body.modal-open .white-block:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
         /* Mobile Responsive */
         @media (max-width: 992px) {
             .admin-sidebar {
@@ -442,7 +455,12 @@ $this->title = "Mutuelle - ENSPY";
     <?php if (isset($this->blocks['script'])) : ?>
         <?= $this->blocks['script'] ?>
     <?php endif; ?>
-
+    <!-- Append modals to body to fix z-index issues -->
+    <script>
+    $(document).on('show.bs.modal', '.modal', function() {
+        $(this).appendTo('body');
+    });
+    </script>
     <?php $this->endBody(); ?>
 </body>
 

@@ -202,6 +202,18 @@ $this->title = 'Borrowings Details';
         opacity: 1;
     }
 
+    /* Ensure Bootstrap modals appear above all admin elements */
+    .modal-backdrop,
+    .modal-backdrop.show { z-index: 2000 !important; }
+
+    .modal,
+    .modal.show { z-index: 2001 !important; }
+
+    .modal-dialog {
+        z-index: 2002 !important;
+        transform: none !important;
+    }
+
     /* Style pour les formulaires */
     .form-control {
         border-radius: 8px;
