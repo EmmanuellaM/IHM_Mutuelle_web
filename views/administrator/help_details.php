@@ -359,7 +359,7 @@ $allMembers = Member::find()->where(['<>', 'id', $help->member_id])->all();
 $allActiveMembers = Member::findAll(['active' => true]);
 ?>
 
-<div class="col-12 white-block m-4">
+<!-- <div class="col-12 white-block m-4">
     <table class="table table-hover">
         <thead class="blue-grey lighten-4">
         <tr>
@@ -411,4 +411,4 @@ $allActiveMembers = Member::findAll(['active' => true]);
         </tbody>
     </table>
 
-</div>
+</div> -->

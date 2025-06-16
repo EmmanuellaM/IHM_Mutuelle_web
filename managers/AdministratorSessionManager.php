@@ -56,10 +56,9 @@ class AdministratorSessionManager
         \Yii::$app->session->set(self::place,"settings");
         \Yii::$app->session->set(self::head,null);
     }
-    public static  function setAgapes(){
+    public static function setAgape(){
         \Yii::$app->session->set(self::place, "agape");
         \Yii::$app->session->set(self::head,null);
-
     }
 
     public static function isHeadHome() {
@@ -122,7 +121,7 @@ class AdministratorSessionManager
         return \Yii::$app->session->get(self::place) == "tontine";
     }
 
-    public static function isHeadAgape() {
+    public static function isAgape() {
         return \Yii::$app->session->get(self::place) == "agape";
     }
 }

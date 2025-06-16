@@ -337,6 +337,9 @@ $this->title = "Mutuelle - ENSPY";
             <a href="<?= Yii::getAlias("@administrator.help_types") ?>" class="menu-item <?= AdministratorSessionManager::isHelps() ? 'active' : '' ?>">
                 <i class="fas fa-hand-holding-heart"></i>Type d'aides
             </a>
+            <a href="<?= Yii::getAlias("@administrator.agape") ?>" class="menu-item <?= AdministratorSessionManager::isAgape() ? 'active' : '' ?>">
+                <i class="fas fa-hand-holding-heart"></i>Agape
+            </a>
             <a href="<?= Yii::getAlias("@administrator.tontine_types") ?>" class="menu-item <?= AdministratorSessionManager::isTontine() ? 'active' : '' ?>">
                 <i class="fas fa-coins"></i>Types de Tontines
             </a>

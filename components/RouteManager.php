@@ -57,6 +57,7 @@ class RouteManager {
         'administrator.borrowings' => '/administrator/emprunts',
         'administrator.new_borrowing' => '/administrator/nouvelle-emprunt',
         'administrator.helps' => '/administrator/aides',
+        'administrator.agape' => '/administrator/agape',
         'administrator.sessions' => '/administrator/sessions',
         'administrator.delete_session' => '/administrator/supprimer-session',
         'administrator.update_session' => '/administrator/modifier-session',

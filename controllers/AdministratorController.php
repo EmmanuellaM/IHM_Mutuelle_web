@@ -700,8 +700,7 @@ class AdministratorController extends Controller
                     //Au depart il n'y avait pas ça la partie de l'email n'avait pas le try catch c'est parce que je n'ai pas la connexion que je met  ça dedans
                     // C'est pour tester la partie du membre
                     try {
-                        \try {
-                Yii::$app->mailer->compose()
+                        \Yii::$app->mailer->compose()
                             ->setFrom('dylaneossombe@gmail.com')
                             ->setTo($model->email)
 
@@ -716,8 +715,7 @@ class AdministratorController extends Controller
 
 
                     /*try{
-                         try {
-                Yii::$app->mailer->compose()
+                         Yii::$app->mailer->compose()
                          ->setTo($user->email)
                          ->setFrom('jasonmfououoyono@gmail.com')
                          ->setSubject('Confirmation de création de compte de membre')
@@ -799,8 +797,7 @@ class AdministratorController extends Controller
     //                 foreach($member1 as $memb1){
 
     //                         try{
-    //                             \try {
-                Yii::$app->mailer->compose()
+    //                             \Yii::$app->mailer->compose()
     //                             ->setFrom('dylaneossombe@gmail.com')
     //                             ->setTo($memb1->email)
 
@@ -818,8 +815,7 @@ class AdministratorController extends Controller
     //                    foreach($member1 as $memb1){
 
     //                             try{
-    //                                 \try {
-                Yii::$app->mailer->compose()
+    //                                 \Yii::$app->mailer->compose()
     //                                 ->setFrom('dylaneossombe@gmail.com')
     //                                 ->setTo($memb1->email)
 
@@ -875,8 +871,7 @@ class AdministratorController extends Controller
                         // Send email notification to members
                         foreach ($members as $member) {
                             try {
-                                try {
-                Yii::$app->mailer->compose()
+                                Yii::$app->mailer->compose()
                                     ->setFrom('dylaneossombe@gmail.com')
                                     ->setTo($member->email)
                                     ->setSubject('Nouvelle Epargne')
@@ -1678,22 +1673,18 @@ class AdministratorController extends Controller
                             $help->unit_amount = $unit_amount;
                             $help->save();
 
-                            // Désactiver l'envoi réel des emails pour éviter les blocages réseau
-            Yii::$app->mailer->useFileTransport = true;
-            // Récupérer les emails de tous les membres actifs
-            $allMembers = Member::find()->select(['email'])->where(['active' => true])->all();
+                            // $member = Member::findAll('email');
 
-                            foreach ($allMembers as $m) {
+                            // foreach ($member as $key) {
         
-                                try {
-                Yii::$app->mailer->compose()
-                                ->setFrom('dylaneossombe@gmail.com')
-                                ->setTo($m->email)
+                            //     Yii::$app->mailer->compose()
+                            //     ->setFrom('dylaneossombe@gmail.com')
+                            //     ->setTo($key->email)
         
-                                ->setSubject('Email sent from GI2025')
-                                ->setHtmlBody('Bonjour une nouvelle aide a ete cree veuillez contacter les administrateurs pour plus de détails')
-                                ->send();
-                            }
+                            //     ->setSubject('Email sent from GI2025')
+                            //     ->setHtmlBody('Bonjour une nouvelle aide a ete cree veuillez contacter les administrateurs pour plus de détails')
+                            //     ->send();
+                            // }
 
                             foreach ($members as $member) {
                                 $contribution = new Contribution();
@@ -1706,7 +1697,7 @@ class AdministratorController extends Controller
                                     Yii::$app->session->setFlash('error', 'Votre action a echoué , instances de contribution non crées !');
                                     return $this->render("new_help", compact("model"));
                                 }
-                                MailManager::alert_new_help($member->user(), $member, $help, $help_type);
+                                // MailManager::alert_new_help($member->user(), $member, $help, $help_type);
                             }
                             Yii::$app->session->setFlash('success', 'Votre action a reussie !');
 
@@ -1868,7 +1859,7 @@ class AdministratorController extends Controller
         $member = Member::findOne($q);
         if ($member) {
             $member->active = false;
-            $member->delete();
+            $member->save(false);
             return $this->redirect("@administrator.members");
         }
     }
@@ -2213,12 +2204,14 @@ public function actionReglerFondSocial($id)
 
     public function actionAgapeIndex()
     {
+        AdministratorSessionManager::setAgape();
         $dataProvider = new \yii\data\ActiveDataProvider([
             'query' => Agape::find(),
         ]);
 
         return $this->render('agape', ['dataProvider' => $dataProvider]);
     }
+
     public function actionAgapeView($id)
     {
         $agapeForm = $this->findModelAgape($id);
