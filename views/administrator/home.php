@@ -366,8 +366,10 @@
                                     'required' => 'required',
                                     'readonly' => 'readonly',
                                     'value' => date('Y')
-                                ]) ?>
+                                ])->label('Année de l\'exercice') ?>
                                 <?= $form->field($model, 'interest')->input('number', ['required' => 'required', 'step' => '0.01'])->label("Taux d'intérêt (%)") ?>
+                                <?= $form->field($model, 'inscription_amount')->input('number', ['required' => 'required', 'min' => '0'])->label('Montant de l\'inscription (XAF)') ?>
+                                <?= $form->field($model, 'social_crown_amount')->input('number', ['required' => 'required', 'min' => '0'])->label('Montant du fond social (XAF)') ?>
                             <?php endif; ?>
                             <?= $form->field($model, 'date')->input('date', ['required' => 'required'])->label("Date de la rencontre de la première session") ?>
                             <div class="form-group text-right">
@@ -389,14 +391,22 @@
     </div>
 
     <div class="stats-grid">
+        <!-- Inscriptions total payées -->
         <div class="white-block">
             <h3 class="text-muted">Inscriptions</h3>
-            <h1 id="social-crown"><?= ($t = \app\managers\FinanceManager::socialCrown()) ? ($t > 0 ? $t : 0) : 0 ?> XAF</h1>
+            <h1><?php $t = \app\managers\FinanceManager::totalInscriptionAmount(); echo $t ? $t : 0; ?> XAF</h1>
         </div>
+        <!-- Fond social total -->
+        <div class="white-block">
+            <h3 class="text-muted">Fond social</h3>
+            <h1><?php $t = \app\managers\FinanceManager::socialCrown(); echo $t ? $t : 0; ?> XAF</h1>
+        </div>
+        <!-- Épargnes (total économies) -->
         <div class="white-block">
             <h3 class="text-muted">Épargnes</h3>
             <h1 id="saving-amount-title"><?= ($t = \app\managers\FinanceManager::totalSavedAmount()) ? ($t > 0 ? $t : 0) : 0 ?> XAF</h1>
         </div>
+        <!-- Emprunts (montant emprunté) -->
         <div class="white-block">
             <h3 class="text-muted">Emprunts</h3>
             <h1><?= ($t = \app\managers\FinanceManager::totalBorrowedAmount()) ? ($t > 0 ? $t : 0) : 0 ?> XAF</h1>

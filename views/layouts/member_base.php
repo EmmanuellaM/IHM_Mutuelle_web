@@ -250,6 +250,11 @@ $this->title = "Mutuelle - ENSPY";
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link <?= MemberSessionManager::isMembers() ? 'active' : '' ?>" href="<?= Yii::getAlias('@member.members') ?>">
+                                <i class="fas fa-users"></i> Membres
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link <?= MemberSessionManager::isAides() ? 'active' : '' ?>" href="<?= Yii::getAlias('@member.helps') ?>">
                                 <i class="fas fa-hands-helping"></i> Aides
                             </a>

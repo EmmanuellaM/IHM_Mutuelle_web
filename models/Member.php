@@ -14,6 +14,19 @@ use yii\db\ActiveRecord;
 class Member extends ActiveRecord
 {
 
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
+                ],
+            ],
+        ];
+    }
+
     public function user() {
         return User::findOne($this->user_id);
     }
@@ -21,6 +34,11 @@ class Member extends ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
+    public function getSavings()
+    {
+        return $this->hasMany(Saving::class, ['member_id' => 'id']);
     }
 
     public function activeBorrowing() {

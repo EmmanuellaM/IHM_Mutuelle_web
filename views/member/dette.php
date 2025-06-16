@@ -1,17 +1,44 @@
 <?php
+use app\models\Member;
+use app\models\FinancialAid;
 use app\managers\MemberSessionManager;
 use app\managers\SettingManager;
 use yii\helpers\Url;
 /** @var $member app\models\Member */
-/** @var $exercise app\models\Exercise */
-/** @var $socialCrownTarget int */
-$this->title = 'Mes Dettes | Mutuelles';
+
+// Récupération du membre connecté
+$member = Member::findOne(Yii::$app->user->id);
+
+// Récupération de l'exercice actif
+$exercise = \app\models\Exercise::find()
+    ->where(['active' => true])
+    ->one();
+
+// Calcul du montant de renfouement
+$fondSocial = $member->social_crown;
+$inscription = $member->inscription;
+
+// Calcul de la somme des aides financières de l'année achevée
+$currentYear = date('Y');
+$totalAides = FinancialAid::find()
+    ->where(['member_id' => $member->id])
+    ->andWhere(['YEAR(date)' => $currentYear - 1])
+    ->sum('amount') ?? 0;
 
 // Calcul des montants
-$registrationAmount = $member->getRegistrationAmount($exercise);
+$montantFondSocialTotal = $exercise->social_crown_amount;
+$montantFondSocialPaye = $fondSocial;
+$montantFondSocialReste = $montantFondSocialTotal - $montantFondSocialPaye;
+
+$montantInscriptionTotal = $exercise->inscription_amount;
+$montantInscriptionPaye = $inscription;
+$montantInscriptionReste = $montantInscriptionTotal - $montantInscriptionPaye;
+
+$registrationAmount = $exercise->inscription_amount;
 $socialFundAmount = $member->getSocialFundAmount($exercise);
 $borrowedAmount = $member->borrowedAmount($exercise);
 $refundedAmount = $member->refundedAmount($exercise);
+$socialCrownTarget = $exercise->social_crown_amount;
 ?>
 
 <?php $this->beginBlock('style'); ?>
@@ -187,24 +214,24 @@ $refundedAmount = $member->refundedAmount($exercise);
                 <div class="debt-body">
                     <div class="amount-display">
                         <div class="amount-label">Montant Total</div>
-                        <div class="amount-value"><?= number_format($socialCrownTarget, 0, ',', ' ') ?> XAF</div>
+                        <div class="amount-value"><?= number_format($montantFondSocialTotal, 0, ',', ' ') ?> XAF</div>
                     </div>
                     
                     <div class="amount-display">
                         <div class="amount-label">Déjà Payé</div>
-                        <div class="amount-value amount-paid"><?= number_format($socialFundAmount, 0, ',', ' ') ?> XAF</div>
+                        <div class="amount-value amount-paid"><?= number_format($montantFondSocialPaye, 0, ',', ' ') ?> XAF</div>
                     </div>
 
                     <div class="amount-display">
                         <div class="amount-label">Reste à Payer</div>
                         <div class="amount-value amount-remaining">
-                            <?= number_format($socialCrownTarget - $socialFundAmount, 0, ',', ' ') ?> XAF
+                            <?= number_format($montantFondSocialReste, 0, ',', ' ') ?> XAF
                         </div>
                     </div>
 
                     <div class="progress">
                         <div class="progress-bar" role="progressbar" 
-                             style="width: <?= ($socialFundAmount > 0 ? ($socialFundAmount / $socialCrownTarget) * 100 : 0) ?>%">
+                             style="width: <?= ($montantFondSocialPaye > 0 ? ($montantFondSocialPaye / $montantFondSocialTotal) * 100 : 0) ?>%">
                         </div>
                     </div>
 
@@ -225,21 +252,21 @@ $refundedAmount = $member->refundedAmount($exercise);
                     <div class="amount-display">
                         <div class="amount-label">Montant Total</div>
                         <div class="amount-value">
-                            <?= number_format($registrationAmount, 0, ',', ' ') ?> XAF
+                            <?= number_format($montantInscriptionTotal, 0, ',', ' ') ?> XAF
                         </div>
                     </div>
 
                     <div class="amount-display">
                         <div class="amount-label">Déjà Payé</div>
                         <div class="amount-value amount-paid">
-                            <?= number_format($registrationAmount, 0, ',', ' ') ?> XAF
+                            <?= number_format($montantInscriptionPaye, 0, ',', ' ') ?> XAF
                         </div>
                     </div>
 
                     <div class="amount-display">
                         <div class="amount-label">Reste à Payer</div>
                         <div class="amount-value amount-remaining">
-                            <?= number_format(0, 0, ',', ' ') ?> XAF
+                            <?= number_format($montantInscriptionReste, 0, ',', ' ') ?> XAF
                         </div>
                     </div>
 

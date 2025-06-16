@@ -15,8 +15,20 @@ class Tontine extends ActiveRecord
         return ContributionTontine::findAll(['tontine_id'=> $this->id,'state' => false]);
     }
 
+    /**
+     * Retourne le montant déjà contribué dans la tontine.
+     * Méthode classique pouvant être appelée explicitement.
+     */
     public function contributedAmount() {
         return ContributionTontine::find()->where(['tontine_id' => $this->id,'state' => true])->count() * $this->unit_amount;
+    }
+
+    /**
+     * Getter Yii2 pour l'accès magique $tontine->contributedAmount
+     */
+    public function getContributedAmount() {
+        // réutilise la logique existante pour garder un seul point de calcul
+        return $this->contributedAmount();
     }
 
     public function member() {

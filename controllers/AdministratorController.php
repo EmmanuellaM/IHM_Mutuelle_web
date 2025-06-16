@@ -167,88 +167,76 @@ class AdministratorController extends Controller
             $idModel = new IdForm();
             $model = new NewSessionForm();
             $session = null;
+            
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 // Check if date is greater than current date
                 $today = new DateTime();
                 $submittedDate = new DateTime($model->date);
-                $submittedDate1 = $submittedDate->format('Y-m-d');
-                $today1 = $today->format('Y-m-d');
-
-                $OSession = Session::find()->one();
                 
-                //vérifier que le moi de la session actuelle est après les les des autres
-                $dateExists = Session::find()
-                    ->where([
-                        'AND',
-                        ['>=', 'date', sprintf('%04d-%02d-01', $submittedDate->format('Y'), $submittedDate->format('m'))],
-                        ['<', 'date', sprintf('%04d-%02d-01', $submittedDate->format('Y'), $submittedDate->format('m') + 1)],
-                    ])
-                    ->all();
-                if ($dateExists) {
-                    $model->addError('date', 'Le mois de cette session a déjà été sélectionnée pour une autre session.');
-                    return $this->render('home', compact('session', 'model', 'idModel'));
-                }
-
-                // vérifier que la moi de la session actuelle est juste après la moi precedant pour plus de précision que la precedante condition 
-                $prevMonth = clone $submittedDate;
-                $prevMonth->modify('-1 month');
-                
-                $PrevExist = Session::find()
-                    ->where([
-                        'AND',
-                        ['>=', 'date', $prevMonth->format('Y-m-01')],
-                        ['<', 'date', $submittedDate->format('Y-m-01')],
-                    ])
-                    ->one();
-
-                if (!$PrevExist && $OSession) {
-                    $model->addError('date', 'Le mois de cette session doit directement suivre celui de la session précédente.');
-                    return $this->render('home', compact('session', 'model', 'idModel'));
-                }
-                
-                // verifier que le jour de création de la session actuelle ne soit par à un jour après le jour current
-                if ($submittedDate1 < $today1) {
-                    // Add error message to the model
-                    $model->addError('date', 'La date ne peut pas être dans le passé.');
-                    return $this->render('home', compact('session', 'model', 'idModel'));
-                }
-
-                // Traitement de l'exercice en cas de bonne validation des contraintess
+                // Vérifier si c'est la création d'un nouvel exercice ou d'une nouvelle session
                 $exercise = Exercise::findOne(['active' => true]);
-                if ($exercise) {
-                    // S'il y a un exercice en cours
-                    if (count(Session::findAll(['exercise_id' => $exercise->id])) >= 12) {
-                        // S'il ya deja 12 sessions pour cet exercice
-                        $exercise->active = false;
-                        $exercise->save();
-
-                        $exercise = new Exercise();
-                        $exercise->year = (int)(new DateTime())->format("Y");
-                        $exercise->interest = $model->interest; // Set interest rate for the new exercise
-                        $exercise->save();
-                    }
-                } else {
-                    // S'il n'y a pas, on le crée
+                
+                if (!$exercise) {
+                    // Création d'un nouvel exercice
                     $exercise = new Exercise();
                     $exercise->year = $model->year;
-
-
-                    $exercise->interest = $model->interest; // Set interest rate for the new exercise
+                    $exercise->interest = $model->interest;
+                    $exercise->inscription_amount = $model->inscription_amount;
+                    $exercise->social_crown_amount = $model->social_crown_amount;
                     $exercise->administrator_id = $this->administrator->id;
-                    $exercise->save();
+                    $exercise->active = true;
+                    
+                    if (!$exercise->save()) {
+                        $model->addErrors($exercise->errors);
+                        return $this->render('home', compact('session', 'model', 'idModel'));
+                    }
                 }
 
+                // Créer la nouvelle session
                 $session = new Session();
                 $session->administrator_id = $this->administrator->id;
                 $session->exercise_id = $exercise->id;
                 $session->date = $model->date;
-                $session->save();
+                $session->active = true;
 
-                foreach (Member::find()->all() as $member) {
-                    MailManager::alert_new_session($member->user(), $session);
+                // Vérifier si c'est la première session de l'exercice
+                if (count(Session::findAll(['exercise_id' => $exercise->id])) == 0) {
+                    // Pas de vérification de mois précédent pour la première session
+                    if ($session->save()) {
+                        foreach (Member::find()->all() as $member) {
+                            MailManager::alert_new_session($member->user(), $session);
+                        }
+                        return $this->redirect("@administrator.home");
+                    }
+                } else {
+                    // Pour les sessions suivantes, vérifier que le mois suit immédiatement le mois précédent
+                    $prevMonth = clone $submittedDate;
+                    $prevMonth->modify('-1 month');
+                    
+                    $prevSession = Session::find()
+                        ->where([
+                            'AND',
+                            ['>=', 'date', $prevMonth->format('Y-m-01')],
+                            ['<', 'date', $submittedDate->format('Y-m-01')],
+                            ['exercise_id' => $exercise->id]
+                        ])
+                        ->one();
+                    
+                    if (!$prevSession) {
+                        $model->addError('date', 'Le mois de cette session doit directement suivre celui de la session précédente.');
+                        return $this->render('home', compact('session', 'model', 'idModel'));
+                    }
+                    
+                    if ($session->save()) {
+                        foreach (Member::find()->all() as $member) {
+                            MailManager::alert_new_session($member->user(), $session);
+                        }
+                        return $this->redirect("@administrator.home");
+                    }
                 }
 
-                return $this->redirect("@administrator.home");
+                $model->addErrors($session->errors);
+                return $this->render('home', compact('session', 'model', 'idModel'));
             } else {
                 return $this->render('home', compact('session', 'model', 'idModel'));
             }
@@ -712,7 +700,8 @@ class AdministratorController extends Controller
                     //Au depart il n'y avait pas ça la partie de l'email n'avait pas le try catch c'est parce que je n'ai pas la connexion que je met  ça dedans
                     // C'est pour tester la partie du membre
                     try {
-                        \Yii::$app->mailer->compose()
+                        \try {
+                Yii::$app->mailer->compose()
                             ->setFrom('dylaneossombe@gmail.com')
                             ->setTo($model->email)
 
@@ -727,7 +716,8 @@ class AdministratorController extends Controller
 
 
                     /*try{
-                         Yii::$app->mailer->compose()
+                         try {
+                Yii::$app->mailer->compose()
                          ->setTo($user->email)
                          ->setFrom('jasonmfououoyono@gmail.com')
                          ->setSubject('Confirmation de création de compte de membre')
@@ -809,7 +799,8 @@ class AdministratorController extends Controller
     //                 foreach($member1 as $memb1){
 
     //                         try{
-    //                             \Yii::$app->mailer->compose()
+    //                             \try {
+                Yii::$app->mailer->compose()
     //                             ->setFrom('dylaneossombe@gmail.com')
     //                             ->setTo($memb1->email)
 
@@ -827,7 +818,8 @@ class AdministratorController extends Controller
     //                    foreach($member1 as $memb1){
 
     //                             try{
-    //                                 \Yii::$app->mailer->compose()
+    //                                 \try {
+                Yii::$app->mailer->compose()
     //                                 ->setFrom('dylaneossombe@gmail.com')
     //                                 ->setTo($memb1->email)
 
@@ -883,7 +875,8 @@ class AdministratorController extends Controller
                         // Send email notification to members
                         foreach ($members as $member) {
                             try {
-                                Yii::$app->mailer->compose()
+                                try {
+                Yii::$app->mailer->compose()
                                     ->setFrom('dylaneossombe@gmail.com')
                                     ->setTo($member->email)
                                     ->setSubject('Nouvelle Epargne')
@@ -1207,8 +1200,109 @@ class AdministratorController extends Controller
     {
         AdministratorSessionManager::setHome("exercise_debt");
 
+        // Récupérer l'exercice actif
+        $exercise = Exercise::find()
+            ->where(['active' => true])
+            ->one();
 
-        return $this->render('exercise_debts');
+        if (!$exercise) {
+            Yii::$app->session->setFlash('error', 'Aucun exercice actif trouvé.');
+            return $this->redirect(['exercices']);
+        }
+
+        // Récupérer les sessions de l'exercice actif
+        $sessions = Session::find()
+            ->where(['exercise_id' => $exercise->id])
+            ->orderBy(['date' => SORT_ASC])
+            ->all();
+
+        // Récupérer les membres avec leurs données de fond social et leur utilisateur
+        $members = \app\models\Member::find()
+            ->with(['savings', 'user'])
+            ->orderBy(['created_at' => SORT_DESC])
+            ->all();
+
+        return $this->render('exercise_debts', [
+            'members' => $members,
+            'exercise' => $exercise,
+            'sessions' => $sessions
+        ]);
+    }
+
+    public function actionPrintReport($type = 'exercise', $id = null)
+    {
+        $exercise = Exercise::find()
+            ->where(['active' => true])
+            ->one();
+
+        if (!$exercise) {
+            throw new NotFoundHttpException('Aucun exercice actif trouvé.');
+        }
+
+        $data = [];
+        $title = '';
+
+        if ($type === 'exercise') {
+            $title = "Bilan de l'exercice " . $exercise->year;
+            $data = [
+                'exercise' => $exercise,
+                'sessions' => Session::find()
+                    ->where(['exercise_id' => $exercise->id])
+                    ->orderBy(['date' => SORT_ASC])
+                    ->all(),
+                'members' => \app\models\Member::find()
+                    ->with(['savings', 'user'])
+                    ->orderBy(['created_at' => SORT_DESC])
+                    ->all()
+            ];
+        } elseif ($type === 'session' && $id) {
+            $session = Session::findOne($id);
+            if (!$session || $session->exercise_id !== $exercise->id) {
+                throw new NotFoundHttpException('Session non trouvée ou non valide.');
+            }
+            $title = "Bilan de la session du " . Yii::$app->formatter->asDate($session->date, 'php:F Y');
+            $data = [
+                'session' => $session,
+                'exercise' => $exercise,
+                'members' => \app\models\Member::find()
+                    ->with(['savings' => function ($query) use ($session) {
+                        $query->where(['session_id' => $session->id]);
+                    }])
+                    ->orderBy(['created_at' => SORT_DESC])
+                    ->all()
+            ];
+        }
+
+        // Générer le contenu HTML
+        $content = $this->renderPartial('print_report', [
+            'title' => $title,
+            'data' => $data,
+            'type' => $type
+        ]);
+
+        // Configurer MPDF
+        $mpdf = new \Mpdf\Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'orientation' => 'P',
+            'margin_left' => 15,
+            'margin_right' => 15,
+            'margin_top' => 25,
+            'margin_bottom' => 25,
+            'margin_header' => 10,
+            'margin_footer' => 10
+        ]);
+
+        // Ajouter le CSS
+        $mpdf->WriteHTML('<style>' . $this->renderPartial('print-report-styles') . '</style>');
+
+        // Ajouter le contenu
+        $mpdf->WriteHTML($content);
+
+        // Générer le PDF
+        $mpdf->Output($title . '.pdf', 'D');
+
+        return false;
     }
 
     /**************************passer aux remboursements ************************************ * */
@@ -1584,13 +1678,17 @@ class AdministratorController extends Controller
                             $help->unit_amount = $unit_amount;
                             $help->save();
 
-                            $member = Member::findAll('email');
+                            // Désactiver l'envoi réel des emails pour éviter les blocages réseau
+            Yii::$app->mailer->useFileTransport = true;
+            // Récupérer les emails de tous les membres actifs
+            $allMembers = Member::find()->select(['email'])->where(['active' => true])->all();
 
-                            foreach ($member as $key) {
+                            foreach ($allMembers as $m) {
         
-                                Yii::$app->mailer->compose()
+                                try {
+                Yii::$app->mailer->compose()
                                 ->setFrom('dylaneossombe@gmail.com')
-                                ->setTo($key->email)
+                                ->setTo($m->email)
         
                                 ->setSubject('Email sent from GI2025')
                                 ->setHtmlBody('Bonjour une nouvelle aide a ete cree veuillez contacter les administrateurs pour plus de détails')
@@ -1931,9 +2029,9 @@ class AdministratorController extends Controller
             $model = new FixInscriptionForm();
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $member = Member::findOne($id);
-                if ($member && ($member->social_crown <= SettingManager::getInscription())) {
-                    $member->social_crown += $model->amount;
-                    if ($member->social_crown > SettingManager::getInscription()) $member->social_crown = SettingManager::getInscription();
+                if ($member && ($member->inscription < SettingManager::getInscription())) {
+                    $member->inscription += $model->amount;
+                    if ($member->inscription > SettingManager::getInscription()) $member->inscription = SettingManager::getInscription();
                     $member->save();
                     return $this->redirect("@administrator.exercise_debts");
                 } else {
@@ -1958,12 +2056,12 @@ class AdministratorController extends Controller
 public function actionReglerFondSocial($id)
 {
     if (Yii::$app->request->getIsPost() ) {
-        $model = new FixInscriptionForm();
+        $model = new \app\models\forms\FixSocialCrownForm();
         if ($model->load(Yii::$app->request->post())&& $model->validate() ){
             $member = Member::findOne($id);
-            if ($member && ($member->inscription <= SettingManager::getSocialCrown())) {
-                $member->inscription += $model->amount;
-                if($member->inscription > SettingManager::getSocialCrown()) $member->inscription = SettingManager::getSocialCrown();
+            if ($member && ($member->social_crown < SettingManager::getSocialCrown())) {
+                $member->social_crown += $model->amount;
+                if($member->social_crown > SettingManager::getSocialCrown()) $member->social_crown = SettingManager::getSocialCrown();
                 $member->save();
                 return $this->redirect("@administrator.exercise_debts");
             } else {

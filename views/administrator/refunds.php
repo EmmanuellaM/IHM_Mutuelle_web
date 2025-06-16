@@ -355,7 +355,7 @@ Remboursements
                                             <th>Montant</th>
                                             <th>Reste à payer</th>
                                             <th>Administrateur</th>
-                                            <th>Action</th>
+                                            <!-- <th>Action</th> -->
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -376,12 +376,12 @@ Remboursements
                                                 <td class="text-capitalize"><?= Html::encode($administratorUser->name . " " . $administratorUser->first_name) ?></td>
                                                 <td>
                                                     <?php if ($selectedSession->active): ?>
-                                                        <button class="btn btn-outline-primary btn-sm mr-2">
+                                                        <!-- <button class="btn btn-outline-primary btn-sm mr-2">
                                                             <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        <button class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target="#modalS<?= $refund->id ?>">
+                                                        </button> -->
+                                                        <!-- <button class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target="#modalS<?= $refund->id ?>">
                                                             <i class="fas fa-trash"></i>
-                                                        </button>
+                                                        </button> -->
                                                     <?php endif; ?>
                                                 </td>
                                             </tr>

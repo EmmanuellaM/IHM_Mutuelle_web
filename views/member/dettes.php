@@ -9,8 +9,14 @@ $this->title = "Mes Dettes - Mutuelle ENSPY";
 // Récupération du membre connecté
 $member = Member::findOne(Yii::$app->user->id);
 
+// Récupération de l'exercice actif
+$exercise = \app\models\Exercise::find()
+    ->where(['active' => true])
+    ->one();
+
 // Calcul du montant de renfouement
 $fondSocial = $member->social_crown;
+$inscription = $member->inscription;
 
 // Calcul de la somme des aides financières de l'année achevée
 $currentYear = date('Y');
@@ -19,9 +25,14 @@ $totalAides = FinancialAid::find()
     ->andWhere(['YEAR(date)' => $currentYear - 1])
     ->sum('amount') ?? 0;
 
-$montantRenfouement = $fondSocial - $totalAides;
-$montantPaye = 0; // valeur par défaut, à remplacer par la valeur réelle
-$resteAPayer = $montantRenfouement - $montantPaye;
+// Calcul des montants
+$montantFondSocialTotal = $exercise->social_crown_amount;
+$montantFondSocialPaye = $fondSocial;
+$montantFondSocialReste = $montantFondSocialTotal - $montantFondSocialPaye;
+
+$montantInscriptionTotal = $exercise->inscription_amount;
+$montantInscriptionPaye = $inscription;
+$montantInscriptionReste = $montantInscriptionTotal - $montantInscriptionPaye;
 
 ?>
 
@@ -112,8 +123,8 @@ $resteAPayer = $montantRenfouement - $montantPaye;
                     <div class="card info-card">
                         <div class="card-body text-white text-center">
                             <i class="fas fa-coins fa-3x mb-3"></i>
-                            <h5 class="card-title">Montant Total du Renfouement</h5>
-                            <p class="amount"><?= number_format($montantRenfouement, 0, ',', ' ') ?> FCFA</p>
+                            <h5 class="card-title">Montant Total du Fond Social</h5>
+                            <p class="amount"><?= number_format($montantFondSocialTotal, 0, ',', ' ') ?> FCFA</p>
                         </div>
                     </div>
                 </div>
@@ -122,8 +133,8 @@ $resteAPayer = $montantRenfouement - $montantPaye;
                     <div class="card success-card">
                         <div class="card-body text-white text-center">
                             <i class="fas fa-check-circle fa-3x mb-3"></i>
-                            <h5 class="card-title">Montant Déjà Payé</h5>
-                            <p class="amount"><?= number_format($montantPaye, 0, ',', ' ') ?> FCFA</p>
+                            <h5 class="card-title">Déjà Payé</h5>
+                            <p class="amount"><?= number_format($montantFondSocialPaye, 0, ',', ' ') ?> FCFA</p>
                         </div>
                     </div>
                 </div>
@@ -133,14 +144,54 @@ $resteAPayer = $montantRenfouement - $montantPaye;
                         <div class="card-body text-white text-center">
                             <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
                             <h5 class="card-title">Reste à Payer</h5>
-                            <p class="amount"><?= number_format($resteAPayer, 0, ',', ' ') ?> FCFA</p>
+                            <p class="amount"><?= number_format($montantFondSocialReste, 0, ',', ' ') ?> FCFA</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="text-center mt-5">
-                <button class="btn btn-payment text-white" <?= $resteAPayer <= 0 ? 'disabled' : '' ?>>
+                <button class="btn btn-payment text-white" <?= $montantFondSocialReste <= 0 ? 'disabled' : '' ?>>
+                    <i class="fas fa-money-bill-wave me-2"></i>
+                    Effectuer un Paiement
+                </button>
+            </div>
+
+            <!-- Section Inscription -->
+            <div class="row g-4 mt-5">
+                <div class="col-md-4">
+                    <div class="card info-card">
+                        <div class="card-body text-white text-center">
+                            <i class="fas fa-file-invoice fa-3x mb-3"></i>
+                            <h5 class="card-title">Montant Total de l'Inscription</h5>
+                            <p class="amount"><?= number_format($montantInscriptionTotal, 0, ',', ' ') ?> FCFA</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card success-card">
+                        <div class="card-body text-white text-center">
+                            <i class="fas fa-check-circle fa-3x mb-3"></i>
+                            <h5 class="card-title">Déjà Payé</h5>
+                            <p class="amount"><?= number_format($montantInscriptionPaye, 0, ',', ' ') ?> FCFA</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card warning-card">
+                        <div class="card-body text-white text-center">
+                            <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
+                            <h5 class="card-title">Reste à Payer</h5>
+                            <p class="amount"><?= number_format($montantInscriptionReste, 0, ',', ' ') ?> FCFA</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-5">
+                <button class="btn btn-payment text-white" <?= $montantInscriptionReste <= 0 ? 'disabled' : '' ?>>
                     <i class="fas fa-money-bill-wave me-2"></i>
                     Effectuer un Paiement
                 </button>

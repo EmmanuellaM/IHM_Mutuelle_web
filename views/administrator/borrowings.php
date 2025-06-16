@@ -429,17 +429,32 @@ Epargnes
                                     $latestBorrowing = \app\models\Borrowing::find()->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])->one();
                                     $administrator = $latestBorrowing ? \app\models\Administrator::findOne($latestBorrowing->administrator_id) : null;
                                     $administratorUser = $administrator ? \app\models\User::findOne($administrator->id) : null;
-                                    $borrowingAmountUser = \app\models\Borrowing::find()->where(['member_id' => $member->id])->sum('amount');
-                                    $TotalrefundedAmountUser = \app\models\Refund::find()->where(['member_id' => $member->id])->sum('amount');
+                                    $borrowingAmountUser = \app\models\Borrowing::find()
+                                        ->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])
+                                        ->sum('amount');
+
+                                    $TotalrefundedAmountUser = \app\models\Refund::find()
+                                        ->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])
+                                        ->sum('amount');
+
                                     $savingAmountUser = \app\models\Saving::find()->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])->sum('amount');
 
                                     $totalRemainingAmount = 0;
-                                    $borrowings = \app\models\Borrowing::find()->where(['member_id' => $member->id])->all();
+                                    $borrowings = \app\models\Borrowing::find()->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])->all();
 
                                     foreach ($borrowings as $borrowing) {
                                         $refundedAmountUser = \app\models\Refund::find()->where(['member_id' => $member->id, 'borrowing_id' => $borrowing->id])->sum('amount');
-                                        $Empruntpaye = $borrowing->amount + ($borrowing->amount * ($borrowing->interest / 100));
-                                        $remainingAmount = $Empruntpaye - $refundedAmountUser;
+                                        
+                                        // Calculer le montant total à rembourser (principe + intérêts)
+                                        $totalToPay = $borrowing->amount + ($borrowing->amount * ($borrowing->interest / 100));
+                                        
+                                        // Si le montant remboursé est égal ou supérieur au total à payer, le reste est 0
+                                        if ($refundedAmountUser >= $totalToPay) {
+                                            $remainingAmount = 0;
+                                        } else {
+                                            $remainingAmount = $totalToPay - $refundedAmountUser;
+                                        }
+                                        
                                         $totalRemainingAmount += $remainingAmount;
                                     }
                                     ?>
@@ -449,7 +464,7 @@ Epargnes
                                         <td class="blue-text amount"><?= $borrowingAmountUser ?> XAF</td>
                                         <td class="blue-text amount"><?= $TotalrefundedAmountUser ? $TotalrefundedAmountUser : 0 ?> XAF</td>
                                         <td class="blue-text amount"><span style="color: <?= $totalRemainingAmount == 0 ? 'green' : 'red' ?>;"><?= $totalRemainingAmount ?> XAF</span></td>
-                                        <td><?= $latestBorrowing ? $latestBorrowing->intendedAmount() . ' XAF' : 'N/A' ?></td>
+                                        <td><?= $totalRemainingAmount ?> XAF</td>
                                         <?php if ($selectedSession->active): ?>
                                             <?php if ($savingAmountUser == 0): ?>
                                                 <td class="red-text">Pour emprunter, veuillez epargner</td>

@@ -18,6 +18,7 @@ use app\managers\RedirectionManager;
 use app\models\Member;
 use app\models\User;
 use app\models\Saving;
+use app\helpers\MemberStatusHelper;
 use app\models\forms\IdForm;
 use app\models\forms\NewBorrowingForm;
 use app\models\forms\NewRefundForm;

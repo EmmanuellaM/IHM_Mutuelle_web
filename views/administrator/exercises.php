@@ -347,8 +347,8 @@ Exercices
                                 <th>Montant emprunté</th>
                                 <th>Dette remboursée</th>
                                 <th>Intérêt sur les dettes</th>
-                                <th>Fond Social</th>
                                 <th>Inscription</th>
+                                <th>Fond Social</th>
                                 <th>Renflouement</th>
                             </tr>
                             </thead>

@@ -18,6 +18,19 @@ Mon profil
         margin-bottom: 2rem;
     }
 
+    .status-badge {
+        font-size: 1.1rem;
+        padding: 0.5rem 1rem;
+        border-radius: 15px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-badge i {
+        font-size: 1.2rem;
+    }
+
     .profile-header {
         text-align: center;
         margin-bottom: 2rem;
@@ -123,11 +136,15 @@ Mon profil
             <div class="col-lg-8">
                 <div class="profile-card">
                     <div class="profile-header">
-                        <div class="img-container">
-                            <img src="<?= \app\managers\FileManager::loadAvatar($this->params['user'], "512") ?>" alt="">
+                        <div class="text-center mb-4">
+                            <img src="<?= \app\managers\FileManager::loadAvatar($this->params['user'], "512") ?>" alt="Avatar" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #4e73df;">
+                            <h2 class="mt-3"><?= $this->params['member']->username ?></h2>
+                            <p class="text-muted">Membre depuis <?= Yii::$app->formatter->asDate($this->params['member']->created_at, 'php:F Y') ?></p>
+                            <div class="status-badge" data-toggle="tooltip" data-placement="bottom" title="<?= app\helpers\MemberStatusHelper::getStatusTooltip($this->params['member']) ?>">
+                                <i class="fas fa-user-check"></i>
+                                <?= app\helpers\MemberStatusHelper::getStatusLabel($this->params['member']) ?>
+                            </div>
                         </div>
-                        <h2 class="mt-3 text-capitalize"><?= $this->params['member']->username ?></h2>
-                        <p class="text-muted mb-0"><?= $this->params['user']->type ?></p>
                     </div>
 
                     <div class="profile-info">
