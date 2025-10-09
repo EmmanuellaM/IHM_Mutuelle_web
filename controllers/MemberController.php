@@ -96,7 +96,8 @@ class MemberController extends Controller
         if ($session)
             $idModel->id = $session->id;
         $model = new NewSessionForm();
-        return $this->render('home',compact('session','model','idModel'));
+        $member = $this->member;
+        return $this->render('home',compact('session','model','idModel','member'));
     }
 /*********************************action de deconnexion ************************************************* */
     public function actionDeconnexion() {

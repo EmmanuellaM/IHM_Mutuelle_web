@@ -1,0 +1,8 @@
+.git
+.gitignore
+.env
+vendor/
+runtime/
+web/assets/
+tests/
+docker-compose.yml
