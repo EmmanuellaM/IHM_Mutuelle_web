@@ -11,13 +11,16 @@ Sessions
         padding: 2rem;
         border-radius: 0.5rem;
         margin-bottom: 2rem;
-        text-align: center;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
     .page-header h1 {
         color: white;
         margin-bottom: 0.5rem;
         font-size: 2rem;
+        text-align: left;
     }
 
     .page-header .status-badge {
@@ -64,14 +67,21 @@ Sessions
         font-size: 1.1rem;
     }
 
-    .active-badge {
+    .status-badge {
         display: inline-block;
         padding: 0.25rem 0.75rem;
         border-radius: 1rem;
-        background: #34a853;
         color: white;
         font-size: 0.9rem;
         margin-left: 0.5rem;
+    }
+
+    .status-badge.active {
+        background: #34a853;
+    }
+
+    .status-badge.closed {
+        background: #6c757d;
     }
 
     .session-info {
@@ -106,6 +116,7 @@ Sessions
         padding: 0.5rem 1.5rem;
         border-radius: 0.5rem;
         transition: all 0.3s ease;
+        margin-right: 0.5rem;
     }
 
     .btn-details:hover {
@@ -114,6 +125,41 @@ Sessions
         color: white;
         text-decoration: none;
         box-shadow: 0 0.5rem 1rem rgba(33, 147, 176, 0.3);
+    }
+
+    .btn-print {
+        background: white;
+        color: #2193b0;
+        border: 2px solid #2193b0;
+        padding: 0.5rem 1.5rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-print:hover {
+        background: #2193b0;
+        color: white;
+        transform: translateY(-2px);
+        text-decoration: none;
+        box-shadow: 0 0.5rem 1rem rgba(33, 147, 176, 0.3);
+    }
+
+    .btn-print-exercise {
+        background: linear-gradient(135deg, #16a34a, #22c55e);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .btn-print-exercise:hover {
+        background: linear-gradient(135deg, #15803d, #16a34a);
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+        box-shadow: 0 0.5rem 1rem rgba(22, 163, 74, 0.3);
     }
 
     .empty-state {
@@ -174,9 +220,18 @@ Sessions
             <!-- En-tête de la page -->
             <div class="col-12">
                 <div class="page-header">
-                    <h1>Exercice de l'année <?= $exercises[0]->year ?></h1>
-                    <div class="status-badge">
-                        <?= $exercises[0]->active ? "En cours" : "Terminé" ?>
+                    <div>
+                        <h1>Exercice de l'année <?= $exercises[0]->year ?></h1>
+                        <div class="status-badge">
+                            <?= $exercises[0]->active ? "En cours" : "Terminé" ?>
+                        </div>
+                    </div>
+                    <div>
+                        <a href="<?= Yii::$app->urlManager->createUrl(['administrator/print-report', 'type' => 'exercise']) ?>" 
+                           class="btn btn-print-exercise" 
+                           target="_blank">
+                            <i class="fas fa-print me-1"></i> Imprimer le bilan de l'exercice
+                        </a>
                     </div>
                 </div>
             </div>
@@ -215,7 +270,9 @@ Sessions
                                         Session du <?= Yii::$app->formatter->asDate($session->date, 'd')?> <?= $monthNames[$monthNumber] ?>
                                     </span>
                                     <?php if($session->active): ?>
-                                        <span class="active-badge">Active</span>
+                                        <span class="status-badge active"><i class="fas fa-check-circle me-1"></i>Active</span>
+                                    <?php else: ?>
+                                        <span class="status-badge closed"><i class="fas fa-times-circle me-1"></i>Clôturée</span>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -238,6 +295,11 @@ Sessions
                             <div class="text-right">
                                 <a href="<?= Yii::getAlias("@administrator.session_details")."?q=".$session->id?>" class="btn btn-details">
                                     <i class="fas fa-info-circle me-1"></i> Détails
+                                </a>
+                                <a href="<?= Yii::$app->urlManager->createUrl(['administrator/print-report', 'type' => 'session', 'id' => $session->id]) ?>" 
+                                   class="btn btn-print" 
+                                   target="_blank">
+                                    <i class="fas fa-print me-1"></i> Imprimer
                                 </a>
                             </div>
                         </div>

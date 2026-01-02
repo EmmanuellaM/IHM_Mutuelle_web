@@ -241,12 +241,8 @@
                         Session du <?= Yii::$app->formatter->asDate($session->date, 'd')?> <?= $monthName ?>
                     </h4>
                         <div class="col-9 text-right">
-                            <?php if (\app\managers\FinanceManager::numberOfSession() < 12) : ?>
-                                <button class="btn btn-primary" data-toggle="modal" data-target="#modal-cloturer">Cloturer la session</button>
-                                <button class="btn bg-success <?= $model->hasErrors() ? 'in' : '' ?>"  id = "modifier-session" data-toggle="modal" data-target="#modal-modifier-session">Modifier la session</button>
-                            <?php else : ?>
-                                <button class="btn btn-primary" data-toggle="modal" data-target="#modal-cloturer">Cloturer l'exercice</button>
-                            <?php endif; ?>
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#modal-cloturer">Cloturer la session</button>
+                            <button class="btn bg-success <?= $model->hasErrors() ? 'in' : '' ?>"  id = "modifier-session" data-toggle="modal" data-target="#modal-modifier-session">Modifier la session</button>
                         </div>
                     </div>
 
@@ -265,9 +261,8 @@
                         </div>
                     </div>
 
-                    <?php if (\app\managers\FinanceManager::numberOfSession() < 12) : ?>
-                        <!-- Modal for closing a session -->
-                        <div class="modal fade" id="modal-cloturer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <!-- Modal for closing a session -->
+                    <div class="modal fade" id="modal-cloturer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-body">
@@ -315,26 +310,6 @@
                                 </div>
                             </div>
                         </div>
-                    <?php else : ?>
-                        <!-- Modal for closing the exercise -->
-                        <div class="modal fade" id="modal-cloturer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-body">
-                                        <div class="text-center mb-2">
-                                            <img src="/img/bravo.jpg" alt="bravo" class="img-bravo">
-                                        </div>
-                                        <p class="text-center text-secondary">Félicitations !</p>
-                                        <p>Vous êtes au terme de l'exercice. Voulez-vous passer au décaissement?</p>
-                                        <div class="mt-3">
-                                            <button type="button" class="btn btn-danger" data-dismiss="modal">Non</button>
-                                            <a href="<?= Yii::getAlias("@administrator.cloture_exercise") . "?q=" . $session->id ?>" class="btn btn-primary">Oui</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endif; ?>
                 <?php endif; ?>
             <?php else : ?>
                 <?php
@@ -399,7 +374,7 @@
         <!-- Fond social total -->
         <div class="white-block">
             <h3 class="text-muted">Fond social</h3>
-            <h1><?php $t = \app\managers\FinanceManager::socialCrown(); echo $t ? $t : 0; ?> XAF</h1>
+            <h1><?php $t = \app\managers\FinanceManager::getAvailableSocialFund(); echo $t ? $t : 0; ?> XAF</h1>
         </div>
         <!-- Épargnes (total économies) -->
         <div class="white-block">

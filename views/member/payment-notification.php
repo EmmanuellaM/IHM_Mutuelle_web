@@ -44,9 +44,9 @@ if ($status === \app\helpers\MemberStatusHelper::STATUS_INSCRIT) {
             <div class="modal-body">
                 <p><?php 
                     if ($status === \app\helpers\MemberStatusHelper::STATUS_INACTIF) {
-                        echo 'Pour activer votre compte, vous devez effectuer le paiement de votre inscription.';
+                        echo 'Pour être en règle, vous devez effectuer le paiement de votre inscription.';
                     } else {
-                        echo 'Pour devenir membre actif, vous devez effectuer le paiement de votre fond social.';
+                        echo 'Pour être totalement en règle, vous devez effectuer le paiement de votre fond social.';
                     }
                 ?></p>
                 <div class="mt-3">

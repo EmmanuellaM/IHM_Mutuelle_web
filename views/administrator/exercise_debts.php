@@ -46,44 +46,6 @@ $this->params['breadcrumbs'][] = $this->title;
         font-weight: 600;
     }
 
-    .sessions-list {
-        background: white;
-        padding: 2rem;
-        border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow);
-        margin-bottom: 2rem;
-    }
-
-    .sessions-timeline {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .session-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
-        background: #f8f9fa;
-        border-radius: 8px;
-        transition: var(--transition);
-    }
-
-    .session-item:hover {
-        background: #f1f5f9;
-    }
-
-    .session-date {
-        font-weight: 600;
-        color: var(--text-dark);
-    }
-
-    .session-status {
-        font-size: 0.9rem;
-        color: var(--text-muted);
-    }
-
     .table {
         margin-bottom: 0;
         border-collapse: separate;
@@ -195,57 +157,17 @@ $this->params['breadcrumbs'][] = $this->title;
 <?php $this->endBlock() ?>
 
 <div class="container-fluid py-5">
-    <!-- Information de l'exercice -->
-    <div class="info-card">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="section-title mb-0">Exercice en cours</h2>
-            <div>
-                <a href="<?= Yii::$app->urlManager->createUrl(['administrator/print-report', 'type' => 'exercise']) ?>" 
-                   class="btn btn-primary" 
-                   target="_blank">
-                    <i class="fas fa-print"></i> Imprimer le bilan de l'exercice
-                </a>
-            </div>
-        </div>
-        <div class="exercise-info">
-            <p><strong>Année :</strong> <?= $exercise->year ?></p>
-            <p><strong>Taux d'intérêt :</strong> <?= $exercise->interest ?>%</p>
-            <p><strong>Montant inscription :</strong> <?= number_format($exercise->inscription_amount, 0, ',', ' ') ?> XAF</p>
-            <p><strong>Montant fond social :</strong> <?= number_format($exercise->social_crown_amount, 0, ',', ' ') ?> XAF</p>
-        </div>
     </div>
 
-    <!-- Liste des sessions de l'exercice -->
-    <div class="sessions-list">
-        <h3 class="section-title">Sessions de l'exercice</h3>
-        <div class="sessions-timeline">
-            <?php foreach ($sessions as $session): ?>
-                <div class="session-item d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <div class="session-date mr-3"><?= Yii::$app->formatter->asDate($session->date, 'php:F Y') ?></div>
-                        <div class="session-status">
-                            <?php if ($session->active) {
-                                echo '<span class="badge bg-success"><i class="fas fa-check-circle"></i> Active</span>';
-                            } else {
-                                echo '<span class="badge bg-secondary"><i class="fas fa-times-circle"></i> Clôturée</span>';
-                            } ?>
-                        </div>
-                    </div>
-                    <div>
-                        <a href="<?= Yii::$app->urlManager->createUrl(['administrator/print-report', 'type' => 'session', 'id' => $session->id]) ?>" 
-                           class="btn btn-outline-primary btn-sm" 
-                           target="_blank">
-                            <i class="fas fa-print"></i> Imprimer
-                        </a>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
+
+
 
     <!-- Table des membres -->
     <div class="table-responsive">
-        <table class="table table-striped">
+        <div class="mb-3">
+             <input type="text" id="memberSearchInput" class="form-control" placeholder="Rechercher un membre..." style="max-width: 300px;">
+        </div>
+        <table class="table table-striped" id="membersTable">
             <thead>
                 <tr>
                     <th>Nom</th>
@@ -255,8 +177,17 @@ $this->params['breadcrumbs'][] = $this->title;
             </thead>
             <tbody>
                 <?php foreach ($members as $member): ?>
+                    <?php 
+                        // FILTRE : Si tout est payé (Inscription + Fond Social), on n'affiche pas
+                        $inscriptionPaid = ($member->inscription >= $exercise->inscription_amount);
+                        $socialFundPaid = ($member->social_crown >= $exercise->social_crown_amount);
+                        
+                        if ($inscriptionPaid && $socialFundPaid) {
+                            continue;
+                        }
+                    ?>
                     <tr>
-                        <td><?= Html::encode($member->username) ?></td>
+                        <td class="member-name"><?= Html::encode($member->username) ?></td>
                         <td>
                             <?php if ($member->inscription >= $exercise->inscription_amount): ?>
                                 <span class="badge bg-success">Payé</span>
@@ -294,7 +225,7 @@ if ($firstSession) {
 
     if (count($members)) {
 ?>
-<div class="container mb-5 mt-5">
+<div class="container-fluid mb-5 mt-5">
     <div class="row mb-2">
         <div class="col-12 white-block">
             <h3 class="text-center section-title">Inscriptions</h3>
@@ -379,6 +310,8 @@ if ($firstSession) {
     echo '<p class="text-center blue-text">Aucune session disponible</p>';
 }
 ?>
+<div class="container-fluid">
+    <div class="row">
             <div class="col-12 white-block">
                 <h3 class="text-center section-title">Fond Social</h3>
                 <hr>
@@ -460,11 +393,11 @@ if ($firstSession) {
                 endif;
                 ?>
             </div>
-        </div>
+    </div>
 
 
 
-    <div class="row">
+    <div class="row mt-4">
         <div class="col-12 white-block">
             <h3 class="text-muted text-center section-title">Dettes d'exercices</h3>
             <hr>
@@ -564,4 +497,31 @@ if ($firstSession) {
             });
         });
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('memberSearchInput');
+        const table = document.getElementById('membersTable');
+        
+        if(table && searchInput) {
+            const tbody = table.querySelector('tbody');
+            const rows = tbody.getElementsByTagName('tr');
+
+            searchInput.addEventListener('keyup', function() {
+                const filter = searchInput.value.toLowerCase();
+
+                for (let i = 0; i < rows.length; i++) {
+                    const nameCell = rows[i].querySelector('.member-name');
+                    if (nameCell) {
+                        const txtValue = nameCell.textContent || nameCell.innerText;
+                        if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                            rows[i].style.display = "";
+                        } else {
+                            rows[i].style.display = "none";
+                        }
+                    }
+                }
+            });
+        }
+    });
+
 </script>

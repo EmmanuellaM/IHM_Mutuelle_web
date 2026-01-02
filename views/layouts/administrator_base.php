@@ -10,6 +10,7 @@ $this->title = "Mutuelle - ENSPY";
 <html lang="<?= Yii::$app->language ?>">
 
 <head>
+    <?php $this->head() ?>
     <?php include Yii::getAlias("@app") . "/includes/links.php"; ?>
     <link href="<?= Yii::getAlias("@web") . '/css/admin.css' ?>" rel="stylesheet">
     <title>
@@ -450,7 +451,9 @@ $this->title = "Mutuelle - ENSPY";
     </nav>
 
     <!-- Main Content -->
+    <!-- Main Content -->
     <div class="main-content">
+        <?= \app\widgets\Alert::widget() ?>
         <?= $content ?>
     </div>
 

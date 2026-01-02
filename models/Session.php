@@ -61,4 +61,42 @@ class Session extends ActiveRecord
     public function exercise() {
         return Exercise::findOne($this->exercise_id);
     }
+    public function getMonthName()
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF-8');
+        return strftime('%B', strtotime($this->date));
+    }
+
+    /**
+     * AFTER SAVE: Check for renflouements and deactivate members if it's the 4th session
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        
+        if ($insert) {
+            // Si c'est la 4ème session de cet exercice
+            if ($this->number() >= 4) {
+                // Trouver tous les renflouements liés à cet exercice qui ne sont pas encore payés
+                $renflouements = Renflouement::find()
+                    ->where(['next_exercise_id' => $this->exercise_id])
+                    ->andWhere(['!=', 'status', Renflouement::STATUS_PAID])
+                    ->all();
+                
+                foreach ($renflouements as $renflouement) {
+                    $member = $renflouement->member;
+                    if ($member && $member->active) {
+                        $member->active = false;
+                        if ($member->save(false)) {
+                            // Mettre à jour le statut du renflouement
+                            $renflouement->status = Renflouement::STATUS_LATE;
+                            $renflouement->save(false);
+                            
+                            Yii::warning("Membre {$member->id} désactivé car renflouement non payé à la session " . $this->number());
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

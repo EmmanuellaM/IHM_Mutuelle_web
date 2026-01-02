@@ -18,7 +18,7 @@ class Help extends ActiveRecord
         return [
             [['member_id', 'help_type_id', 'amount'], 'required'],
             [['member_id', 'help_type_id'], 'integer'],
-            [['amount'], 'number'],
+            [['amount', 'amount_from_social_fund'], 'number'],
         ];
     }
 
@@ -113,6 +113,6 @@ class Help extends ActiveRecord
      */
     public function getDeficit()
     {
-        return $this->amount - $this->getContributedAmount();
+        return $this->amount - $this->amount_from_social_fund - $this->getContributedAmount();
     }
 }

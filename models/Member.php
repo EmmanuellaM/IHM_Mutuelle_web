@@ -132,6 +132,27 @@ class Member extends ActiveRecord
         return $sum;
     }
 
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            // Activation uniquement si inscription et fond social sont TOTALEMENT payés
+            $activeExercise = Exercise::findOne(['active' => true]);
+            
+            if ($activeExercise) {
+                $inscriptionOK = $this->inscription >= $activeExercise->inscription_amount;
+                $socialCrownOK = $this->social_crown >= $activeExercise->social_crown_amount;
+
+                if ($inscriptionOK && $socialCrownOK) {
+                    $this->active = true;
+                } else {
+                    $this->active = false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
     public function interest(Exercise $exercise) {
         $sessions = Session::find()->select('id')->where(['exercise_id' => $exercise->id])->column();
         $savings = Saving::find()->select('id')->where(['member_id' => $this->id,'session_id' => $sessions])->column();
@@ -185,5 +206,63 @@ class Member extends ActiveRecord
 
     public function administrator() {
         return Administrator::findOne($this->administrator_id);
+    }
+
+    /**
+     * Get all unpaid help contributions for this member
+     * @return Contribution[]
+     */
+    public function getUnpaidHelpContributions()
+    {
+        return Contribution::find()
+            ->joinWith('help')
+            ->where(['contribution.member_id' => $this->id, 'contribution.state' => false])
+            ->andWhere(['help.state' => true]) // Only active helps
+            ->all();
+    }
+
+    /**
+     * Get total amount due for help contributions
+     * @return float
+     */
+    public function getTotalHelpContributionsDue()
+    {
+        $contributions = $this->getUnpaidHelpContributions();
+        $total = 0;
+        foreach ($contributions as $contribution) {
+            if ($contribution->help) {
+                $total += $contribution->help->unit_amount;
+            }
+        }
+        return $total;
+    }
+
+    /**
+     * Get total amount already paid for help contributions
+     * @return float
+     */
+    public function getTotalHelpContributionsPaid()
+    {
+        $paidContributions = Contribution::find()
+            ->joinWith('help')
+            ->where(['contribution.member_id' => $this->id, 'contribution.state' => true])
+            ->all();
+        
+        $total = 0;
+        foreach ($paidContributions as $contribution) {
+            if ($contribution->help) {
+                $total += $contribution->help->unit_amount;
+            }
+        }
+        return $total;
+    }
+
+    /**
+     * Get count of unpaid help contributions
+     * @return int
+     */
+    public function getUnpaidHelpContributionsCount()
+    {
+        return count($this->getUnpaidHelpContributions());
     }
 }

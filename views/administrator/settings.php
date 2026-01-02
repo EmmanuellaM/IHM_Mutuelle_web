@@ -149,6 +149,41 @@
 <div class="container">
     <div class="row justify-content-center animate-fade-in">
         <div class="col-12 col-lg-10">
+
+
+
+
+            <!-- AJOUTÉ : Messages Flash -->
+            <?php if (Yii::$app->session->hasFlash('success')): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 8px; margin-bottom: 1rem;">
+                    <?= Yii::$app->session->getFlash('success') ?>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            <?php endif; ?>
+
+            <?php if (Yii::$app->session->hasFlash('error')): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 8px; margin-bottom: 1rem;">
+                    <?= Yii::$app->session->getFlash('error') ?>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            <?php endif; ?>
+
+            <?php if (Yii::$app->session->hasFlash('warning')): ?>
+                <div class="alert alert-warning alert-dismissible fade show" role="alert" style="border-radius: 8px; margin-bottom: 1rem;">
+                    <?= Yii::$app->session->getFlash('warning') ?>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            <?php endif; ?>
+
+
+
+
             <!-- Header -->
             <div class="config-header">
                 <div class="config-logo">
@@ -170,35 +205,44 @@
                 ?>
 
                 <div class="field-highlight">
-                    <?= $form->field($model, 'interest')->input("number", [
-                        'required' => 'required',
-                        'readonly' => true, 
-                        'id' => 'interest-field',
-                        'class' => 'form-control',
-                        'min' => '0',
-                        'step' => '0.1'
-                    ])->label('<div class="label-with-icon"><i class="fas fa-percentage"></i> Intérêt par mois sur un emprunt (%)</div>') ?>
-                </div>
+    <?= $form->field($model, 'interest')->input("number", [
+        'required' => 'required',
+        'id' => 'interest-field',
+        'class' => 'form-control field-readonly',
+        'min' => '0',
+        'step' => '0.1',
+        'disabled' => true  // CHANGÉ : disabled au lieu de readonly
+    ])->label('<div class="label-with-icon"><i class="fas fa-percentage"></i> Intérêt par mois sur un emprunt (%)</div>') ?>
+    
+    <!-- AJOUTÉ : Champ caché pour la soumission -->
+    <?= \yii\helpers\Html::hiddenInput('SettingForm[interest]', $model->interest, ['id' => 'interest-hidden']) ?>
+</div>
 
-                <div class="field-highlight">
-                    <?= $form->field($model, 'social_crown')->input("number", [
-                        'required' => 'required',
-                        'readonly' => true, 
-                        'id' => 'social-crown-field',
-                        'class' => 'form-control',
-                        'min' => '0'
-                    ])->label('<div class="label-with-icon"><i class="fas fa-hands-helping"></i> Montant de solidarité à payer par membre (FCFA)</div>') ?>
-                </div>
+<div class="field-highlight">
+    <?= $form->field($model, 'social_crown')->input("number", [
+        'required' => 'required',
+        'id' => 'social-crown-field',
+        'class' => 'form-control field-readonly',
+        'min' => '0',
+        'disabled' => true  // CHANGÉ
+    ])->label('<div class="label-with-icon"><i class="fas fa-hands-helping"></i> Montant de solidarité à payer par membre (FCFA)</div>') ?>
+    
+    <!-- AJOUTÉ -->
+    <?= \yii\helpers\Html::hiddenInput('SettingForm[social_crown]', $model->social_crown, ['id' => 'social-crown-hidden']) ?>
+</div>
 
-                <div class="field-highlight">
-                    <?= $form->field($model, 'inscription')->input("number", [
-                        'required' => 'required',
-                        'readonly' => true, 
-                        'id' => 'inscription-field',
-                        'class' => 'form-control',
-                        'min' => '0'
-                    ])->label('<div class="label-with-icon"><i class="fas fa-file-signature"></i> Montant de l\'inscription à payer par membre (FCFA)</div>') ?>
-                </div>
+<div class="field-highlight">
+    <?= $form->field($model, 'inscription')->input("number", [
+        'required' => 'required',
+        'id' => 'inscription-field',
+        'class' => 'form-control field-readonly',
+        'min' => '0',
+        'disabled' => true  // CHANGÉ
+    ])->label('<div class="label-with-icon"><i class="fas fa-file-signature"></i> Montant de l\'inscription à payer par membre (FCFA)</div>') ?>
+    
+    <!-- AJOUTÉ -->
+    <?= \yii\helpers\Html::hiddenInput('SettingForm[inscription]', $model->inscription, ['id' => 'inscription-hidden']) ?>
+</div>
                 
                 <div class="form-group text-right mt-4">
                     <button type="button" class="btn btn-secondary me-2" id="cancel-button" style="display: none;">
@@ -227,13 +271,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const editSaveButton = document.getElementById('edit-save-button');
     const cancelButton = document.getElementById('cancel-button');
     
+    // Champs visibles
     const interestField = document.getElementById('interest-field');
     const socialCrownField = document.getElementById('social-crown-field');
     const inscriptionField = document.getElementById('inscription-field');
     
+    // Champs cachés (ces champs sont ceux qui seront vraiment soumis)
+    const interestHidden = document.getElementById('interest-hidden');
+    const socialCrownHidden = document.getElementById('social-crown-hidden');
+    const inscriptionHidden = document.getElementById('inscription-hidden');
+    
     const fieldHighlights = document.querySelectorAll('.field-highlight');
     
-    // Sauvegarde des valeurs initiales pour annuler les modifications si nécessaire
+    // Sauvegarde des valeurs initiales pour pouvoir annuler
     const initialValues = {
         interest: interestField.value,
         socialCrown: socialCrownField.value,
@@ -244,10 +294,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fonction pour activer le mode édition
     function enableEditMode() {
-        // Rendre les champs éditables
-        interestField.removeAttribute('readonly');
-        socialCrownField.removeAttribute('readonly');
-        inscriptionField.removeAttribute('readonly');
+        // Rendre les champs éditables en retirant disabled
+        interestField.removeAttribute('disabled');
+        socialCrownField.removeAttribute('disabled');
+        inscriptionField.removeAttribute('disabled');
+        
+        // Retirer la classe readonly pour changer l'apparence
+        interestField.classList.remove('field-readonly');
+        socialCrownField.classList.remove('field-readonly');
+        inscriptionField.classList.remove('field-readonly');
         
         // Mettre en surbrillance les champs éditables
         fieldHighlights.forEach(field => {
@@ -268,20 +323,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fonction pour désactiver le mode édition et revenir en lecture seule
     function disableEditMode() {
-        // Rendre les champs en lecture seule
-        interestField.setAttribute('readonly', true);
-        socialCrownField.setAttribute('readonly', true);
-        inscriptionField.setAttribute('readonly', true);
+        // Remettre en lecture seule
+        interestField.setAttribute('disabled', true);
+        socialCrownField.setAttribute('disabled', true);
+        inscriptionField.setAttribute('disabled', true);
+        
+        // Remettre la classe readonly
+        interestField.classList.add('field-readonly');
+        socialCrownField.classList.add('field-readonly');
+        inscriptionField.classList.add('field-readonly');
         
         // Supprimer la surbrillance des champs
         fieldHighlights.forEach(field => {
             field.classList.remove('active');
         });
 
-        // Remettre les valeurs initiales si on annule
+        // Restaurer les valeurs initiales si on annule
         interestField.value = initialValues.interest;
         socialCrownField.value = initialValues.socialCrown;
         inscriptionField.value = initialValues.inscription;
+        
+        // Restaurer aussi les champs cachés
+        interestHidden.value = initialValues.interest;
+        socialCrownHidden.value = initialValues.socialCrown;
+        inscriptionHidden.value = initialValues.inscription;
 
         // Changer le texte et l'icône du bouton
         editSaveButton.innerHTML = '<i class="fas fa-edit me-1"></i> Modifier';
@@ -298,16 +363,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fonction pour soumettre le formulaire et enregistrer les modifications
     function saveChanges() {
         // Validation basique
-        if (parseFloat(interestField.value) < 0 || 
-            parseFloat(socialCrownField.value) < 0 || 
-            parseFloat(inscriptionField.value) < 0) {
+        const interestValue = parseFloat(interestField.value);
+        const socialCrownValue = parseFloat(socialCrownField.value);
+        const inscriptionValue = parseFloat(inscriptionField.value);
+        
+        if (interestValue < 0 || socialCrownValue < 0 || inscriptionValue < 0) {
             alert("Les valeurs ne peuvent pas être négatives.");
             return;
         }
         
+        if (isNaN(interestValue) || isNaN(socialCrownValue) || isNaN(inscriptionValue)) {
+            alert("Veuillez entrer des valeurs numériques valides.");
+            return;
+        }
+        
+        // IMPORTANT : Mettre à jour les champs cachés avec les nouvelles valeurs
+        // Ce sont ces champs qui seront envoyés au serveur
+        interestHidden.value = interestValue;
+        socialCrownHidden.value = socialCrownValue;
+        inscriptionHidden.value = inscriptionValue;
+        
         // Effet visuel pour indiquer l'enregistrement
         editSaveButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enregistrement...';
         editSaveButton.disabled = true;
+        cancelButton.disabled = true;
         
         // Soumettre le formulaire après un court délai pour l'effet visuel
         setTimeout(() => {
@@ -330,6 +409,17 @@ document.addEventListener('DOMContentLoaded', function() {
     cancelButton.addEventListener('click', function() {
         // Annuler et revenir en lecture seule sans enregistrer
         disableEditMode();
+    });
+    
+    // IMPORTANT : Synchroniser les champs visibles avec les champs cachés pendant l'édition
+    // Chaque fois que l'utilisateur tape dans un champ, on met à jour le champ caché correspondant
+    [interestField, socialCrownField, inscriptionField].forEach((field, index) => {
+        field.addEventListener('input', function() {
+            if (isEditMode) {
+                const hiddenFields = [interestHidden, socialCrownHidden, inscriptionHidden];
+                hiddenFields[index].value = this.value;
+            }
+        });
     });
     
     // Mettre en surbrillance les champs au survol (uniquement en mode édition)

@@ -276,6 +276,7 @@ $helpType = $help->helpType();
                         <h6 class="date-created">Créée le : <?= $help->created_at ?></h6>
                         <div class="text-center">
                             <p class="objective">Montant de l'aide : <?= $help->amount ?> XAF</p>
+                            <p class="objective" style="font-size: 1.5rem; color: var(--success-color);">Pris en charge par le Fonds Social : <?= $help->amount_from_social_fund ?> XAF</p>
                             <h4 class="text-primary mb-4">Contribution individuelle : <?= $help->unit_amount ?> XAF / membre</h4>
                             <h4 class="text-secondary mb-2">Montant des contributions perçues : </h4>
                             <p class="contributed"><?= ($t=$help->getContributedAmount())?$t:0 ?> XAF</p>

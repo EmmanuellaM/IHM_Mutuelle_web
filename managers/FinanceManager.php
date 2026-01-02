@@ -23,7 +23,7 @@ class FinanceManager
 {
 
     public static function exerciseAmount() {
-        return self::totalSavedAmount()+self::totalRefundedAmount()-self::totalBorrowedAmount()-self::totalAgapeAmount();
+        return self::totalSavedAmount()+self::totalRefundedAmount()-self::totalBorrowedAmount();
     }
 
     public static function totalInscriptionAmount() {
@@ -141,5 +141,21 @@ class FinanceManager
         return $r;
     }
 
+    public static function getAvailableSocialFund()
+    {
+        $totalCollected = self::socialCrown();
+        $totalUsedForHelps = Help::find()->sum('amount_from_social_fund') ?: 0;
+        $totalUsedForAgapes = Agape::find()->sum('amount') ?: 0;
+        
+        return $totalCollected - $totalUsedForHelps - $totalUsedForAgapes;
+    }
 
+    public static function registerSocialFundExpense($amount, $reason, $exercise)
+    {
+        // This method is primarily for code semantic clarity. 
+        // The actual expense is recorded via the creation of Help or Agape records, 
+        // which are queried by getAvailableSocialFund().
+        // In a more complex system, this would create a Ledger/Transaction record.
+        return true;
+    }
 }

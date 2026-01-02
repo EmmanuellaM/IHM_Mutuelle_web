@@ -68,7 +68,7 @@
 
         <?php if ($this->params['administrator']->root): ?>
             <div class="d-flex justify-content-end mt-4">
-                <a href="<?= Yii::$app->urlManager->createUrl(['/administrator/new-administrator']) ?>" 
+                <a href="<?= Yii::$app->urlManager->createUrl(['/administrator/nouvel-administrateur']) ?>" 
                    class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Ajouter un Administrateur
                 </a>

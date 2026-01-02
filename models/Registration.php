@@ -52,4 +52,16 @@ class Registration extends ActiveRecord
     {
         return $this->hasOne(Exercise::class, ['id' => 'exercise_id']);
     }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        
+        // Mettre à jour le statut inscription du membre
+        $member = $this->member;
+        if ($member) {
+            $member->inscription += $this->amount;
+            $member->save();
+        }
+    }
 }

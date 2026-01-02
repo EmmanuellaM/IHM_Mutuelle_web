@@ -52,4 +52,16 @@ class SocialFund extends ActiveRecord
     {
         return $this->hasOne(Exercise::class, ['id' => 'exercise_id']);
     }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        
+        // Mettre à jour le statut fond social du membre
+        $member = $this->member;
+        if ($member) {
+            $member->social_crown += $this->amount;
+            $member->save();
+        }
+    }
 }

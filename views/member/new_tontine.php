@@ -199,7 +199,7 @@ Nouvelle Tontine
         <?php ActiveForm::end(); ?>
     <?php else: ?>
         <div class="white-block empty-state">
-            <h3>Impossible de créer une tontine avec moins de 2 membres actifs</h3>
+            <h3>Impossible de créer une tontine avec moins de 2 membres en règle</h3>
             <a href="<?= Yii::getAlias("@administrator.new_member") ?>" class="btn btn-primary">
                 Ajouter un nouveau membre
             </a>

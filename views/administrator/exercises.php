@@ -252,7 +252,34 @@ Exercices
         color: var(--primary-color);
         margin-bottom: 1.5rem;
         text-align: center;
+        
     }
+
+
+
+
+
+
+
+
+    .renflouement-complete {
+        color: #4CAF50 !important; /* Vert pour payé */
+        font-weight: 600;
+    }
+    
+    .renflouement-incomplete {
+        color: #f44336 !important; /* Rouge pour non payé */
+        font-weight: 600;
+    }
+    
+    .status-icon {
+        margin-left: 0.5rem;
+    }
+
+
+
+
+
 </style>
 <?php $this->endBlock() ?>
 
@@ -331,6 +358,30 @@ Exercices
                             </div>
                             <?php endif; ?>
                         </div>
+                        <div class="d-flex flex-column gap-2 mt-3">
+                            <?php if ($exercise->active): ?>
+                                <?php if ($exercise->canBeClosed()): ?>
+                                    <a href="<?= Yii::$app->urlManager->createUrl(['administrator/cloturer-exercice', 'q' => $exercise->id]) ?>" 
+                                       class="btn btn-danger"
+                                       data-confirm="Êtes-vous sûr de vouloir clôturer cet exercice ? Cette action est irréversible et générera les renflouements."
+                                       >
+                                        <i class="fas fa-lock"></i> Clôturer l'exercice
+                                    </a>
+                                <?php endif; ?>
+                            <?php else: ?>
+                                 <a href="<?= Yii::$app->urlManager->createUrl(['administrator/renflouements', 'q' => $exercise->id]) ?>" 
+                                   class="btn btn-warning" 
+                                   >
+                                    <i class="fas fa-money-bill-wave"></i> Voir Renflouements
+                                </a>
+                            <?php endif; ?>
+                            
+                            <a href="<?= Yii::$app->urlManager->createUrl(['administrator/print-report', 'type' => 'exercise']) ?>" 
+                               class="btn btn-primary" 
+                               target="_blank">
+                                <i class="fas fa-print"></i> Imprimer le bilan de l'exercice
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -338,6 +389,19 @@ Exercices
             <?php if (count($members)): ?>
                 <div class="col-12 white-block">
                     <h3 class="text-center my-4 blue-text">Bilan de l'exercice</h3>
+
+                    <!-- BARRE DE RECHERCHE -->
+                    <div class="row mb-3 justify-content-end">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                </div>
+                                <input type="text" id="memberSearchInput" class="form-control" placeholder="Rechercher un membre...">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="modern-table">
                             <thead>
@@ -349,6 +413,7 @@ Exercices
                                 <th>Intérêt sur les dettes</th>
                                 <th>Inscription</th>
                                 <th>Fond Social</th>
+                                <th>Reste F. Social</th>
                                 <th>Renflouement</th>
                             </tr>
                             </thead>
@@ -363,19 +428,78 @@ Exercices
                                 $sc = $member->social_crown;
                                 $insc = $member->inscription;
 
+
+
+
+
+
+
+                            // CALCUL DU RENFLOUEMENT
+                              $montantRenflouementTotal = \app\managers\SettingManager::getSocialCrown();
+                              $montantRenflouementPaye = $sc; // Ce que le membre a déjà payé
+                              $montantRenflouementRestant = $montantRenflouementTotal - $montantRenflouementPaye;
+    
+                            // DÉTERMINER SI C'EST PAYÉ COMPLÈTEMENT
+                              $renflouementComplete = ($montantRenflouementRestant <= 0);
+    
+                            // CLASSE CSS À APPLIQUER
+                            $renflouementClass = $renflouementComplete ? 'renflouement-complete' : 'renflouement-incomplete';
+
+                            // DÉTERMINER SI RÉGLÉ (INSCRIPTION)
+                            $montantInscriptionTotal = \app\managers\SettingManager::getInscription();
+                            $inscriptionComplete = ($insc >= $montantInscriptionTotal);
+
+                            // FILTRE SUPPRIMÉ : On affiche tout le monde comme demandé !
+
+
+
+
+
+
                                 $labels[] = $user->name . " " . $user->first_name;
                                 $data[] = $interest ?: 0;
                                 $colors[] = \app\managers\ColorManager::getColor();
                                 ?>
                                 <tr>
-                                    <td class="text-capitalize"><?= $user->name . " " . $user->first_name ?></td>
+                                    <td class="text-capitalize member-name"><?= $user->name . " " . $user->first_name ?></td>
                                     <td><?= number_format($savedAmount ?: 0, 0, ',', ' ') ?> XAF</td>
                                     <td><?= number_format($borrowedAmount ?: 0, 0, ',', ' ') ?> XAF</td>
                                     <td><?= number_format($refundedAmount ?: 0, 0, ',', ' ') ?> XAF</td>
                                     <td class="blue-text"><?= number_format($interest ?: 0, 0, ',', ' ') ?> XAF</td>
                                     <td class="blue-text"><?= number_format($insc ?: 0, 0, ',', ' ') ?> XAF</td>
                                     <td class="blue-text"><?= number_format($sc ?: 0, 0, ',', ' ') ?> XAF</td>
-                                    <td class="blue-text"><?= number_format(\app\managers\SettingManager::getSocialCrown() - $sc, 0, ',', ' ') ?> XAF</td>
+                                    
+
+                                
+
+
+                                     <!-- COLONNE RESTE FOND SOCIAL -->
+                                     <td class="<?= $renflouementClass ?>">
+                                       <?= number_format($montantRenflouementRestant, 0, ',', ' ') ?> XAF
+                                       <?php if ($renflouementComplete): ?>
+                                           <i class="fas fa-check-circle status-icon"></i>
+                                        <?php else: ?>
+                                           <i class="fas fa-exclamation-circle status-icon"></i>
+                                        <?php endif; ?>
+                                     </td>
+
+                                     <!-- COLONNE RENFLOUEMENT REEL -->
+                                     <?php 
+                                        $renflouementModel = \app\models\Renflouement::findOne(['member_id' => $member->id, 'exercise_id' => $exercise->id]);
+                                     ?>
+                                     <td>
+                                        <?php if ($renflouementModel): ?>
+                                            <span class="<?= $renflouementModel->status == 'paye' ? 'text-success' : 'text-danger' ?>">
+                                            <?= number_format($renflouementModel->getRemainingAmount(), 0, ',', ' ') ?> XAF
+                                            </span>
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
+                                     </td>
+
+
+                                     
+
                                 </tr>
                             <?php endforeach; ?>
                             </tbody>
@@ -472,5 +596,32 @@ Exercices
         }
     });
 
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('memberSearchInput');
+    const table = document.querySelector('.modern-table'); 
+    
+    if(table) {
+        const tbody = table.querySelector('tbody');
+        const rows = tbody.getElementsByTagName('tr');
+
+        searchInput.addEventListener('keyup', function() {
+            const filter = searchInput.value.toLowerCase();
+
+            for (let i = 0; i < rows.length; i++) {
+                const nameCell = rows[i].querySelector('.member-name');
+                if (nameCell) {
+                    const txtValue = nameCell.textContent || nameCell.innerText;
+                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                        rows[i].style.display = "";
+                    } else {
+                        rows[i].style.display = "none";
+                    }
+                }
+            }
+        });
+    }
+});
 </script>
 <?php $this->endBlock() ?>

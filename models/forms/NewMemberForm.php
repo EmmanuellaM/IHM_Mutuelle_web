@@ -40,7 +40,8 @@ class NewMemberForm extends Model
             [['username','name','first_name','password','tel','email','address','password_repeat'],'string','message' => 'Ce champ attend du texte'],
             [['username','name','first_name','tel','password','email'],'required','message' => 'Ce champ est obligatoire'],
             [['email'],'email','message' => 'Ce champ attend un email'],
-            [['tel'],'match', 'pattern' => '/^[0-9]{9}$/', 'message' => 'Le numéro de téléphone doit avoir exactement 9 chiffres.'],
+            [['tel'],'match', 'pattern' => '/^6[0-9]{8}$/', 'message' => 'Le numéro de téléphone doit commencer par 6 et avoir exactement 9 chiffres.'],
+            [['password'], 'match', 'pattern' => '/^(?=.*[A-Z])(?=.*\d).{8,}$/', 'message' => 'Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.'],
             [['avatar'],'image','message' => 'Ce champ attend une image'],
             ['password_repeat','compare','compareAttribute' => 'password'],
         ];//C'est ici qu'on définit les messages d'erreur sur la page 

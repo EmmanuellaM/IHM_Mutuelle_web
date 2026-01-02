@@ -33,11 +33,11 @@ class MemberStatusHelper
         
         switch ($status) {
             case self::STATUS_ACTIF:
-                return '<span class="badge badge-success">Actif</span>';
+                return '<span class="badge badge-success">En règle</span>';
             case self::STATUS_INSCRIT:
                 return '<span class="badge badge-warning">Inscrit</span>';
             default:
-                return '<span class="badge badge-danger">Inactif</span>';
+                return '<span class="badge badge-danger">Irrégulier</span>';
         }
     }
 

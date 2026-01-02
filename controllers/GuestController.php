@@ -80,16 +80,21 @@ public function actionMemberForm() {
 
         if ($memberModel->validate()) {
             $member = Member::findOne(['username' => $memberModel->username]);
-            if ($member && $member->active) {
+            
+            if ($member) {
                 $user = User::findIdentity($member->user_id);
 
                 if ($user && $user->validatePassword($memberModel->password)) {
-                    if ($memberModel->rememberMe) {
-                        Yii::$app->user->login($user, 3600 * 24 * 30);
+                    if ($member->active) {
+                        if ($memberModel->rememberMe) {
+                            Yii::$app->user->login($user, 3600 * 24 * 30);
+                        } else {
+                            Yii::$app->user->login($user);
+                        }
+                        return ['success' => true, 'redirect' => Yii::$app->urlManager->createUrl('member/accueil')];
                     } else {
-                        Yii::$app->user->login($user);
+                        return ['success' => false, 'message' => 'Veuillez payer la totalité de votre fonds social ou inscription.'];
                     }
-                    return ['success' => true, 'redirect' => Yii::$app->urlManager->createUrl('member/accueil')];
                 }
             }
         }
@@ -122,7 +127,7 @@ public function actionAdministratorForm() {
                 }
             }
         }
-        return ['success' => false, 'message' => 'Incorrect username or password.'];
+        return ['success' => false, 'message' => "Le nom d'utilisateur ou le mot de passe est incorrect."];
     }
     return $this->redirect('@guest.connection');
 }

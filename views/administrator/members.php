@@ -56,7 +56,7 @@ Membres
                                     <p>
                                         <span class="info-label">Statut :</span>
                                         <span class="<?= $member->active ? 'status-active' : 'status-inactive' ?>">
-                                            <?= $member->active ? "Actif" : "Inactif" ?>
+                                            <?= $member->active ? "En règle" : "Irrégulier" ?>
                                         </span>
                                     </p>
                                     <p>

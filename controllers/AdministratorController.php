@@ -44,6 +44,8 @@ use app\models\Help;
 use app\models\HelpType;
 use app\models\Member;
 use app\models\Refund;
+use app\models\Renflouement;
+use app\models\forms\FixRenflouementForm;
 use app\models\Saving;
 use app\models\Session;
 use app\models\Tontine;
@@ -176,6 +178,11 @@ class AdministratorController extends Controller
                 // Vérifier si c'est la création d'un nouvel exercice ou d'une nouvelle session
                 $exercise = Exercise::findOne(['active' => true]);
                 
+                if ($exercise && $exercise->sessionNumber() >= 12) {
+                     Yii::$app->session->setFlash('warning', "L'exercice actuel a atteint 12 sessions. Veuillez le clôturer avant de continuer.");
+                     return $this->redirect(['administrator/cloturer-exercice', 'q' => $exercise->id]);
+                }
+
                 if (!$exercise) {
                     // Création d'un nouvel exercice
                     $exercise = new Exercise();
@@ -228,6 +235,67 @@ class AdministratorController extends Controller
                     }
                     
                     if ($session->save()) {
+                        // --- DEBUT LOGIQUE REFINANCEMENT AUTOMATIQUE (3 MOIS) ---
+                        $exercise = Exercise::findOne($session->exercise_id);
+                        
+                        // 1. Récupérer tous les emprunts actifs de l'exercice
+                        $activeBorrowings = \app\models\Borrowing::find()
+                            ->joinWith('session')
+                            ->where(['borrowing.state' => true])
+                            ->andWhere(['session.exercise_id' => $exercise->id])
+                            ->all();
+
+                        // 2. Classer les sessions par date pour déterminer l'ancienneté
+                        $allSessions = \app\models\Session::find()
+                            ->where(['exercise_id' => $exercise->id])
+                            ->orderBy('date ASC')
+                            ->all();
+
+                        $sessionIndices = [];
+                        foreach ($allSessions as $index => $s) {
+                            $sessionIndices[$s->id] = $index;
+                        }
+
+                        $currentSessionIndex = $sessionIndices[$session->id];
+
+                        foreach ($activeBorrowings as $borrowing) {
+                            $borrowingSessionIndex = $sessionIndices[$borrowing->session_id] ?? -1;
+
+                            // Si l'emprunt a 3 sessions ou plus d'écart (ex: emprunté sess 1, on est sess 4. 4-1=3 => Echéance)
+                            if ($borrowingSessionIndex >= 0 && ($currentSessionIndex - $borrowingSessionIndex) >= 3) {
+                                
+                                $refundedAmount = FinanceManager::borrowingRefundedAmount($borrowing);
+                                $intendedAmount = FinanceManager::intendedAmountFromBorrowing($borrowing);
+                                $remaining = $intendedAmount - $refundedAmount;
+
+                                if ($remaining > 0) {
+                                    // A. Créer un remboursement VIRTUEL pour solder l'ancienne dette
+                                    $refund = new \app\models\Refund();
+                                    $refund->borrowing_id = $borrowing->id;
+                                    $refund->member_id = $borrowing->member_id;
+                                    $refund->session_id = $session->id; 
+                                    $refund->amount = $remaining;
+                                    $refund->administrator_id = $this->administrator->id;
+                                    $refund->save();
+
+                                    // B. Clôturer l'ancien emprunt
+                                    $borrowing->state = false;
+                                    $borrowing->save();
+
+                                    // C. Créer le NOUVEL emprunt (Restructuration)
+                                    $newBorrowing = new \app\models\Borrowing();
+                                    $newBorrowing->member_id = $borrowing->member_id;
+                                    $newBorrowing->session_id = $session->id;
+                                    $newBorrowing->administrator_id = $this->administrator->id;
+                                    $newBorrowing->amount = $remaining; // Le nouveau capital est le reste à payer (Intérêts composés)
+                                    $newBorrowing->interest = $exercise->interest;
+                                    $newBorrowing->state = true;
+                                    $newBorrowing->save();
+                                }
+                            }
+                        }
+                        // --- FIN LOGIQUE REFINANCEMENT ---
+
                         foreach (Member::find()->all() as $member) {
                             MailManager::alert_new_session($member->user(), $session);
                         }
@@ -695,6 +763,7 @@ class AdministratorController extends Controller
                     $member->username = $model->username;
                     // $member->inscription = SettingManager::getInscription();
                     $member->inscription = 0;
+                    $member->active = false;
                     $member->save();
 
                     //Au depart il n'y avait pas ça la partie de l'email n'avait pas le try catch c'est parce que je n'ai pas la connexion que je met  ça dedans
@@ -1000,131 +1069,291 @@ class AdministratorController extends Controller
             return RedirectionManager::abort($this);
     }
 
+    // /***********************action sur les Emprunts **************************************** */
+    // public function actionEmprunts()
+    // {
+    //     AdministratorSessionManager::setHome("borrowing");
+
+    //     $model = new NewBorrowingForm();
+
+    //     $query = Session::find();
+    //     $pagination = new Pagination([
+    //         'defaultPageSize' => 5,
+    //         'totalCount' => $query->count(),
+    //     ]);
+
+    //     $sessions = $query->orderBy(['created_at' => SORT_DESC])
+    //         ->offset($pagination->offset)
+    //         ->limit($pagination->limit)
+    //         ->all();
+
+    //     return $this->render("borrowings", compact("model", "sessions", "pagination"));
+    // }
+
+    // /*********************************création d'un nouvel emprunt ********************************************************************* */
+    // public function actionNouvelleEmprunt()
+    // {
+    //     if (!Yii::$app->request->isPost) {
+    //         return RedirectionManager::abort($this);
+    //     }
+    
+    //     $query = Session::find();
+    //     $pagination = new Pagination([
+    //         'defaultPageSize' => 5,
+    //         'totalCount' => $query->count(),
+    //     ]);
+    
+    //     $sessions = $query->orderBy(['created_at' => SORT_DESC])
+    //         ->offset($pagination->offset)
+    //         ->limit($pagination->limit)
+    //         ->all();
+    
+    //     $model = new NewBorrowingForm();
+    
+    //     if (!$model->load(Yii::$app->request->post()) || !$model->validate()) {
+    //         return $this->render("borrowings", compact("model", "sessions", "pagination"));
+    //     }
+    
+    //     $member = Member::findOne($model->member_id);
+    //     $session = Session::findOne($model->session_id);
+    //     $exercise = Exercise::findOne(['active' => 1]);
+    
+    //     if (!$member || !$session || FinanceManager::numberOfSession() >= 12) {
+    //         return RedirectionManager::abort($this);
+    //     }
+    
+    //     if (Borrowing::findOne(['member_id' => $member->id, 'state' => true])) {
+    //         $model->addError('member_id', 'Ce membre a déjà contracté un emprunt');
+    //         return $this->render("borrowings", compact("model", "sessions", "pagination"));
+    //     }
+    
+    //     $savings = Saving::find()->where(['member_id' => $member->id, 'session_id' => $session->id])->sum('amount');
+    //     $maxBorrowingAmount = $this->calculateMaxBorrowingAmount($savings);
+    
+    //     // Pour ajouter le pop up au message d'erreur
+    //     $model->checkBorrowingAmount($maxBorrowingAmount);
+    //     if ($model->amount > $maxBorrowingAmount) {
+    //         $errorMessage = 'Le montant demandé est supérieur au montant maximum empruntable basé sur les épargnes de cette session : ' . $maxBorrowingAmount . ' XAF';
+    //         $model->addError('amount', $errorMessage);
+    //         return $this->render("borrowings", compact("model", "sessions", "pagination", "errorMessage"));
+    //     }
+    
+    //     $borrowing = new Borrowing();
+    //     $borrowing->interest = $exercise ? $exercise->interest : 0; // Default to 0 if no active exercise
+    //     $borrowing->amount = $model->amount;
+    //     $borrowing->member_id = $model->member_id;
+    //     $borrowing->administrator_id = $this->administrator->id;
+    //     $borrowing->session_id = $model->session_id;
+    
+    //     $transaction = Yii::$app->db->beginTransaction();
+    //     try {
+    //         if (!$borrowing->save()) {
+    //             throw new \Exception('Unable to save borrowing');
+    //         }
+    
+    //         $totalSavedAmount = FinanceManager::totalSavedAmount();
+    //         foreach (FinanceManager::exerciseSavings() as $saving) {
+    //             $borrowingSaving = new BorrowingSaving();
+    //             $borrowingSaving->saving_id = $saving->id;
+    //             $borrowingSaving->borrowing_id = $borrowing->id;
+    //             $borrowingSaving->percent = 100.0 * ((float)$saving->amount) / $totalSavedAmount;
+    //             if (!$borrowingSaving->save()) {
+    //                 throw new \Exception('Unable to save borrowing saving');
+    //             }
+    //         }
+    
+    //         $transaction->commit();
+    //         return $this->redirect('@administrator.borrowings');
+    //     } catch (\Exception $e) {
+    //         $transaction->rollBack();
+    //         $model->addError('general', 'An error occurred while processing your request. Please try again.');
+    //         Yii::error($e->getMessage(), __METHOD__);
+    //         return $this->render("borrowings", compact("model", "sessions", "pagination"));
+    //     }
+    // }
+    
+    // /**
+    //  * Calculate the maximum borrowing amount based on savings.
+    //  *
+    //  * @param float $savings
+    //  * @return float
+    //  */
+    // private function calculateMaxBorrowingAmount($savings)
+    // {
+    //     if ($savings <= 200000) {
+    //         return 5 * $savings;
+    //     } elseif ($savings <= 500000) {
+    //         return 5 * $savings;
+    //     } elseif ($savings <= 1000000) {
+    //         return 4 * $savings;
+    //     } elseif ($savings <= 1500000) {
+    //         return 3 * $savings;
+    //     } elseif ($savings <= 2000000) {
+    //         return 2 * $savings;
+    //     } else {
+    //         return 1.5 * $savings;
+    //     }
+    // }
+
+
     /***********************action sur les Emprunts **************************************** */
-    public function actionEmprunts()
-    {
-        AdministratorSessionManager::setHome("borrowing");
+public function actionEmprunts()
+{
+    AdministratorSessionManager::setHome("borrowing");
 
-        $model = new NewBorrowingForm();
+    $model = new NewBorrowingForm();
 
-        $query = Session::find();
-        $pagination = new Pagination([
-            'defaultPageSize' => 5,
-            'totalCount' => $query->count(),
-        ]);
+    $query = Session::find();
+    $pagination = new Pagination([
+        'defaultPageSize' => 5,
+        'totalCount' => $query->count(),
+    ]);
 
-        $sessions = $query->orderBy(['created_at' => SORT_DESC])
-            ->offset($pagination->offset)
-            ->limit($pagination->limit)
-            ->all();
+    $sessions = $query->orderBy(['created_at' => SORT_DESC])
+        ->offset($pagination->offset)
+        ->limit($pagination->limit)
+        ->all();
 
-        return $this->render("borrowings", compact("model", "sessions", "pagination"));
+    // ✅ AJOUT : récupération des membres
+    $members = Member::find()->all();
+
+    return $this->render(
+        "borrowings",
+        compact("model", "sessions", "pagination", "members")
+    );
+}
+
+/*********************************création d'un nouvel emprunt ********************************************************************* */
+public function actionNouvelleEmprunt()
+{
+    if (!Yii::$app->request->isPost) {
+        return RedirectionManager::abort($this);
     }
 
-    /*********************************création d'un nouvel emprunt ********************************************************************* */
-    public function actionNouvelleEmprunt()
-    {
-        if (!Yii::$app->request->isPost) {
-            return RedirectionManager::abort($this);
+    $query = Session::find();
+    $pagination = new Pagination([
+        'defaultPageSize' => 5,
+        'totalCount' => $query->count(),
+    ]);
+
+    $sessions = $query->orderBy(['created_at' => SORT_DESC])
+        ->offset($pagination->offset)
+        ->limit($pagination->limit)
+        ->all();
+
+    $model = new NewBorrowingForm();
+
+    // ✅ AJOUT : récupération des membres
+    $members = Member::find()->all();
+
+    if (!$model->load(Yii::$app->request->post()) || !$model->validate()) {
+        return $this->render(
+            "borrowings",
+            compact("model", "sessions", "pagination", "members")
+        );
+    }
+
+    $member = Member::findOne($model->member_id);
+    $session = Session::findOne($model->session_id);
+    $exercise = Exercise::findOne(['active' => 1]);
+
+    if (!$member || !$session || FinanceManager::numberOfSession() >= 12) {
+        return RedirectionManager::abort($this);
+    }
+
+    if (Borrowing::findOne(['member_id' => $member->id, 'state' => true])) {
+        $model->addError('member_id', 'Ce membre a déjà contracté un emprunt');
+        return $this->render(
+            "borrowings",
+            compact("model", "sessions", "pagination", "members")
+        );
+    }
+
+    $savings = Saving::find()
+        ->where(['member_id' => $member->id, 'session_id' => $session->id])
+        ->sum('amount');
+
+    $maxBorrowingAmount = $this->calculateMaxBorrowingAmount($savings);
+
+    // Pour ajouter le pop up au message d'erreur
+    $model->checkBorrowingAmount($maxBorrowingAmount);
+    if ($model->amount > $maxBorrowingAmount) {
+        $errorMessage =
+            'Le montant demandé est supérieur au montant maximum empruntable basé sur les épargnes de cette session : '
+            . $maxBorrowingAmount . ' XAF';
+
+        $model->addError('amount', $errorMessage);
+
+        return $this->render(
+            "borrowings",
+            compact("model", "sessions", "pagination", "members", "errorMessage")
+        );
+    }
+
+    $borrowing = new Borrowing();
+    $borrowing->interest = $exercise ? $exercise->interest : 0;
+    $borrowing->amount = $model->amount;
+    $borrowing->member_id = $model->member_id;
+    $borrowing->administrator_id = $this->administrator->id;
+    $borrowing->session_id = $model->session_id;
+
+    $transaction = Yii::$app->db->beginTransaction();
+    try {
+        if (!$borrowing->save()) {
+            throw new \Exception('Unable to save borrowing');
         }
-    
-        $query = Session::find();
-        $pagination = new Pagination([
-            'defaultPageSize' => 5,
-            'totalCount' => $query->count(),
-        ]);
-    
-        $sessions = $query->orderBy(['created_at' => SORT_DESC])
-            ->offset($pagination->offset)
-            ->limit($pagination->limit)
-            ->all();
-    
-        $model = new NewBorrowingForm();
-    
-        if (!$model->load(Yii::$app->request->post()) || !$model->validate()) {
-            return $this->render("borrowings", compact("model", "sessions", "pagination"));
-        }
-    
-        $member = Member::findOne($model->member_id);
-        $session = Session::findOne($model->session_id);
-        $exercise = Exercise::findOne(['active' => 1]);
-    
-        if (!$member || !$session || FinanceManager::numberOfSession() >= 12) {
-            return RedirectionManager::abort($this);
-        }
-    
-        if (Borrowing::findOne(['member_id' => $member->id, 'state' => true])) {
-            $model->addError('member_id', 'Ce membre a déjà contracté un emprunt');
-            return $this->render("borrowings", compact("model", "sessions", "pagination"));
-        }
-    
-        $savings = Saving::find()->where(['member_id' => $member->id, 'session_id' => $session->id])->sum('amount');
-        $maxBorrowingAmount = $this->calculateMaxBorrowingAmount($savings);
-    
-        // Pour ajouter le pop up au message d'erreur
-        $model->checkBorrowingAmount($maxBorrowingAmount);
-        if ($model->amount > $maxBorrowingAmount) {
-            $errorMessage = 'Le montant demandé est supérieur au montant maximum empruntable basé sur les épargnes de cette session : ' . $maxBorrowingAmount . ' XAF';
-            $model->addError('amount', $errorMessage);
-            return $this->render("borrowings", compact("model", "sessions", "pagination", "errorMessage"));
-        }
-    
-        $borrowing = new Borrowing();
-        $borrowing->interest = $exercise ? $exercise->interest : 0; // Default to 0 if no active exercise
-        $borrowing->amount = $model->amount;
-        $borrowing->member_id = $model->member_id;
-        $borrowing->administrator_id = $this->administrator->id;
-        $borrowing->session_id = $model->session_id;
-    
-        $transaction = Yii::$app->db->beginTransaction();
-        try {
-            if (!$borrowing->save()) {
-                throw new \Exception('Unable to save borrowing');
+
+        $totalSavedAmount = FinanceManager::totalSavedAmount();
+        foreach (FinanceManager::exerciseSavings() as $saving) {
+            $borrowingSaving = new BorrowingSaving();
+            $borrowingSaving->saving_id = $saving->id;
+            $borrowingSaving->borrowing_id = $borrowing->id;
+            $borrowingSaving->percent =
+                100.0 * ((float) $saving->amount) / $totalSavedAmount;
+
+            if (!$borrowingSaving->save()) {
+                throw new \Exception('Unable to save borrowing saving');
             }
-    
-            $totalSavedAmount = FinanceManager::totalSavedAmount();
-            foreach (FinanceManager::exerciseSavings() as $saving) {
-                $borrowingSaving = new BorrowingSaving();
-                $borrowingSaving->saving_id = $saving->id;
-                $borrowingSaving->borrowing_id = $borrowing->id;
-                $borrowingSaving->percent = 100.0 * ((float)$saving->amount) / $totalSavedAmount;
-                if (!$borrowingSaving->save()) {
-                    throw new \Exception('Unable to save borrowing saving');
-                }
-            }
-    
-            $transaction->commit();
-            return $this->redirect('@administrator.borrowings');
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            $model->addError('general', 'An error occurred while processing your request. Please try again.');
-            Yii::error($e->getMessage(), __METHOD__);
-            return $this->render("borrowings", compact("model", "sessions", "pagination"));
         }
+
+        $transaction->commit();
+        return $this->redirect('@administrator.borrowings');
+
+    } catch (\Exception $e) {
+        $transaction->rollBack();
+        $model->addError(
+            'general',
+            'An error occurred while processing your request. Please try again.'
+        );
+        Yii::error($e->getMessage(), __METHOD__);
+
+        return $this->render(
+            "borrowings",
+            compact("model", "sessions", "pagination", "members")
+        );
     }
-    
-    /**
-     * Calculate the maximum borrowing amount based on savings.
-     *
-     * @param float $savings
-     * @return float
-     */
-    private function calculateMaxBorrowingAmount($savings)
-    {
-        if ($savings <= 200000) {
-            return 5 * $savings;
-        } elseif ($savings <= 500000) {
-            return 5 * $savings;
-        } elseif ($savings <= 1000000) {
-            return 4 * $savings;
-        } elseif ($savings <= 1500000) {
-            return 3 * $savings;
-        } elseif ($savings <= 2000000) {
-            return 2 * $savings;
-        } else {
-            return 1.5 * $savings;
-        }
+}
+
+/**
+ * Calculate the maximum borrowing amount based on savings.
+ */
+private function calculateMaxBorrowingAmount($savings)
+{
+    if ($savings <= 200000) {
+        return 5 * $savings;
+    } elseif ($savings <= 500000) {
+        return 5 * $savings;
+    } elseif ($savings <= 1000000) {
+        return 4 * $savings;
+    } elseif ($savings <= 1500000) {
+        return 3 * $savings;
+    } elseif ($savings <= 2000000) {
+        return 2 * $savings;
+    } else {
+        return 1.5 * $savings;
     }
+}
+
 
 
     /*******************************action sur des sesions ******************************************************************* * */
@@ -1165,7 +1394,7 @@ class AdministratorController extends Controller
         AdministratorSessionManager::setHome("exercise");
         $query = Exercise::find();
         $pagination = new Pagination([
-            'defaultPageSize' => 1,
+            'defaultPageSize' => 200,
             'totalCount' => $query->count(),
         ]);
 
@@ -1188,6 +1417,53 @@ class AdministratorController extends Controller
         ];
 
         return $this->render('exercises', compact('exercises', 'pagination', 'member', 'labels', 'data', 'colors'));
+    }
+
+    /*******************************actions sur les renflouements******************************************* */
+    public function actionRenflouements($q = 0)
+    {
+        AdministratorSessionManager::setHome("exercise");
+        
+        $exercise = null;
+        if ($q) {
+            $exercise = Exercise::findOne($q);
+        } else {
+            // Par défaut, afficher pour l'exercice actif ou le dernier
+             $exercise = Exercise::find()->orderBy(['year' => SORT_DESC])->one();
+        }
+        
+        if (!$exercise) {
+            Yii::$app->session->setFlash('warning', "Aucun exercice trouvé.");
+            return $this->redirect("@administrator.home");
+        }
+
+        $renflouements = Renflouement::find()->where(['next_exercise_id' => $exercise->id])->all();
+        
+        return $this->render('renflouements', compact('exercise', 'renflouements'));
+    }
+
+    public function actionReglerRenflouement($id)
+    {
+        if (Yii::$app->request->getIsPost()) {
+            $model = new FixRenflouementForm();
+            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+                 $renflouement = Renflouement::findOne($id);
+                 if ($renflouement) {
+                     $remaining = $renflouement->getRemainingAmount();
+                     if ($model->amount > $remaining) {
+                         Yii::$app->session->setFlash('error', "Erreur : Le montant saisi dépasse le reste à payer ({$remaining} XAF).");
+                     } else {
+                         if ($renflouement->pay($model->amount)) {
+                             Yii::$app->session->setFlash('success', "Paiement de renflouement enregistré.");
+                         } else {
+                             Yii::$app->session->setFlash('error', "Erreur lors du paiement.");
+                         }
+                     }
+                     return $this->redirect(['administrator/renflouements', 'q' => $renflouement->exercise_id]);
+                 }
+            }
+        }
+        return RedirectionManager::abort($this);
     }
 
     /****************************dettes au cours des exercices******************************************* */
@@ -1220,7 +1496,8 @@ class AdministratorController extends Controller
         return $this->render('exercise_debts', [
             'members' => $members,
             'exercise' => $exercise,
-            'sessions' => $sessions
+            'sessions' => $sessions,
+            'refunds' => []
         ]);
     }
 
@@ -1380,56 +1657,65 @@ class AdministratorController extends Controller
                     MailManager::alert_end_session($member->user(), $member, $session);
                 }
 
-                return $this->redirect("@administrator.home");
+                Yii::$app->session->setFlash('success', 'La session a été clôturée avec succès.');
+                return $this->redirect(['administrator/sessions']);
+            } else {
+                Yii::$app->session->setFlash('error', 'Session introuvable ou déjà clôturée.');
+                return $this->redirect(['administrator/sessions']);
             }
         }
 
-        return RedirectionManager::abort($this);
+        Yii::$app->session->setFlash('error', 'Identifiant de session invalide.');
+        return $this->redirect(['administrator/sessions']);
     }
 
     /********************************cloturer un exercice ********************************************************************** */
     public function actionCloturerExercice($q = 0)
     {
         if ($q) {
-            $session = Session::findOne($q);
-            if ($session && $session->active) {
-                if (FinanceManager::numberOfSession() == 12) {
-                    $exercise = Exercise::findOne(['active' => true]);
-                    $lastSession = Session::find()->orderBy(['created_at' => SORT_DESC])->where(['exercise_id' => $exercise])->one();
-                    if ($lastSession->id == $session->id) {
-                        foreach (FinanceManager::notRefundedBorrowings() as $borrowing) {
-                            $intendedAmount = FinanceManager::intendedAmountFromBorrowing($borrowing);
-                            $refundedAmount = FinanceManager::borrowingRefundedAmount($borrowing);
-
-                            $refund = new Refund();
-
-                            $refund->borrowing_id = $borrowing->id;
-                            $refund->session_id = $session->id;
-                            $refund->administrator_id = $this->administrator->id;
-                            $refund->amount = $intendedAmount - $refundedAmount;
-                            $refund->exercise_id = $exercise->id;
-                            $refund->save();
-
-                            $borrowing->state = false;
-                            $borrowing->save();
-                        }
-
-                        $session->active = false;
-                        $session->state = "END";
-
-                        $session->save();
-
-                        $exercise->active = false;
-
-                        $exercise->save();
-                        foreach (Member::find()->all() as $member) {
-                            MailManager::alert_end_exercise($member->user(), $member, $exercise);
-                        }
+            $exercise = Exercise::findOne($q);
+            if ($exercise && $exercise->active) {
+                // Vérifier si 12 sessions sont atteintes
+                if (!$exercise->canBeClosed()) {
+                    Yii::$app->session->setFlash('error', "L'exercice ne peut pas être clôturé (moins de 12 sessions ou déjà inactif).");
+                    return $this->redirect("@administrator.exercises");
+                }
+                
+                // Si confirmation POST reçue (à gérer via une vue intermédiaire ou JS, mais ici on fait simple pour le moment)
+                // Idéalement on affiche un récapitulatif avant.
+                // Pour l'instant, on exécute la fermeture.
+                
+                // 1. Déterminer l'année du prochain exercice
+                $nextYear = (int)$exercise->year + 1;
+                
+                // 2. Vérifier si l'exercice suivant existe déjà
+                $newExercise = Exercise::find()->where(['year' => $nextYear])->one();
+                
+                if (!$newExercise) {
+                    // Créer automatiquement le prochain exercice
+                    $newExercise = new Exercise();
+                    $newExercise->year = $nextYear;
+                    $newExercise->interest = $exercise->interest;
+                    $newExercise->inscription_amount = $exercise->inscription_amount;
+                    $newExercise->social_crown_amount = $exercise->social_crown_amount;
+                    $newExercise->administrator_id = $this->administrator->id;
+                    $newExercise->active = true;
+                    $newExercise->status = 'active';
+                    
+                    if (!$newExercise->save()) {
+                        Yii::$app->session->setFlash('error', "Erreur lors de la création automatique du nouvel exercice.");
                         return $this->redirect("@administrator.exercises");
-                    } else
-                        return RedirectionManager::abort($this);
-                } else
-                    return RedirectionManager::abort($this);
+                    }
+                }
+
+                // 3. Clôturer l'exercice actuel et passer l'ID du prochain
+                if ($exercise->closeExercise($newExercise->id)) {
+                    Yii::$app->session->setFlash('success', "Exercice clôturé avec succès. Les renflouements on été calculés pour l'exercice " . $newExercise->year . ".");
+                    return $this->redirect("@administrator.exercises");
+                } else {
+                    Yii::$app->session->setFlash('error', "Erreur lors de la clôture de l'exercice.");
+                    return $this->redirect("@administrator.exercises");
+                }
             } else
                 return RedirectionManager::abort($this);
         } else
@@ -1635,7 +1921,14 @@ class AdministratorController extends Controller
     {
         AdministratorSessionManager::setHome("help");
         $model = new NewHelpForm();
-        return $this->render("new_help", compact("model"));
+        
+        $helpTypes = \app\models\HelpType::find()->all();
+        $help_amounts = [];
+        foreach ($helpTypes as $type) {
+            $help_amounts[$type->id] = $type->amount;
+        }
+
+        return $this->render("new_help", compact("model", "help_amounts"));
     }
 
     /********************************ajouter une aide ********************************************************** */
@@ -1644,77 +1937,73 @@ class AdministratorController extends Controller
         if (Yii::$app->request->getIsPost()) {
             $model = new NewHelpForm();
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-                $d1 = (new DateTime())->getTimestamp();
-                $d2 = (new DateTime($model->limit_date))->getTimestamp();
 
                 $member = Member::findOne($model->member_id);
                 $help_type = HelpType::findOne($model->help_type_id);
+                $exercise = Exercise::findOne(['active' => true]);
 
-                if ($member && $help_type && $member->active) {
-                    //vérifier si le membre a déjà fait un emprunt
-                    if (!Borrowing::findOne(['member_id' => $member->id, 'state' => true])) {
+                if ($member && $help_type && $member->active && $exercise) {
+                    
+                    // Vérifier le fond social disponible
+                    $availableSocialFund = FinanceManager::getAvailableSocialFund();
+                    $targetAmount = $help_type->amount;
 
-                        if ($d1 <= $d2 + 86400000 * 30) {
-                            $help = new Help();
-                            $help->limit_date = $model->limit_date;
-                            $help->help_type_id = $model->help_type_id;
-                            $help->member_id = $model->member_id;
-                            $help->comments = $model->comments;
-                            $help->state = true;
-                            $help->administrator_id = $this->administrator->id;
-
-                            $members = Member::find()->where(['!=', 'id', $model->member_id])->andWhere(['active' => true])->all();
-
-                            $unit_amount = (int)ceil((double)($help_type->amount) / count($members));
-                            //$unit_amount = (int)ceil((float)($help_type->amount) / count($members));
-                            $amount = $unit_amount * count($members);
-
-                            $help->amount = $amount;
-                            $help->unit_amount = $unit_amount;
-                            $help->save();
-
-                            // $member = Member::findAll('email');
-
-                            // foreach ($member as $key) {
-        
-                            //     Yii::$app->mailer->compose()
-                            //     ->setFrom('dylaneossombe@gmail.com')
-                            //     ->setTo($key->email)
-        
-                            //     ->setSubject('Email sent from GI2025')
-                            //     ->setHtmlBody('Bonjour une nouvelle aide a ete cree veuillez contacter les administrateurs pour plus de détails')
-                            //     ->send();
-                            // }
-
-                            foreach ($members as $member) {
-                                $contribution = new Contribution();
-                                $contribution->state = false;
-                                $contribution->member_id = $member->id;
-                                $contribution->help_id = $help->id;
-                                $contribution->amount = 1;
-                                if (!$contribution->save(false)) {
-                                    # code...
-                                    Yii::$app->session->setFlash('error', 'Votre action a echoué , instances de contribution non crées !');
-                                    return $this->render("new_help", compact("model"));
-                                }
-                                // MailManager::alert_new_help($member->user(), $member, $help, $help_type);
-                            }
-                            Yii::$app->session->setFlash('success', 'Votre action a reussie !');
-
-                            return $this->redirect("@administrator.helps");
-                        } else {
-                            $model->addError("limit_date", "Le délai minimum est d'un mois");
-                            return $this->render("new_help", compact("model"));
+                    // Vérifier si le fond social est suffisant
+                    if ($availableSocialFund < $targetAmount) {
+                        $model->addError('help_type_id', 
+                            "Le fond social est insuffisant pour cette aide. Disponible: " . 
+                            number_format($availableSocialFund, 0, ',', ' ') . " XAF, Requis: " . 
+                            number_format($targetAmount, 0, ',', ' ') . " XAF");
+                        
+                        $helpTypes = \app\models\HelpType::find()->all();
+                        $help_amounts = [];
+                        foreach ($helpTypes as $type) {
+                            $help_amounts[$type->id] = $type->amount;
                         }
-                    } else
-                        $model->addError("member_id", "ce membre a doit rembourser son emprunt avant de bénéficier d'une aide");
-                    return $this->render("new_help", compact("model"));
-                } else
-                    return RedirectionManager::abort($this);
-            } else
-                return $this->render("new_help", compact("model"));
-        } else
-            return RedirectionManager::abort($this);
+                        return $this->render("new_help", compact("model", "help_amounts"));
+                    }
+
+                    // Créer l'aide financée uniquement par le fond social
+                    $help = new Help();
+                    $help->help_type_id = $model->help_type_id;
+                    $help->member_id = $model->member_id;
+                    $help->comments = $model->comments;
+                    $help->administrator_id = $this->administrator->id;
+                    
+                    // Montants - uniquement du fond social
+                    $help->amount = $targetAmount;
+                    $help->amount_from_social_fund = $targetAmount;
+                    $help->unit_amount = 0; // Plus de contributions des membres
+                    $help->state = false; // Fermé car entièrement financé par le fond social
+                    
+                    $help->save();
+
+                    // Enregistrer la transaction de sortie du fond social
+                    FinanceManager::registerSocialFundExpense(
+                        $help->amount_from_social_fund, 
+                        "Aide sociale pour " . $member->user()->name . " (" . $help_type->title . ")",
+                        $exercise
+                    );
+
+                    Yii::$app->session->setFlash('success', 'L\'aide a été créée avec succès et financée par le fond social !');
+                    return $this->redirect(["@administrator.helps"]); 
+
+                } else {
+                        Yii::$app->session->setFlash('error', "Membre ou type d'aide invalide ou aucun exercice actif.");
+                }
+            }
+            
+            // Validation failed or Member invalid - re-render view with help_amounts
+            $helpTypes = \app\models\HelpType::find()->all();
+            $help_amounts = [];
+            foreach ($helpTypes as $type) {
+                $help_amounts[$type->id] = $type->amount;
+            }
+            return $this->render("new_help", compact("model", "help_amounts"));
+
+        } else {
+             return RedirectionManager::abort($this);
+        }
     }
 
     /***********************************Details Aider côté administrateur ******************************************************* */
@@ -1819,6 +2108,14 @@ class AdministratorController extends Controller
             ->all();
 
         return $this->render("helps", compact("helps", 'pagination', "activeHelps"));
+    }
+
+    public function actionAgape()
+    {
+         $agapes = \app\models\Agape::find()->all();
+         $sessions = \app\models\Session::find()->all();
+         $model = new \app\models\Agape();
+         return $this->render('agapes', compact('agapes', 'sessions', 'model'));
     }
 
     /********************************desactiver les membres ******************************************************* */
@@ -2013,66 +2310,98 @@ class AdministratorController extends Controller
         return $this->redirect(['administrator/emprunt-detail', 'member_id' => $borrowing->member_id, 'session_id' => $borrowing->session_id]);
     }
 
+
+    public function actionTestRenflouement()
+    {
+        $exercise = Exercise::findOne(['status' => 'closed']);
+        if (!$exercise) $exercise = Exercise::findOne(['active' => 1]);
+        
+        echo "<h1>Debug Renflouement (Web Context)</h1>";
+        echo "Exercise: " . ($exercise ? $exercise->year : 'None') . "<br>";
+        
+        if ($exercise) {
+            $activeMembersQuery = \app\models\Member::find()->where(['active' => 1]);
+            $activeMembersCount = $activeMembersQuery->count();
+            $activeMembersList = $activeMembersQuery->all();
+            
+            echo "Active Members Count: " . $activeMembersCount . "<br>";
+            echo "<ul>";
+            foreach($activeMembersList as $m) {
+                echo "<li>" . $m->user->name . " (Active: " . var_export($m->active, true) . ", Inscription: " . $m->inscription . ", Social: " . $m->social_crown . ")</li>";
+            }
+            echo "</ul>";
+            
+            echo "Total Agape: " . $exercise->totalAgapeAmount() . "<br>";
+            echo "Total Helps (Social Fund): " . $exercise->getTotalHelpsFromSocialFund() . "<br>";
+            
+            $calc = $exercise->calculateRenflouementPerMember();
+            echo "Calculated Per Member: " . $calc . "<br>";
+        }
+        
+        exit;
+    }
+
     /*******************************regler le Inscription************************************************************* */
-    public function actionReglerInscription($id)
+        public function actionReglerInscription($id)
     {
         if (Yii::$app->request->getIsPost()) {
             $model = new FixInscriptionForm();
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $member = Member::findOne($id);
-                if ($member && ($member->inscription < SettingManager::getInscription())) {
+                $exercise = Exercise::findOne(['active' => true]);
+                
+                if ($member && $exercise && ($member->inscription < $exercise->inscription_amount)) {
                     $member->inscription += $model->amount;
-                    if ($member->inscription > SettingManager::getInscription()) $member->inscription = SettingManager::getInscription();
+                    if ($member->inscription > $exercise->inscription_amount) $member->inscription = $exercise->inscription_amount;
                     $member->save();
                     return $this->redirect("@administrator.exercise_debts");
                 } else {
-                    echo 'member';
-                    var_dump($member); 
-                    var_dump($model);        
-       
-                    //return RedirectionManager::abort($this);
+                    Yii::$app->session->setFlash('error', 'Impossible de régler l\'inscription. Vérifiez le montant ou l\'exercice actif.');
+                    return $this->redirect("@administrator.exercise_debts");
                 }
+            } else {
+                Yii::$app->session->setFlash('error', 'Données invalides');
+                return $this->redirect("@administrator.exercise_debts");
             }
-            else {
-                echo 'model';
-                var_dump($model);        
-                //return RedirectionManager::abort($this);
-            }
-            
-           
         } else
             return RedirectionManager::abort($this);
     }
-    /*******************************regler le Inscription************************************************************* */
-public function actionReglerFondSocial($id)
-{
-    if (Yii::$app->request->getIsPost() ) {
-        $model = new \app\models\forms\FixSocialCrownForm();
-        if ($model->load(Yii::$app->request->post())&& $model->validate() ){
-            $member = Member::findOne($id);
-            if ($member && ($member->social_crown < SettingManager::getSocialCrown())) {
-                $member->social_crown += $model->amount;
-                if($member->social_crown > SettingManager::getSocialCrown()) $member->social_crown = SettingManager::getSocialCrown();
-                $member->save();
-                return $this->redirect("@administrator.exercise_debts");
+    /*******************************regler le Fond social ************************************************************* */
+        public function actionReglerFondSocial($id)
+    {
+        if (Yii::$app->request->getIsPost()) {
+            $model = new \app\models\forms\FixSocialCrownForm();
+            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+                $member = Member::findOne($id);
+                $exercise = Exercise::findOne(['active' => true]);
+
+                if ($member && $exercise && ($member->social_crown < $exercise->social_crown_amount)) {
+                    $remaining = $exercise->social_crown_amount - $member->social_crown;
+                    
+                    if ($model->amount > $remaining) {
+                        Yii::$app->session->setFlash('error', "Le montant saisi ({$model->amount} XAF) dépasse le montant restant à payer ({$remaining} XAF).");
+                        return $this->redirect("@administrator.exercise_debts");
+                    }
+                    
+                    $member->social_crown += $model->amount;
+                    // Double check (redundant but safe)
+                    if ($member->social_crown > $exercise->social_crown_amount) {
+                         $member->social_crown = $exercise->social_crown_amount;
+                    }
+                    
+                    $member->save();
+                    return $this->redirect("@administrator.exercise_debts");
+                } else {
+                    Yii::$app->session->setFlash('error', 'Impossible de régler le fond social. Vérifiez le montant ou l\'exercice actif.');
+                    return $this->redirect("@administrator.exercise_debts");
+                }
             } else {
-                echo 'member';
-                var_dump($member); 
-                var_dump($model);        
-   
-                //return RedirectionManager::abort($this);
+                Yii::$app->session->setFlash('error', 'Données invalides');
+                return $this->redirect("@administrator.exercise_debts");
             }
-        }
-        else {
-            echo 'model';
-            var_dump($model);        
-            //return RedirectionManager::abort($this);
-        }
-        
-       
-    } else
-        return RedirectionManager::abort($this);
-}
+        } else
+            return RedirectionManager::abort($this);
+    }
     /***************************supprimer une aide*********************************************** */
 
     public function actionSupprimerAide($q = 0)
@@ -2108,22 +2437,71 @@ public function actionReglerFondSocial($id)
 
 
     /*****************************Appliquer les configurations ********************************************************* */
-    public function actionAppliquerConfiguration()
-    {
-        if (Yii::$app->request->getIsPost()) {
-            $model = new SettingForm();
-            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+   
+   
+   
+   
 
-                SettingManager::setValues($model->interest, $model->social_crown, $model->inscription);
-
-                return $this->redirect("@administrator.settings");
-            } else
-                return $this->render("settings", compact("model"));
-        } else
-            return RedirectionManager::abort($this);
+    
+    /*****************************Appliquer les configurations ********************************************************* */
+public function actionAppliquerConfiguration()
+{
+    if (Yii::$app->request->getIsPost()) {
+        $model = new SettingForm();
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            
+            // 1. Sauvegarder dans SettingManager (votre système actuel)
+            SettingManager::setValues($model->interest, $model->social_crown, $model->inscription);
+            
+            // 2. IMPORTANT : Mettre à jour aussi l'exercice actif
+            $exercise = \app\models\Exercise::find()->where(['active' => 1])->one();
+            
+            if ($exercise) {
+                // Sauvegarder les anciennes valeurs pour le message
+                $oldInterest = $exercise->interest;
+                $oldInscription = $exercise->inscription_amount;
+                $oldSocialCrown = $exercise->social_crown_amount;
+                
+                // Mettre à jour l'exercice
+                $exercise->interest = $model->interest;
+                $exercise->inscription_amount = $model->inscription;
+                $exercise->social_crown_amount = $model->social_crown;
+                
+                if ($exercise->save()) {
+                    Yii::$app->session->setFlash('success', 
+                        'Configuration mise à jour avec succès !<br>' .
+                        '<strong>Intérêt:</strong> ' . $oldInterest . '% → ' . $model->interest . '%<br>' .
+                        '<strong>Inscription:</strong> ' . number_format($oldInscription, 0, ',', ' ') . ' → ' . number_format($model->inscription, 0, ',', ' ') . ' XAF<br>' .
+                        '<strong>Fond social:</strong> ' . number_format($oldSocialCrown, 0, ',', ' ') . ' → ' . number_format($model->social_crown, 0, ',', ' ') . ' XAF'
+                    );
+                } else {
+                    Yii::$app->session->setFlash('warning', 
+                        'Configuration sauvegardée mais erreur lors de la mise à jour de l\'exercice: ' . 
+                        implode(', ', $exercise->getFirstErrors())
+                    );
+                }
+            } else {
+                Yii::$app->session->setFlash('warning', 
+                    'Configuration sauvegardée mais aucun exercice actif trouvé.'
+                );
+            }
+            
+            return $this->redirect("@administrator.settings");
+        } else {
+            Yii::$app->session->setFlash('error', 'Données invalides');
+            return $this->render("settings", compact("model"));
+        }
+    } else {
+        return RedirectionManager::abort($this);
     }
+}
+   
 
-    /*************************enregistrement des membres durant une session************************************************************* */
+
+
+
+
+/*************************enregistrement des membres durant une session************************************************************* */
     public static function savingofmember($member, $sessionss)
     {
         $r = Saving::find()->where(['session_id' => $sessionss, 'member_id' => $member->id])->sum('amount');
@@ -2134,51 +2512,39 @@ public function actionReglerFondSocial($id)
         endif;
     }
 
-    /********************************************Appliquer Agape***************************************************************/
 
-    public function actionAgape()
+
+
+    /*******************************************Nouvelle Agape ********************************************************************************************/
+    public function actionNouvelleAgape()
     {
-        $agapeForm = new Agape();
+        if (Yii::$app->request->getIsPost()) {
+            $model = new Agape();
+            if ($model->load(Yii::$app->request->post()) ) {
+                $session = Session::findOne(['active' => true]);
+                if ($session) {
+                    $model->session_id = $session->id;
+                    $model->administrator_id = $this->administrator->id;
+                    
+                    if ($model->save()) {
+                        // Enregistrer la dépense (optionnel si calculé dynamiquement, mais bon pour la cohérence)
+                        FinanceManager::registerSocialFundExpense(
+                            $model->amount, 
+                            "Agape session du " . $session->date, 
+                            $session->exercise()
+                        );
 
-        // Retrieve the list of sessions for the dropdown
-        $sessions = Session::find()->all();
-
-        $exercise = Exercise::findOne(['active' => true]);
-
-
-        if (!($exercise)) {
-            // Handle the case when no current exercice is found
-            // You can display an error message or redirect to a different page
-            throw new \yii\web\NotFoundHttpException('No current exercice found.');
-        }
-
-        // Retrieve the sessions for the current exercice
-        $sessions = Session::find()->where(['exercise_id' => $exercise->id])->all();
-    
-        if ($agapeForm->load(Yii::$app->request->post())) {
-            // Check if a session is selected
-            if (empty($agapeForm->session_id)) {
-                $agapeForm->addError('session_id', 'Vous devez choisir une session.');
-            } else {
-                // Check if an Agape3 record already exists for the selected session
-                $existingAgapeForm = Agape::findOne(['session_id' => $agapeForm->session_id]);
-                if ($existingAgapeForm !== null) {
-                    // An Agape3 record already exists for the selected session
-                    $agapeForm->addError('session_id', 'L\'agape de cette session existe déjà.');
-                } elseif ($agapeForm->validate()) {
-                    // No existing Agape3 record found, and the model passes validation
-                    $agapeForm->save();
-    
-                    return $this->redirect(['@administrator.agape']);
+                        Yii::$app->session->setFlash('success', 'Agape enregistrée avec succès.');
+                    } else {
+                        Yii::$app->session->setFlash('error', 'Erreur lors de l\'enregistrement de l\'agape.');
+                    }
+                } else {
+                    Yii::$app->session->setFlash('error', 'Aucune session active.');
                 }
+                return $this->redirect(['@administrator.agape']);
             }
         }
-
-        return $this->render('agape', [
-            'agapeForm' => $agapeForm,
-            'sessions' => $sessions,
-            'exercise_id' => $exercise->id,
-        ]);
+        return RedirectionManager::abort($this);
     }
 
     public function actionUpdateAgape($id)

@@ -370,7 +370,8 @@ $this->registerJs(<<<JS
                         window.location.href = response.redirect;
                     }, 1000);
                 } else {
-                    $('#member-error').fadeIn().delay(3000).fadeOut();
+                    var errorMsg = response.message ? response.message : "Le nom d'utilisateur ou le mot de passe est incorrect";
+                    $('#member-error').html('<i class="fas fa-exclamation-circle mr-2"></i>' + errorMsg).fadeIn().delay(3000).fadeOut();
                 }
             },
             error: function() {

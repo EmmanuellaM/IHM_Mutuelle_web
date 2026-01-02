@@ -35,3 +35,19 @@ tests/_support/_generated
 #Uploaded files
 /storage
 /web/storage
+
+
+
+
+
+/vendor/
+/runtime/
+/assets/
+/tests/runtime/
+/nbproject/
+/.idea/
+/vagrant/
+/.vscode/
+*.log
+
+config/params.php

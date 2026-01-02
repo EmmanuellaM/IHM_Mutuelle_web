@@ -456,6 +456,61 @@ class MemberController extends Controller
         ]);
     }
 
+    /**
+     * Display list of help contributions for the member
+     */
+    public function actionHelpContributions()
+    {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['site/login']);
+        }
+
+        MemberSessionManager::setDette();
+        return $this->render('help-contributions');
+    }
+
+    /**
+     * Pay a specific help contribution
+     */
+    public function actionPayHelpContribution($id)
+    {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['site/login']);
+        }
+
+        $contribution = Contribution::findOne($id);
+        
+        if (!$contribution || $contribution->member_id != $this->member->id) {
+            Yii::$app->session->setFlash('error', 'Contribution non trouvée.');
+            return $this->redirect(['member/help-contributions']);
+        }
+
+        if ($contribution->state) {
+            Yii::$app->session->setFlash('info', 'Cette contribution a déjà été payée.');
+            return $this->redirect(['member/help-contributions']);
+        }
+
+        // Mark contribution as paid
+        $contribution->state = true;
+        $contribution->date = date('Y-m-d H:i:s');
+        $contribution->amount = $contribution->help->unit_amount;
+        
+        if ($contribution->save()) {
+            // Check if all contributions for this help are paid
+            $help = $contribution->help;
+            if ($help && $help->deficit == 0) {
+                $help->state = false; // Close the help
+                $help->save();
+            }
+            
+            Yii::$app->session->setFlash('success', 'Contribution payée avec succès !');
+        } else {
+            Yii::$app->session->setFlash('error', 'Erreur lors du paiement de la contribution.');
+        }
+
+        return $this->redirect(['member/help-contributions']);
+    }
+
 
     /*******************************************Type de Tontine********************************************************************************************/
 
@@ -675,6 +730,33 @@ class MemberController extends Controller
                 return $this->redirect(['member/validate-mobile-payment']);
             }
 
+            // Check if this is a help contribution payment
+            $payment_category = Yii::$app->session->get('payment_type_category');
+            if ($payment_category === 'help_contribution') {
+                $contribution_id = Yii::$app->session->get('contribution_id');
+                if ($contribution_id) {
+                    $contribution = Contribution::findOne($contribution_id);
+                    if ($contribution && $contribution->member_id == $this->member->id) {
+                        // Mark contribution as paid
+                        $contribution->state = true;
+                        $contribution->date = date('Y-m-d H:i:s');
+                        $contribution->amount = $contribution->help->unit_amount;
+                        $contribution->save();
+                        
+                        // Check if all contributions for this help are paid
+                        $help = $contribution->help;
+                        if ($help && $help->deficit == 0) {
+                            $help->state = false; // Close the help
+                            $help->save();
+                        }
+                    }
+                    
+                    // Clear contribution session data
+                    Yii::$app->session->remove('contribution_id');
+                    Yii::$app->session->remove('payment_type_category');
+                }
+            }
+
             // Stocker les informations de paiement en session
             Yii::$app->session->set('payment_amount', $amount);
             Yii::$app->session->set('payment_method', $payment_type);
@@ -706,6 +788,23 @@ class MemberController extends Controller
     public function actionProcessPayment() {
         if (Yii::$app->user->isGuest) {
             return $this->redirect(['site/login']);
+        }
+
+        // Handle GET request for help_contribution type
+        $type = Yii::$app->request->get('type');
+        if ($type === 'help_contribution') {
+            $contribution_id = Yii::$app->request->get('contribution_id');
+            $amount = Yii::$app->request->get('amount');
+            
+            if ($contribution_id && $amount) {
+                // Store in session for later use
+                Yii::$app->session->set('payment_type_category', 'help_contribution');
+                Yii::$app->session->set('contribution_id', $contribution_id);
+                Yii::$app->session->set('payment_amount', $amount);
+                
+                // Redirect to payment page (assuming there's a pay action)
+                return $this->redirect(['member/pay']);
+            }
         }
 
         if (Yii::$app->request->isPost) {

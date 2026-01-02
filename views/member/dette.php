@@ -7,7 +7,20 @@ use yii\helpers\Url;
 /** @var $member app\models\Member */
 
 // Récupération du membre connecté
-$member = Member::findOne(Yii::$app->user->id);
+//$member = Member::findOne(Yii::$app->user->id);( pas correst)
+
+
+
+
+// ✅ CORRECT - Cherche le membre par user_id
+$member = Member::find()
+    ->where(['user_id' => Yii::$app->user->id])
+    ->one();
+
+
+
+
+    
 
 // Récupération de l'exercice actif
 $exercise = \app\models\Exercise::find()
@@ -190,7 +203,7 @@ $socialCrownTarget = $exercise->social_crown_amount;
 </style>
 <?php $this->endBlock(); ?>
 
-<div class="container debt-dashboard">
+<div class="container-fluid debt-dashboard">
     <!-- En-tête avec résumé -->
     <div class="debt-summary">
         <div class="row align-items-center">
@@ -199,7 +212,9 @@ $socialCrownTarget = $exercise->social_crown_amount;
                 <p class="mb-0">Bienvenue, <strong><?= htmlspecialchars($member->user()->name) ?></strong></p>
             </div>
             <div class="col-md-4 text-end">
-                <span class="status-badge status-active">Compte Actif</span>
+                <span class="status-badge <?= $member->active ? 'status-active' : 'status-inactive' ?>">
+                    <?= $member->active ? "Compte en règle" : "Compte irrégulier" ?>
+                </span>
             </div>
         </div>
     </div>
@@ -277,6 +292,58 @@ $socialCrownTarget = $exercise->social_crown_amount;
                     <a href="<?= Url::to(['/member/process-payment', 'type' => 'registration']) ?>" class="btn btn-pay">
                         Régler l'Inscription
                     </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carte Contributions aux Aides -->
+        <div class="col-md-4">
+            <div class="debt-card">
+                <div class="debt-header">
+                    <h3>Contributions aux Aides</h3>
+                </div>
+                <div class="debt-body">
+                    <?php 
+                    $unpaidContributions = $member->getUnpaidHelpContributions();
+                    $totalContributionsDue = $member->getTotalHelpContributionsDue();
+                    $totalContributionsPaid = $member->getTotalHelpContributionsPaid();
+                    $contributionsCount = $member->getUnpaidHelpContributionsCount();
+                    ?>
+                    
+                    <div class="amount-display">
+                        <div class="amount-label">Nombre d'aides à payer</div>
+                        <div class="amount-value"><?= $contributionsCount ?></div>
+                    </div>
+
+                    <div class="amount-display">
+                        <div class="amount-label">Total à Payer</div>
+                        <div class="amount-value amount-remaining">
+                            <?= number_format($totalContributionsDue, 0, ',', ' ') ?> XAF
+                        </div>
+                    </div>
+
+                    <div class="amount-display">
+                        <div class="amount-label">Déjà Payé</div>
+                        <div class="amount-value amount-paid">
+                            <?= number_format($totalContributionsPaid, 0, ',', ' ') ?> XAF
+                        </div>
+                    </div>
+
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: <?= ($totalContributionsDue + $totalContributionsPaid > 0 ? ($totalContributionsPaid / ($totalContributionsDue + $totalContributionsPaid)) * 100 : 0) ?>%">
+                        </div>
+                    </div>
+
+                    <?php if ($contributionsCount > 0): ?>
+                        <a href="<?= Url::to(['/member/help-contributions']) ?>" class="btn btn-pay">
+                            Voir mes Contributions
+                        </a>
+                    <?php else: ?>
+                        <div class="text-center mt-3" style="color: var(--success-color); font-weight: 600;">
+                            ✅ Aucune contribution en attente
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

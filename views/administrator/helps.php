@@ -210,7 +210,7 @@ Aides
             <div class="white-block text-center blue-gradient">
                 <h3 class="text-white mb-3">Fond Social</h3>
                 <h1 id="saving-amount-title">
-                    <?= ($t = \app\managers\FinanceManager::socialCrown()) ? ($t > 0 ? $t : 0) : 0 ?> XAF
+                    <?= ($t = \app\managers\FinanceManager::getAvailableSocialFund()) ? ($t > 0 ? $t : 0) : 0 ?> XAF
                 </h1>
             </div>
         </div>

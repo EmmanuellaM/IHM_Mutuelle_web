@@ -19,7 +19,7 @@ $user = $member->user();
                     <h2 class="member-name">
                         <?= htmlspecialchars($member->username) ?>
                         <span class="badge <?= $member->active ? 'bg-success' : 'bg-danger' ?> ms-2">
-                            <?= $member->active ? 'Actif' : 'Inactif' ?>
+                            <?= $member->active ? 'En règle' : 'Irrégulier' ?>
                         </span>
                     </h2>
                     <div class="text-muted small">

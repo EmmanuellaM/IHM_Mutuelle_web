@@ -201,7 +201,7 @@ Nouvelle Tontine
             <div class="col-12">
                 <div class="form-section">
                     <h3>Informations importantes</h3>
-                    <p>Veuillez remplir tous les champs requis pour créer une nouvelle tontine. Les membres actifs seront automatiquement notifiés.</p>
+                    <p>Veuillez remplir tous les champs requis pour créer une nouvelle tontine. Les membres en règle seront automatiquement notifiés.</p>
                 </div>
                 <?php
                 $form = \yii\widgets\ActiveForm::begin([
@@ -269,7 +269,7 @@ Nouvelle Tontine
             <div class="col-12">
                 <div class="error-message">
                     <h3>Impossible de créer une tontine</h3>
-                    <p>Il faut au moins 2 membres actifs pour créer une tontine.</p>
+                    <p>Il faut au moins 2 membres en règle pour créer une tontine.</p>
                     <div class="mt-4">
                         <a href="<?= Yii::getAlias("@administrator.new_member") ?>" class="btn btn-primary">
                             Ajouter un nouveau membre
