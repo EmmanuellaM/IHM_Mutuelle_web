@@ -10,7 +10,7 @@ Aides
 <div class="page-container">
     <div class="container">
         <div class="help-dashboard">
-            <h3 class="dashboard-title">Inscriptions</h3>
+            <h3 class="dashboard-title">Fond social</h3>
             <div class="dashboard-amount">
                 <?= number_format(($t=\app\managers\FinanceManager::socialCrown()) ? ($t>0?$t:0) : 0, 0, ',', ' ') ?> XAF
             </div>

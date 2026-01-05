@@ -14,6 +14,25 @@ use yii\db\ActiveRecord;
 
 class Exercise extends ActiveRecord
 {
+    /**
+     * Getter pour le statut virtuel basé sur 'active'.
+     * @return string
+     */
+    public function getStatus()
+    {
+        return $this->active ? 'active' : 'closed';
+    }
+
+    /**
+     * Setter pour le statut virtuel.
+     * Met à jour 'active' en conséquence.
+     * @param string $value
+     */
+    public function setStatus($value)
+    {
+        $this->active = ($value === 'active');
+    }
+
     public static function tableName()
     {
         return 'exercise';

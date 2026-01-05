@@ -4,6 +4,19 @@
 # netbeans project files
 nbproject
 
+# Environment variables
+.env
+
+# Configuration with secrets
+config/params.php
+
+# Large binary files and installers
+/Outils/
+*.exe
+*.msi
+*.dmg
+*.pkg
+
 # zend studio for eclipse project files
 .buildpath
 .project

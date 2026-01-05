@@ -24,6 +24,7 @@ class NewMemberForm extends Model
     public $name;
     public $first_name;
     public $tel;
+    public $operator; // Opérateur téléphonique (MTN, Orange, Camtel)
     public $email;
     public $address;
     public $avatar;
@@ -37,15 +38,49 @@ class NewMemberForm extends Model
     public function rules()
     {
         return [
-            [['username','name','first_name','password','tel','email','address','password_repeat'],'string','message' => 'Ce champ attend du texte'],
-            [['username','name','first_name','tel','password','email'],'required','message' => 'Ce champ est obligatoire'],
+            [['username','name','first_name','password','tel','email','address','password_repeat','operator'],'string','message' => 'Ce champ attend du texte'],
+            [['username','name','first_name','tel','password','email','operator'],'required','message' => 'Ce champ est obligatoire'],
             [['email'],'email','message' => 'Ce champ attend un email'],
-            [['tel'],'match', 'pattern' => '/^6[0-9]{8}$/', 'message' => 'Le numéro de téléphone doit commencer par 6 et avoir exactement 9 chiffres.'],
+            [['tel'], 'validatePhoneByOperator'], // Validation personnalisée par opérateur
             [['password'], 'match', 'pattern' => '/^(?=.*[A-Z])(?=.*\d).{8,}$/', 'message' => 'Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.'],
             [['avatar'],'image','message' => 'Ce champ attend une image'],
             ['password_repeat','compare','compareAttribute' => 'password'],
         ];//C'est ici qu'on définit les messages d'erreur sur la page 
-    } /**
+    }
+    
+    /**
+     * Validation personnalisée du numéro de téléphone en fonction de l'opérateur
+     */
+    public function validatePhoneByOperator($attribute, $params)
+    {
+        if (!$this->hasErrors()) {
+            $phone = $this->$attribute;
+            $operator = $this->operator;
+            
+            // Patterns de validation par opérateur camerounais (préfixes à 2 chiffres)
+            $patterns = [
+                'MTN' => '/^(67|65)[0-9]{7}$/',
+                'Orange' => '/^(69|65)[0-9]{7}$/',
+                'Camtel' => '/^(23|24)[0-9]{7}$/',
+            ];
+            
+            if (!isset($patterns[$operator])) {
+                $this->addError($attribute, 'Opérateur invalide.');
+                return;
+            }
+            
+            if (!preg_match($patterns[$operator], $phone)) {
+                $examples = [
+                    'MTN' => '670123456, 651234567',
+                    'Orange' => '690123456, 651234567',
+                    'Camtel' => '231234567, 241234567',
+                ];
+                $this->addError($attribute, "Le numéro ne correspond pas à l'opérateur {$operator}. Exemples valides : {$examples[$operator]}");
+            }
+        }
+    }
+    
+    /**
     * Signs user up.
     *
     * @return bool whether the creating new account was successful and email was sent

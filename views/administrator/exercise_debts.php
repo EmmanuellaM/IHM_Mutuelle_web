@@ -157,7 +157,57 @@ $this->params['breadcrumbs'][] = $this->title;
 <?php $this->endBlock() ?>
 
 <div class="container-fluid py-5">
+    <?php if (!$exercise): ?>
+        <!-- Message quand aucun exercice n'existe -->
+        <div class="row">
+            <div class="col-12">
+                <div class="info-card text-center">
+                    <i class="fas fa-info-circle" style="font-size: 4rem; color: #f59e0b; margin-bottom: 1rem;"></i>
+                    <h3 class="section-title">Aucun exercice disponible</h3>
+                    <p class="text-muted" style="font-size: 1.1rem; margin-bottom: 2rem;">
+                        Vous devez d'abord créer un exercice pour pouvoir consulter les dettes.
+                    </p>
+                    <a href="<?= Yii::$app->urlManager->createUrl(['administrator/accueil']) ?>" class="btn btn-primary">
+                        <i class="fas fa-plus-circle"></i> Créer un exercice
+                    </a>
+                </div>
+            </div>
+        </div>
+    <?php else: ?>
+        <!-- Messages Flash -->
+        <?php if (Yii::$app->session->hasFlash('success')): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle"></i>
+                <?= Yii::$app->session->getFlash('success') ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <?php endif; ?>
+        
+        <?php if (Yii::$app->session->hasFlash('error')): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle"></i>
+                <?= Yii::$app->session->getFlash('error') ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <?php endif; ?>
+        
+        <?php if (Yii::$app->session->hasFlash('warning')): ?>
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <?= Yii::$app->session->getFlash('warning') ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <?php endif; ?>
+        
+        <!-- Contenu normal quand un exercice existe -->
     </div>
+
 
 
 
@@ -343,43 +393,52 @@ if ($firstSession) {
                                  <td class="blue-text"><?= number_format($member->social_crown, 0, ',', ' ') ?> XAF</td>
 
                                 <td class="red-text"><?= number_format($exercise->social_crown_amount - $member->social_crown, 0, ',', ' ') ?> XAF</td>
-                                    <td><button class="btn btn-primary p-2 m-0" data-target="#modalS<?= $member->id ?>" data-toggle="modal">payer </button></td>
+                                    <td><button class="btn btn-primary p-2 m-0" data-target="#modalFondSocial<?= $member->id ?>" data-toggle="modal">payer </button></td>
 
                             </tr>
 
 
-                        <div class="modal fade" id="modalS<?= $member->id?>" tabindex="-1" role="dialog"
+
+                        <div class="modal fade" id="modalFondSocial<?= $member->id?>" tabindex="-1" role="dialog"
                              aria-labelledby="myModalLabel"
                              aria-hidden="true">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
+                                    <?php
+                                    $modelFondSocial = new \app\models\forms\FixSocialCrownForm();
+                                    $formFondSocial = \yii\widgets\ActiveForm::begin([
+                                        'errorCssClass' => 'text-secondary',
+                                        'method' => 'post',
+                                        'action' => ['@administrator.fix_social_crown', 'id' => $member->id],
+                                        'options' => [
+                                            'class' => 'col-12 white-block',
+                                            'data-max-fund' => $exercise->social_crown_amount - $member->social_crown,
+                                        ]
+                                    ]);
+                                    ?>
 
-
-                                    <?php                                    $model = new  \app\models\forms\FixSocialCrownForm();
-
-                                     $form = \yii\widgets\ActiveForm::begin([
-                                'errorCssClass' => 'text-secondary',
-                                'method' => 'post',
-                                'action' => ['@administrator.fix_social_crown', 'id'=>$member->id],
-                                'options' => [
-                                    'class' => 'col-12 white-block',
-                                    'data-max-fund' => $exercise->social_crown_amount - $member->social_crown,
-                                ]
-                                ]) ?>
-
-                            <h3> Veuillez entrer le montant à payer</h3>
-                                <?= $form->field($model, 'amount')->input('number', ['required' => 'required', 'min' =>1])->label("montant") ?>
-                                <?= $form->field($model,'id')->hiddenInput(['value'=>$member->id])->label(false) ?>
-                            <div class="form-group text-right">
-                                <button type="submit" class="btn btn-primary" >valider </button>
-                                
-                            </div>
-                            <?php \yii\widgets\ActiveForm::end(); ?>
-
-                                    
+                                    <div class="text-center mb-4">
+                                        <h4 class="mb-3">Paiement du fond social</h4>
+                                        <p class="text-muted">Pour le membre : <?= $memberUser->name . " " . $memberUser->first_name ?></p>
+                                    </div>
+                                    <?= $formFondSocial->field($modelFondSocial, 'amount')->input('number', [
+                                        'required' => 'required',
+                                        'min' => 1,
+                                        'max' => $exercise->social_crown_amount - $member->social_crown,
+                                        'class' => 'form-control',
+                                        'placeholder' => 'Montant à payer'
+                                    ])->label("Montant à payer") ?>
+                                    <?= $formFondSocial->field($modelFondSocial, 'id')->hiddenInput(['value' => $member->id])->label(false) ?>
+                                    <div class="form-group text-center">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-check-circle"></i> Valider le paiement
+                                        </button>
+                                    </div>
+                                    <?php \yii\widgets\ActiveForm::end(); ?>
                                 </div>
                             </div>
                         </div>
+
 
                     <?php endforeach; ?>
                     </tbody>
@@ -469,6 +528,8 @@ if ($firstSession) {
 
     </div>
 </div>
+
+<?php endif; // Fin de la condition if (!$exercise) ?>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {

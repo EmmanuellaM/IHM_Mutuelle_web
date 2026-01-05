@@ -100,6 +100,9 @@ class AdministratorController extends Controller
         if ($session)
             $idModel->id = $session->id;
         $model = new NewSessionForm();
+        $model->interest = SettingManager::getInterest();
+        $model->inscription_amount = SettingManager::getInscription();
+        $model->social_crown_amount = SettingManager::getSocialCrown();
         return $this->render('home', compact('session', 'model', 'idModel'));
     }
     // Nouvelle Session (ancien)
@@ -1291,7 +1294,7 @@ public function actionNouvelleEmprunt()
     }
 
     $borrowing = new Borrowing();
-    $borrowing->interest = $exercise ? $exercise->interest : 0;
+    $borrowing->interest = SettingManager::getInterest();
     $borrowing->amount = $model->amount;
     $borrowing->member_id = $model->member_id;
     $borrowing->administrator_id = $this->administrator->id;
@@ -1476,9 +1479,14 @@ private function calculateMaxBorrowingAmount($savings)
             ->where(['active' => true])
             ->one();
 
+        // Si aucun exercice n'existe, afficher la vue avec un message
         if (!$exercise) {
-            Yii::$app->session->setFlash('error', 'Aucun exercice actif trouvé.');
-            return $this->redirect(['exercices']);
+            return $this->render('exercise_debts', [
+                'members' => [],
+                'exercise' => null,
+                'sessions' => [],
+                'refunds' => []
+            ]);
         }
 
         // Récupérer les sessions de l'exercice actif

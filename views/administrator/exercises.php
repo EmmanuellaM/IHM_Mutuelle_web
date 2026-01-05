@@ -485,7 +485,11 @@ Exercices
 
                                      <!-- COLONNE RENFLOUEMENT REEL -->
                                      <?php 
-                                        $renflouementModel = \app\models\Renflouement::findOne(['member_id' => $member->id, 'exercise_id' => $exercise->id]);
+                                        // Chercher le renflouement de l'exercice PRECEDENT qui doit être payé dans CET exercice
+                                        $renflouementModel = \app\models\Renflouement::findOne([
+                                            'member_id' => $member->id, 
+                                            'next_exercise_id' => $exercise->id
+                                        ]);
                                      ?>
                                      <td>
                                         <?php if ($renflouementModel): ?>
@@ -527,8 +531,14 @@ Exercices
             </div>
         <?php else: ?>
             <div class="col-12 white-block empty-state">
-                <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                <i class="fas fa-calendar-times fa-3x mb-3" style="color: var(--warning-color);"></i>
                 <h4>Aucun exercice créé</h4>
+                <p class="text-muted mt-3 mb-4">
+                    Pour commencer à utiliser la mutuelle, vous devez d'abord créer un exercice en ajoutant une première session.
+                </p>
+                <a href="<?= Yii::$app->urlManager->createUrl(['administrator/accueil']) ?>" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus-circle"></i> Créer le premier exercice
+                </a>
             </div>
         <?php endif; ?>
     </div>
