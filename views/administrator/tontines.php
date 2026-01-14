@@ -45,7 +45,7 @@ Tontines
 <div class="container mt-5 mb-5">
     <div class="row mb-2">
         <div class="col-12 white-block text-center blue-gradient ">
-            <h3 class="text-white">Inscriptions</h3>
+            <h3 class="text-white">Fond Social</h3>
             <h1 id="saving-amount-title">
                 <?=  ($t=\app\managers\FinanceManager::socialCrown())? ($t>0?$t:0) :0 ?> XAF
             </h1>

@@ -12,7 +12,7 @@ class RouteManager {
         'guest.reset_password' => "/guest/reset_password",//C'est moi ici
 //Ici c'est le lien dans la vue connection                          //Ici c'est dans le controleur
         'guest.member_form' => "/guest/member-form",
-        'guest.administrator_form' => '/guest/administrator-form',
+        'guest.administrator_form' => '/guest/adminlogin',
 
         // ============================ ESPACE ADMINISTRATEUR ==========================
 
@@ -82,6 +82,7 @@ class RouteManager {
         'administrator.savings_details' => '/administrator/epargne-detail',
         'administrator.borrowing_member' => '/administrator/emprunt-membre',
         'administrator.borrowings_details' => '/administrator/emprunt-detail',
+        'administrator.borrowing_details' => '/administrator/details-emprunt',  // Alias pour les détails d'un emprunt
         'administrator.contribution_member' => '/administrator/contribution-membre',
         'administrator.contribution_member' => '/administrator/contribution-membre',
 

@@ -2028,6 +2028,20 @@ private function calculateMaxBorrowingAmount($savings)
             return RedirectionManager::abort($this);
     }
 
+    /***********************************Details Emprunt côté administrateur ******************************************************* */
+    public function actionDetailsEmprunt($q = 0)
+    {
+        if ($q) {
+            $borrowing = Borrowing::findOne($q);
+            if ($borrowing) {
+
+                return $this->render("borrowing_details", compact("borrowing"));
+            } else
+                return RedirectionManager::abort($this);
+        } else
+            return RedirectionManager::abort($this);
+    }
+
     /************************nouvelle contribution dans la mutuelle ****************************************************** */
     public function actionNouvelleContribution($q=0, $m=0) {
         if ($q) {
