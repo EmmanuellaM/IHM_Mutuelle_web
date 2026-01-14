@@ -1653,12 +1653,18 @@ private function calculateMaxBorrowingAmount($savings)
                 $session->active = false;
                 $session->save();
 
-                Yii::$app->db->createCommand('UPDATE borrowing SET interest=interest+:val WHERE session_id!=:session_id AND state=1 ')
-                    ->bindValues([
-                        ':val' => SettingManager::getInterest(),
-                        ':session_id' => $session->id,
-                    ])
-                    ->execute();
+
+                // Nouvelle logique : appliquer les intérêts de pénalité uniquement après 3 mois
+                // sur le montant restant dû
+                $interestRate = SettingManager::getInterest();
+                $borrowings = Borrowing::findAll(['state' => 1]); // Tous les emprunts actifs
+                
+                foreach ($borrowings as $borrowing) {
+                    if ($borrowing->shouldApplyPenaltyInterest()) {
+                        $borrowing->applyPenaltyInterest($interestRate);
+                        $borrowing->save();
+                    }
+                }
 
                 $members = Member::find()->all();
                 foreach ($members as $member) {
