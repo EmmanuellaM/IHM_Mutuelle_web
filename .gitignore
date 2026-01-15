@@ -8,7 +8,7 @@ nbproject
 .env
 
 # Configuration with secrets
-config/params.php
+# config/params.php
 
 # Large binary files and installers
 /Outils/
