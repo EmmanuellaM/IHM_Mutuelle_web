@@ -18,7 +18,7 @@ Yii::setAlias('@chat', '/chat/index');
 Yii::setAlias('@administrator.borrowing_details', '/administrator/emprunt-detail');
 Yii::setAlias('@member.helps', '/member/types_aide');
 Yii::setAlias('@guest.connexion', '/guest/connexion');
-Yii::setAlias('@guest.administrator_form', '/guest/adminlogin');
+Yii::setAlias('@guest.administrator_form', '/guest/administrator-form');
 Yii::setAlias('@guest.member_form', '/guest/member-form');
 
 $config = [
