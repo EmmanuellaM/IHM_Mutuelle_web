@@ -1,14 +1,25 @@
 <?php
 
 $params = require __DIR__ . '/params.php';
-$db = require __DIR__ . '/db.php';
+
+// Utiliser la configuration Railway si les variables d'environnement sont présentes
+if (getenv('RAILWAY_ENVIRONMENT')) {
+    $db = require __DIR__ . '/db-railway.php';
+} else {
+    $db = require __DIR__ . '/db.php';
+}
+
 $routes = require __DIR__ . '/routes.php';
+
 
 Yii::setAlias('@member.dette', '/member/dette');
 Yii::setAlias('@member.dettes', '/member/dettes'); // Remplace '/member/dettes' par l'URL réelle de ton action
 Yii::setAlias('@chat', '/chat/index');
 Yii::setAlias('@administrator.borrowing_details', '/administrator/emprunt-detail');
 Yii::setAlias('@member.helps', '/member/types_aide');
+Yii::setAlias('@guest.connexion', '/guest/connexion');
+Yii::setAlias('@guest.administrator_form', '/guest/adminlogin');
+Yii::setAlias('@guest.member_form', '/guest/member-form');
 
 $config = [
     'id' => 'ensp-m',
@@ -77,7 +88,7 @@ $config = [
 
         'urlManager' => [
             'enablePrettyUrl' => true,
-            'showScriptName' => false,
+            'showScriptName' => true,  // Changé à true pour fonctionner sans mod_rewrite
             'rules' => [
                 '@administrator/update-agape/<id:\d+>' => 'administrator/update-agape',
                 'member/types-aide' => 'member/types-aide',
