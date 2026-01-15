@@ -26,7 +26,6 @@ try {
     $user->login = 'railway_admin';
     $user->email = 'railway@admin.com';
     $user->password = Yii::$app->security->generatePasswordHash('Railway2026!');
-    $user->status = 10; // Actif
     
     if ($user->save()) {
         echo "<p class='success'>✅ Utilisateur créé (ID: {$user->id})</p>";
