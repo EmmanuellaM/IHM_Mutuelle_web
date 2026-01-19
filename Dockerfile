@@ -31,12 +31,8 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 RUN mkdir -p runtime web/assets \
     && chmod -R 777 runtime web/assets
 
-# Copier et rendre exécutable le script de démarrage
-COPY docker-start.sh /start.sh
-RUN chmod +x /start.sh
-
 # Exposer le port
 EXPOSE 8080
 
-# Démarrer avec le script
-CMD ["/start.sh"]
+# Démarrer le serveur PHP avec chemin absolu
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8080} -t /var/www/html/web /var/www/html/web/router.php"]
