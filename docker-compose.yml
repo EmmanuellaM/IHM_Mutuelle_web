@@ -1,9 +1,58 @@
-version: '2'
+version: '3.8'
+
 services:
-  php:
-    image: yiisoftware/yii2-php:7.1-apache
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mutuelle_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    environment:
+      - DOCKER_ENV=true
     volumes:
-      - ~/.composer-docker/cache:/root/.composer/cache:delegated
-      - ./:/app:delegated
+      - ./:/var/www/html
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - mutuelle_network
+    depends_on:
+      - mysql
+
+  nginx:
+    image: nginx:alpine
+    container_name: mutuelle_nginx
+    restart: unless-stopped
     ports:
-      - '8000:80'
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - mutuelle_network
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.0
+    container_name: mutuelle_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: mutuelle_web
+      MYSQL_USER: mutuelle_user
+      MYSQL_PASSWORD: mutuelle_pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - mutuelle_network
+
+networks:
+  mutuelle_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
