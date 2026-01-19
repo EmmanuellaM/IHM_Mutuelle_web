@@ -132,7 +132,7 @@
             formData.append('remember', false);
 
             // Envoyer la requête
-            fetch('<?= Yii::getAlias("@guest.administrator_form") ?>', {
+            fetch('/guest/administrator-form', {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
