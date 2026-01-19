@@ -114,10 +114,12 @@ public function actionAdministratorForm() {
         $administratorModel->attributes = Yii::$app->request->post();
 
         if ($administratorModel->validate()) {
-            $administrator = Administrator::findOne(['username' => $administratorModel->username]);
-            if ($administrator) {
-                $user = User::findOne($administrator->user_id);
-                if ($user && $user->validatePassword($administratorModel->password)) {
+            // Chercher l'utilisateur par login
+            $user = User::findOne(['login' => $administratorModel->username]);
+            if ($user) {
+                // Vérifier que cet utilisateur est un administrateur
+                $administrator = Administrator::findOne(['user_id' => $user->id]);
+                if ($administrator && $user->validatePassword($administratorModel->password)) {
                     if ($administratorModel->remember) {
                         Yii::$app->user->login($user, 3600*24*30);
                     } else {
