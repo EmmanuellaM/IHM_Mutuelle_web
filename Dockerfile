@@ -31,8 +31,12 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 RUN mkdir -p runtime web/assets \
     && chmod -R 777 runtime web/assets
 
-# Exposer le port (Railway utilise la variable $PORT)
+# Créer le script de démarrage
+RUN echo '#!/bin/sh\nphp -S 0.0.0.0:${PORT:-8080} -t web web/router.php' > /start.sh \
+    && chmod +x /start.sh
+
+# Exposer le port
 EXPOSE 8080
 
-# Démarrer le serveur PHP intégré avec le router
-CMD sh -c "php -S 0.0.0.0:${PORT:-8080} -t web web/router.php"
+# Démarrer avec le script
+CMD ["/start.sh"]
