@@ -35,4 +35,4 @@ RUN mkdir -p runtime web/assets \
 EXPOSE 8080
 
 # Démarrer le serveur PHP intégré avec le router
-CMD php -S 0.0.0.0:${PORT:-8080} -t web web/router.php
+CMD sh -c "php -S 0.0.0.0:${PORT:-8080} -t web web/router.php"
