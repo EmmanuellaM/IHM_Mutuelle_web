@@ -1,4 +1,4 @@
-FROM php:8.1-fpm
+FROM php:8.1-cli
 
 # Installation des dépendances système
 RUN apt-get update && apt-get install -y \
@@ -29,10 +29,10 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Créer les répertoires nécessaires et définir les permissions
 RUN mkdir -p runtime web/assets \
-    && chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/web \
     && chmod -R 777 runtime web/assets
 
-EXPOSE 9000
+# Exposer le port (Railway utilise la variable $PORT)
+EXPOSE 8080
 
-CMD ["php-fpm"]
+# Démarrer le serveur PHP intégré avec le router
+CMD php -S 0.0.0.0:${PORT:-8080} -t web web/router.php
