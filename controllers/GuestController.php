@@ -108,7 +108,8 @@ public function actionMemberForm() {
     /**********************action sur le formulaire administrateur *************************************** */
 
 public function actionAdministratorForm() {
-    if (Yii::$app->request->isAjax) {
+    // Accepter les requêtes POST et AJAX
+    if (Yii::$app->request->isPost || Yii::$app->request->isAjax) {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $administratorModel = new AdministratorConnectionForm();
         $administratorModel->attributes = Yii::$app->request->post();
