@@ -22,12 +22,19 @@ try {
     ")->execute();
     echo "✅ Colonne 'inscription' ajoutée!\n\n";
     
-    echo "Ajout d'autres colonnes potentiellement manquantes...\n";
+    echo "Ajout de la colonne 'social_crown' à la table 'member'...\n";
     $db->createCommand("
         ALTER TABLE member 
         ADD COLUMN IF NOT EXISTS social_crown DECIMAL(10,2) DEFAULT 0
     ")->execute();
     echo "✅ Colonne 'social_crown' ajoutée!\n\n";
+    
+    echo "Ajout de la colonne 'state' à la table 'help'...\n";
+    $db->createCommand("
+        ALTER TABLE help 
+        ADD COLUMN IF NOT EXISTS state BOOLEAN DEFAULT true
+    ")->execute();
+    echo "✅ Colonne 'state' ajoutée!\n\n";
     
     echo "<h2 style='color:green;'>🎉 Colonnes ajoutées avec succès!</h2>";
     echo "<p><a href='/direct-admin-login.php'>➡️ Se connecter en tant qu'admin</a></p>";
