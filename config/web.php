@@ -3,7 +3,10 @@
 $params = require __DIR__ . '/params.php';
 
 // Charger la configuration DB selon l'environnement
-if (getenv('DOCKER_ENV')) {
+if (getenv('DATABASE_URL')) {
+    // Render avec PostgreSQL
+    $db = require __DIR__ . '/db-postgres.php';
+} elseif (getenv('DOCKER_ENV')) {
     $db = require __DIR__ . '/db-docker.php';
 } elseif (getenv('RAILWAY_ENVIRONMENT')) {
     $db = require __DIR__ . '/db-railway.php';
