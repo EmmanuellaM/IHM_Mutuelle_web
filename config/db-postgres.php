@@ -8,7 +8,12 @@ if (getenv('DATABASE_URL')) {
     $url = parse_url(getenv('DATABASE_URL'));
     return [
         'class' => 'yii\db\Connection',
-        'dsn' => sprintf('pgsql:host=%s;port=%s;dbname=%s', $url['host'], $url['port'], ltrim($url['path'], '/')),
+        'dsn' => sprintf(
+            'pgsql:host=%s;port=%s;dbname=%s', 
+            $url['host'], 
+            isset($url['port']) ? $url['port'] : '5432',
+            ltrim($url['path'], '/')
+        ),
         'username' => $url['user'],
         'password' => $url['pass'],
         'charset' => 'utf8',
