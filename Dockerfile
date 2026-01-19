@@ -1,4 +1,4 @@
-FROM php:8.1-cli
+FROM php:8.1-fpm
 
 # Installation des dépendances système
 RUN apt-get update && apt-get install -y \
@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     libpq-dev \
+    nginx \
+    supervisor \
     && rm -rf /var/lib/apt/lists/*
 
 # Installation des extensions PHP (MySQL et PostgreSQL)
@@ -30,10 +32,36 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Créer les répertoires nécessaires et définir les permissions
 RUN mkdir -p runtime web/assets \
-    && chmod -R 777 runtime web/assets
+    && chmod -R 777 runtime web/assets \
+    && chown -R www-data:www-data /var/www/html
+
+# Copier la configuration Nginx
+COPY docker/nginx/conf.d/default.conf /etc/nginx/sites-available/default
+
+# Créer le script de démarrage pour Supervisor
+RUN echo '[supervisord]\n\
+nodaemon=true\n\
+\n\
+[program:php-fpm]\n\
+command=/usr/local/sbin/php-fpm\n\
+autostart=true\n\
+autorestart=true\n\
+stdout_logfile=/dev/stdout\n\
+stdout_logfile_maxbytes=0\n\
+stderr_logfile=/dev/stderr\n\
+stderr_logfile_maxbytes=0\n\
+\n\
+[program:nginx]\n\
+command=/usr/sbin/nginx -g "daemon off;"\n\
+autostart=true\n\
+autorestart=true\n\
+stdout_logfile=/dev/stdout\n\
+stdout_logfile_maxbytes=0\n\
+stderr_logfile=/dev/stderr\n\
+stderr_logfile_maxbytes=0' > /etc/supervisor/conf.d/supervisord.conf
 
 # Exposer le port
 EXPOSE 8080
 
-# Démarrer le serveur PHP avec chemin absolu
-CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8080} -t /var/www/html/web /var/www/html/web/router.php"]
+# Démarrer Supervisor qui gère Nginx et PHP-FPM
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
