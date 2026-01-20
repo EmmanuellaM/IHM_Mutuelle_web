@@ -50,6 +50,15 @@ try {
     ")->execute();
     echo "✅ Colonne 'avatar' ajoutée!\n\n";
     
+    echo "Ajout des colonnes à la table 'administrator'...\n";
+    $db->createCommand("
+        ALTER TABLE administrator 
+        ADD COLUMN IF NOT EXISTS name VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS surname VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS username VARCHAR(255)
+    ")->execute();
+    echo "✅ Colonnes 'name', 'surname', 'username' ajoutées à administrator!\n\n";
+    
     echo "<h2 style='color:green;'>🎉 Colonnes ajoutées avec succès!</h2>";
     echo "<p><a href='/direct-admin-login.php'>➡️ Se connecter en tant qu'admin</a></p>";
     
