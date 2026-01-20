@@ -36,6 +36,20 @@ try {
     ")->execute();
     echo "✅ Colonne 'state' ajoutée!\n\n";
     
+    echo "Ajout de la colonne 'type' à la table 'user'...\n";
+    $db->createCommand("
+        ALTER TABLE \"user\" 
+        ADD COLUMN IF NOT EXISTS type VARCHAR(50) DEFAULT 'MEMBER'
+    ")->execute();
+    echo "✅ Colonne 'type' ajoutée!\n\n";
+    
+    echo "Ajout de la colonne 'avatar' à la table 'user'...\n";
+    $db->createCommand("
+        ALTER TABLE \"user\" 
+        ADD COLUMN IF NOT EXISTS avatar VARCHAR(255)
+    ")->execute();
+    echo "✅ Colonne 'avatar' ajoutée!\n\n";
+    
     echo "<h2 style='color:green;'>🎉 Colonnes ajoutées avec succès!</h2>";
     echo "<p><a href='/direct-admin-login.php'>➡️ Se connecter en tant qu'admin</a></p>";
     
