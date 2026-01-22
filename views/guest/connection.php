@@ -295,7 +295,7 @@ Connexion
 <!-- Modal for Administrator -->
 <div class="modal fade login-modal" id="modalAdministrator" tabindex="-1" role="dialog" aria-labelledby="modalAdministratorLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <form id="administrator-form" class="modal-content" method="post" action="<?= Yii::getAlias("@guest.administrator_form") ?>">
+        <form id="administrator-form" class="modal-content" method="post" action="/guest/administrator-form">
             <input type="hidden" name="<?= Yii::$app->request->csrfParam ?>" value="<?= Yii::$app->request->csrfToken ?>" />
             <div class="modal-header">
                 <h4 class="modal-title">Connexion - Administrateur</h4>
