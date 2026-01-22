@@ -66,9 +66,10 @@ try {
         ALTER TABLE administrator 
         ADD COLUMN IF NOT EXISTS name VARCHAR(255),
         ADD COLUMN IF NOT EXISTS surname VARCHAR(255),
-        ADD COLUMN IF NOT EXISTS username VARCHAR(255)
+        ADD COLUMN IF NOT EXISTS username VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS root BOOLEAN DEFAULT false
     ")->execute();
-    echo "✅ Colonnes 'name', 'surname', 'username' ajoutées à administrator!\n\n";
+    echo "✅ Colonnes 'name', 'surname', 'username', 'root' ajoutées à administrator!\n\n";
     
     echo "Ajout de la colonne 'state' à la table 'tontine'...\n";
     $db->createCommand("
