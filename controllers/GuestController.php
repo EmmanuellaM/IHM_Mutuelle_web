@@ -110,7 +110,6 @@ public function actionMemberForm() {
 public function actionAdministratorForm() {
     // Accepter les requêtes POST et AJAX
     if (Yii::$app->request->isPost || Yii::$app->request->isAjax) {
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $administratorModel = new AdministratorConnectionForm();
         $administratorModel->attributes = Yii::$app->request->post();
 
@@ -126,11 +125,28 @@ public function actionAdministratorForm() {
                     } else {
                         Yii::$app->user->login($user);
                     }
-                    return ['success' => true, 'redirect' => Yii::$app->urlManager->createUrl('administrator/accueil')];
+                    
+                    // Si c'est une requête AJAX, retourner JSON
+                    if (Yii::$app->request->isAjax) {
+                        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                        return ['success' => true, 'redirect' => Yii::$app->urlManager->createUrl('administrator/accueil')];
+                    }
+                    
+                    // Sinon, rediriger directement (POST classique)
+                    return $this->redirect(['administrator/accueil']);
                 }
             }
         }
-        return ['success' => false, 'message' => "Le nom d'utilisateur ou le mot de passe est incorrect."];
+        
+        // En cas d'échec
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            return ['success' => false, 'message' => "Le nom d'utilisateur ou le mot de passe est incorrect."];
+        }
+        
+        // Pour POST classique, rediriger avec message d'erreur
+        Yii::$app->session->setFlash('error', "Le nom d'utilisateur ou le mot de passe est incorrect.");
+        return $this->redirect(['guest/connection']);
     }
     return $this->redirect('@guest.connection');
 }
