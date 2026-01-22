@@ -107,6 +107,7 @@ try {
             exercise_id INTEGER,
             administrator_id INTEGER,
             date DATE NOT NULL,
+            state VARCHAR(50) DEFAULT 'SAVING',
             active BOOLEAN DEFAULT true,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
