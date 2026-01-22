@@ -380,30 +380,11 @@ $this->registerJs(<<<JS
         });
     });
 
-    // Handle form submission for administrator
+    // Handle form submission for administrator - POST classique pour Render
     $('#administrator-form').on('submit', function(e) {
-        e.preventDefault();
-        const form = $(this);
-        const actionUrl = form.attr('action');
-
-        $.ajax({
-            type: 'POST',
-            url: actionUrl,
-            data: form.serialize(),
-            success: function(response) {
-                if (response.success) {
-                    $('#administrator-success').fadeIn();
-                    setTimeout(() => {
-                        window.location.href = response.redirect;
-                    }, 1000);
-                } else {
-                    $('#administrator-error').fadeIn().delay(3000).fadeOut();
-                }
-            },
-            error: function() {
-                $('#administrator-error').fadeIn().delay(3000).fadeOut();
-            }
-        });
+        // Ne pas empêcher la soumission par défaut - laisser le formulaire se soumettre normalement
+        // Le formulaire sera soumis en POST classique vers l'action définie
+        return true;
     });
 JS
 );
