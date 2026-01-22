@@ -153,6 +153,7 @@ try {
             CREATE TABLE borrowing (
                 id SERIAL PRIMARY KEY,
                 member_id INTEGER,
+                session_id INTEGER,
                 amount DECIMAL(10,2),
                 interest_rate DECIMAL(5,2),
                 state BOOLEAN DEFAULT true,
