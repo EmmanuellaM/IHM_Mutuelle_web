@@ -86,6 +86,13 @@ try {
     ")->execute();
     echo "✅ Colonnes 'year', 'administrator_id' ajoutées à exercise!\n\n";
     
+    echo "Modification de la colonne 'name' pour accepter NULL...\n";
+    $db->createCommand("
+        ALTER TABLE exercise 
+        ALTER COLUMN name DROP NOT NULL
+    ")->execute();
+    echo "✅ Colonne 'name' modifiée pour accepter NULL!\n\n";
+    
     echo "<h2 style='color:green;'>🎉 Colonnes ajoutées avec succès!</h2>";
     echo "<p><a href='/direct-admin-login.php'>➡️ Se connecter en tant qu'admin</a></p>";
     
