@@ -33,6 +33,7 @@ try {
     $db->createCommand("
         CREATE TABLE \"user\" (
             id SERIAL PRIMARY KEY,
+            login VARCHAR(255) UNIQUE,
             name VARCHAR(255),
             first_name VARCHAR(255),
             tel VARCHAR(255),
@@ -430,6 +431,7 @@ try {
     // Créer l'admin root
     $passwordHash = Yii::$app->security->generatePasswordHash('admin123');
     $db->createCommand()->insert('user', [
+        'login' => 'root',
         'name' => 'root',
         'first_name' => 'root',
         'tel' => '00000',
