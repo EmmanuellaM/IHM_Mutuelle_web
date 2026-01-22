@@ -50,6 +50,17 @@ try {
     ")->execute();
     echo "✅ Colonne 'avatar' ajoutée!\n\n";
     
+    echo "Ajout des colonnes de profil à la table 'user'...\n";
+    $db->createCommand("
+        ALTER TABLE \"user\" 
+        ADD COLUMN IF NOT EXISTS name VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS first_name VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS tel VARCHAR(50),
+        ADD COLUMN IF NOT EXISTS email VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS address TEXT
+    ")->execute();
+    echo "✅ Colonnes 'name', 'first_name', 'tel', 'email', 'address' ajoutées à user!\n\n";
+    
     echo "Ajout des colonnes à la table 'administrator'...\n";
     $db->createCommand("
         ALTER TABLE administrator 
