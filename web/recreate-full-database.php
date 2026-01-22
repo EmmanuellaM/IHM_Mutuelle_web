@@ -105,6 +105,7 @@ try {
         CREATE TABLE session (
             id SERIAL PRIMARY KEY,
             exercise_id INTEGER,
+            administrator_id INTEGER,
             date DATE NOT NULL,
             active BOOLEAN DEFAULT true,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
