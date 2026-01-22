@@ -78,6 +78,14 @@ try {
     ")->execute();
     echo "✅ Colonne 'state' ajoutée à tontine!\n\n";
     
+    echo "Ajout des colonnes à la table 'exercise'...\n";
+    $db->createCommand("
+        ALTER TABLE exercise 
+        ADD COLUMN IF NOT EXISTS year INTEGER,
+        ADD COLUMN IF NOT EXISTS administrator_id INTEGER
+    ")->execute();
+    echo "✅ Colonnes 'year', 'administrator_id' ajoutées à exercise!\n\n";
+    
     echo "<h2 style='color:green;'>🎉 Colonnes ajoutées avec succès!</h2>";
     echo "<p><a href='/direct-admin-login.php'>➡️ Se connecter en tant qu'admin</a></p>";
     
