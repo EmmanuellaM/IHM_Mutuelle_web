@@ -59,6 +59,13 @@ try {
     ")->execute();
     echo "✅ Colonnes 'name', 'surname', 'username' ajoutées à administrator!\n\n";
     
+    echo "Ajout de la colonne 'state' à la table 'tontine'...\n";
+    $db->createCommand("
+        ALTER TABLE tontine 
+        ADD COLUMN IF NOT EXISTS state BOOLEAN DEFAULT true
+    ")->execute();
+    echo "✅ Colonne 'state' ajoutée à tontine!\n\n";
+    
     echo "<h2 style='color:green;'>🎉 Colonnes ajoutées avec succès!</h2>";
     echo "<p><a href='/direct-admin-login.php'>➡️ Se connecter en tant qu'admin</a></p>";
     
