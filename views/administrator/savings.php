@@ -267,9 +267,9 @@ $this->beginBlock('title') ?>
                                                 ->one();
                                             $administrator = $latestSaving ? \app\models\Administrator::findOne($latestSaving->administrator_id) : null;
                                             $administratorUser = $administrator ? \app\models\User::findOne($administrator->id) : null;
-                                            $savingAmountUser = \app\models\Saving::find()
-    ->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])
-    ->sum('amount');
+                                            $savingAmountUser = (float) \app\models\Saving::find()
+                                                ->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])
+                                                ->sum('amount');
                                             ?>
                                             <tr>
                                                 <td><?= $index + 1 ?></td>

@@ -437,19 +437,18 @@ Epargnes
                                     <?php
                                     $user = \app\models\User::findOne($member->user_id);
                                     $latestBorrowing = \app\models\Borrowing::find()->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])->one();
-                                    $administrator = $latestBorrowing ? \app\models\Administrator::findOne($latestBorrowing->administrator_id) : null;
                                     $administratorUser = $administrator ? \app\models\User::findOne($administrator->id) : null;
-                                    $borrowingAmountUser = \app\models\Borrowing::find()
+                                    $borrowingAmountUser = (float) \app\models\Borrowing::find()
                                         ->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])
                                         ->sum('amount');
 
 
-                                    $TotalrefundedAmountUser = \app\models\Refund::find()
+                                    $TotalrefundedAmountUser = (float) \app\models\Refund::find()
                                         ->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])
                                         ->sum('amount');
 
                                     // ✅ MODIFICATION: Vérifier l'épargne TOTALE dans l'exercice, pas seulement dans cette session
-                                    $savingAmountUser = \app\models\Saving::find()
+                                    $savingAmountUser = (float) \app\models\Saving::find()
                                         ->joinWith('session')
                                         ->where(['saving.member_id' => $member->id])
                                         ->andWhere(['session.exercise_id' => $selectedSession->exercise_id])
@@ -459,7 +458,7 @@ Epargnes
                                     $borrowings = \app\models\Borrowing::find()->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])->all();
 
                                     foreach ($borrowings as $borrowing) {
-                                        $refundedAmountUser = \app\models\Refund::find()->where(['member_id' => $member->id, 'borrowing_id' => $borrowing->id])->sum('amount');
+                                        $refundedAmountUser = (float) \app\models\Refund::find()->where(['member_id' => $member->id, 'borrowing_id' => $borrowing->id])->sum('amount');
                                         
                                         // Calculer le montant total à rembourser (principe + intérêts)
                                         $totalToPay = $borrowing->amount + ($borrowing->amount * ($borrowing->interest / 100));
@@ -477,10 +476,10 @@ Epargnes
                                     <tr>
                                         <th><?= $index + 1 ?></th>
                                         <td><?= Html::encode($user->name . " " . $user->first_name) ?></td>
-                                        <td class="blue-text amount"><?= $borrowingAmountUser ?> XAF</td>
-                                        <td class="blue-text amount"><?= $TotalrefundedAmountUser ? $TotalrefundedAmountUser : 0 ?> XAF</td>
-                                        <td class="blue-text amount"><span style="color: <?= $totalRemainingAmount == 0 ? 'green' : 'red' ?>;"><?= $totalRemainingAmount ?> XAF</span></td>
-                                        <td><?= $totalRemainingAmount ?> XAF</td>
+                                        <td class="blue-text amount"><?= number_format($borrowingAmountUser, 0, ',', ' ') ?> XAF</td>
+                                        <td class="blue-text amount"><?= number_format($TotalrefundedAmountUser, 0, ',', ' ') ?> XAF</td>
+                                        <td class="blue-text amount"><span style="color: <?= $totalRemainingAmount == 0 ? 'green' : 'red' ?>;"><?= number_format($totalRemainingAmount, 0, ',', ' ') ?> XAF</span></td>
+                                        <td><?= number_format($totalRemainingAmount, 0, ',', ' ') ?> XAF</td>
                                         <?php if ($selectedSession->active): ?>
                                             <?php if ($savingAmountUser == 0): ?>
                                                 <td class="red-text">Pour emprunter, veuillez épargner dans l'exercice</td>
