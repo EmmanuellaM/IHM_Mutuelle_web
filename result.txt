@@ -1,0 +1,7 @@
+--- Calcul Renflouement 2026 ---
+Membres: 2
+Montant Fond Social: 150000
+Max Théorique: 300000
+Dépenses (Agape+Aides): 400000
+Différence: -100000
+Renflouement par membre: 0

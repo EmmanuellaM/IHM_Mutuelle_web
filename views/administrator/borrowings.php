@@ -433,11 +433,17 @@ Epargnes
                                         ->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])
                                         ->sum('amount');
 
+
                                     $TotalrefundedAmountUser = \app\models\Refund::find()
                                         ->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])
                                         ->sum('amount');
 
-                                    $savingAmountUser = \app\models\Saving::find()->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])->sum('amount');
+                                    // ✅ MODIFICATION: Vérifier l'épargne TOTALE dans l'exercice, pas seulement dans cette session
+                                    $savingAmountUser = \app\models\Saving::find()
+                                        ->joinWith('session')
+                                        ->where(['saving.member_id' => $member->id])
+                                        ->andWhere(['session.exercise_id' => $selectedSession->exercise_id])
+                                        ->sum('saving.amount');
 
                                     $totalRemainingAmount = 0;
                                     $borrowings = \app\models\Borrowing::find()->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])->all();
@@ -467,7 +473,7 @@ Epargnes
                                         <td><?= $totalRemainingAmount ?> XAF</td>
                                         <?php if ($selectedSession->active): ?>
                                             <?php if ($savingAmountUser == 0): ?>
-                                                <td class="red-text">Pour emprunter, veuillez epargner</td>
+                                                <td class="red-text">Pour emprunter, veuillez épargner dans l'exercice</td>
                                             <?php else: ?>
                                                 <td>
                                                     <?php $form = ActiveForm::begin([

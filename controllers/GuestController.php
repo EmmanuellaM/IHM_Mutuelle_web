@@ -117,17 +117,29 @@ public function actionAdministratorForm() {
             $administrator = Administrator::findOne(['username' => $administratorModel->username]);
             if ($administrator) {
                 $user = User::findOne($administrator->user_id);
-                if ($user && $user->validatePassword($administratorModel->password)) {
-                    if ($administratorModel->remember) {
-                        Yii::$app->user->login($user, 3600*24*30);
+                if ($user) {
+                    if ($user->validatePassword($administratorModel->password)) {
+                        if ($administratorModel->remember) {
+                            Yii::$app->user->login($user, 3600*24*30);
+                        } else {
+                            Yii::$app->user->login($user);
+                        }
+                        return ['success' => true, 'redirect' => Yii::$app->urlManager->createUrl('administrator/accueil')];
                     } else {
-                        Yii::$app->user->login($user);
+                        // DEBUG: Generic error for security usually, but specific here for debugging
+                        return ['success' => false, 'message' => "Mot de passe incorrect pour l'utilisateur lié (ID: " . $user->id . ")."];
                     }
-                    return ['success' => true, 'redirect' => Yii::$app->urlManager->createUrl('administrator/accueil')];
+                } else {
+                    return ['success' => false, 'message' => "Utilisateur lié introuvable (ID: " . $administrator->user_id . ")."];
                 }
+            } else {
+                return ['success' => false, 'message' => "Administrateur '" . $administratorModel->username . "' introuvable."];
             }
+        } else {
+            $errors = implode(", ", $administratorModel->getFirstErrors());
+            return ['success' => false, 'message' => "Erreur de validation: " . $errors];
         }
-        return ['success' => false, 'message' => "Le nom d'utilisateur ou le mot de passe est incorrect."];
+        return ['success' => false, 'message' => "Erreur inconnue."];
     }
     return $this->redirect('@guest.connection');
 }

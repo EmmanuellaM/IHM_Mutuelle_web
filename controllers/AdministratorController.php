@@ -238,67 +238,6 @@ class AdministratorController extends Controller
                     }
                     
                     if ($session->save()) {
-                        // --- DEBUT LOGIQUE REFINANCEMENT AUTOMATIQUE (3 MOIS) ---
-                        $exercise = Exercise::findOne($session->exercise_id);
-                        
-                        // 1. Récupérer tous les emprunts actifs de l'exercice
-                        $activeBorrowings = \app\models\Borrowing::find()
-                            ->joinWith('session')
-                            ->where(['borrowing.state' => true])
-                            ->andWhere(['session.exercise_id' => $exercise->id])
-                            ->all();
-
-                        // 2. Classer les sessions par date pour déterminer l'ancienneté
-                        $allSessions = \app\models\Session::find()
-                            ->where(['exercise_id' => $exercise->id])
-                            ->orderBy('date ASC')
-                            ->all();
-
-                        $sessionIndices = [];
-                        foreach ($allSessions as $index => $s) {
-                            $sessionIndices[$s->id] = $index;
-                        }
-
-                        $currentSessionIndex = $sessionIndices[$session->id];
-
-                        foreach ($activeBorrowings as $borrowing) {
-                            $borrowingSessionIndex = $sessionIndices[$borrowing->session_id] ?? -1;
-
-                            // Si l'emprunt a 3 sessions ou plus d'écart (ex: emprunté sess 1, on est sess 4. 4-1=3 => Echéance)
-                            if ($borrowingSessionIndex >= 0 && ($currentSessionIndex - $borrowingSessionIndex) >= 3) {
-                                
-                                $refundedAmount = FinanceManager::borrowingRefundedAmount($borrowing);
-                                $intendedAmount = FinanceManager::intendedAmountFromBorrowing($borrowing);
-                                $remaining = $intendedAmount - $refundedAmount;
-
-                                if ($remaining > 0) {
-                                    // A. Créer un remboursement VIRTUEL pour solder l'ancienne dette
-                                    $refund = new \app\models\Refund();
-                                    $refund->borrowing_id = $borrowing->id;
-                                    $refund->member_id = $borrowing->member_id;
-                                    $refund->session_id = $session->id; 
-                                    $refund->amount = $remaining;
-                                    $refund->administrator_id = $this->administrator->id;
-                                    $refund->save();
-
-                                    // B. Clôturer l'ancien emprunt
-                                    $borrowing->state = false;
-                                    $borrowing->save();
-
-                                    // C. Créer le NOUVEL emprunt (Restructuration)
-                                    $newBorrowing = new \app\models\Borrowing();
-                                    $newBorrowing->member_id = $borrowing->member_id;
-                                    $newBorrowing->session_id = $session->id;
-                                    $newBorrowing->administrator_id = $this->administrator->id;
-                                    $newBorrowing->amount = $remaining; // Le nouveau capital est le reste à payer (Intérêts composés)
-                                    $newBorrowing->interest = $exercise->interest;
-                                    $newBorrowing->state = true;
-                                    $newBorrowing->save();
-                                }
-                            }
-                        }
-                        // --- FIN LOGIQUE REFINANCEMENT ---
-
                         foreach (Member::find()->all() as $member) {
                             MailManager::alert_new_session($member->user(), $session);
                         }
@@ -1264,17 +1203,40 @@ public function actionNouvelleEmprunt()
         return RedirectionManager::abort($this);
     }
 
-    if (Borrowing::findOne(['member_id' => $member->id, 'state' => true])) {
-        $model->addError('member_id', 'Ce membre a déjà contracté un emprunt');
-        return $this->render(
-            "borrowings",
-            compact("model", "sessions", "pagination", "members")
-        );
+
+    // ✅ MODIFICATION: Vérifier si le membre a un emprunt actif NON REMBOURSÉ
+    $activeBorrowing = Borrowing::findOne(['member_id' => $member->id, 'state' => true]);
+    
+    if ($activeBorrowing) {
+        // Vérifier si l'emprunt est complètement remboursé
+        $intendedAmount = $activeBorrowing->intendedAmount();
+        $refundedAmount = $activeBorrowing->refundedAmount();
+        $remainingAmount = $intendedAmount - $refundedAmount;
+        
+        if ($remainingAmount <= 0) {
+            // L'emprunt est complètement remboursé, on le clôture automatiquement
+            $activeBorrowing->state = false;
+            $activeBorrowing->save();
+        } else {
+            // Il reste encore à rembourser, on bloque le nouvel emprunt
+            $model->addError('member_id', 
+                'Ce membre a déjà un emprunt actif non remboursé. Reste à payer: ' 
+                . number_format($remainingAmount, 0, ',', ' ') . ' XAF');
+            return $this->render(
+                "borrowings",
+                compact("model", "sessions", "pagination", "members")
+            );
+        }
     }
 
+
+    // ✅ MODIFICATION: Vérifier l'épargne TOTALE dans l'exercice, pas seulement dans cette session
+    // Cela permet à un membre d'épargner à une session et emprunter à une autre session
     $savings = Saving::find()
-        ->where(['member_id' => $member->id, 'session_id' => $session->id])
-        ->sum('amount');
+        ->joinWith('session')
+        ->where(['saving.member_id' => $member->id])
+        ->andWhere(['session.exercise_id' => $exercise->id])
+        ->sum('saving.amount');
 
     $maxBorrowingAmount = $this->calculateMaxBorrowingAmount($savings);
 
@@ -1282,8 +1244,9 @@ public function actionNouvelleEmprunt()
     $model->checkBorrowingAmount($maxBorrowingAmount);
     if ($model->amount > $maxBorrowingAmount) {
         $errorMessage =
-            'Le montant demandé est supérieur au montant maximum empruntable basé sur les épargnes de cette session : '
-            . $maxBorrowingAmount . ' XAF';
+            'Le montant demandé est supérieur au montant maximum empruntable basé sur vos épargnes totales dans cet exercice : '
+            . number_format($maxBorrowingAmount, 0, ',', ' ') . ' XAF (Épargne totale: ' 
+            . number_format($savings, 0, ',', ' ') . ' XAF)';
 
         $model->addError('amount', $errorMessage);
 
@@ -1397,7 +1360,7 @@ private function calculateMaxBorrowingAmount($savings)
         AdministratorSessionManager::setHome("exercise");
         $query = Exercise::find();
         $pagination = new Pagination([
-            'defaultPageSize' => 200,
+            'defaultPageSize' => 1,
             'totalCount' => $query->count(),
         ]);
 
@@ -1485,7 +1448,7 @@ private function calculateMaxBorrowingAmount($savings)
                 'members' => [],
                 'exercise' => null,
                 'sessions' => [],
-                'refunds' => []
+                'unpaidBorrowings' => []
             ]);
         }
 
@@ -1501,11 +1464,19 @@ private function calculateMaxBorrowingAmount($savings)
             ->orderBy(['created_at' => SORT_DESC])
             ->all();
 
+        // ✅ CORRECTION: Récupérer les emprunts NON REMBOURSÉS des exercices PRÉCÉDENTS
+        // On cherche les emprunts actifs (state = true) dont la session appartient à un exercice terminé
+        $unpaidBorrowings = Borrowing::find()
+            ->joinWith('session')
+            ->where(['borrowing.state' => true])
+            ->andWhere(['session.exercise_id' => Exercise::find()->where(['active' => false])->select('id')])
+            ->all();
+
         return $this->render('exercise_debts', [
             'members' => $members,
             'exercise' => $exercise,
             'sessions' => $sessions,
-            'refunds' => []
+            'unpaidBorrowings' => $unpaidBorrowings
         ]);
     }
 
@@ -2552,7 +2523,6 @@ public function actionAppliquerConfiguration()
                 $session = Session::findOne(['active' => true]);
                 if ($session) {
                     $model->session_id = $session->id;
-                    $model->administrator_id = $this->administrator->id;
                     
                     if ($model->save()) {
                         // Enregistrer la dépense (optionnel si calculé dynamiquement, mais bon pour la cohérence)

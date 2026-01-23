@@ -121,7 +121,7 @@ class FinanceManager
     }
 
     public static function intendedAmountFromBorrowing(Borrowing $borrowing) {
-        return $borrowing->amount + ($borrowing->amount*$borrowing->interest)/100.0;
+        return $borrowing->intendedAmount();
     }
 
     public static function notRefundedBorrowings() {

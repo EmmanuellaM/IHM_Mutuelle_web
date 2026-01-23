@@ -461,57 +461,50 @@ if ($firstSession) {
             <h3 class="text-muted text-center section-title">Dettes d'exercices</h3>
             <hr>
             <p class="warning-block text-center">
-                Attention ! Il s'agit des dettes d'exercices qui n'ont pas été remboursées.
-                
+                Attention ! Il s'agit des emprunts d'exercices précédents qui n'ont pas été complètement remboursés.
             </p>
 
             <?php
-            if (count($refunds)):
+            if (isset($unpaidBorrowings) && count($unpaidBorrowings)):
             ?>
             <table class="table table-hover">
                 <thead class="blue-grey lighten-4">
                 <tr>
                     <th>#</th>
                     <th>Membre</th>
-                    <th>Montant</th>
+                    <th>Montant Emprunté</th>
+                    <th>Montant Remboursé</th>
+                    <th>Reste à Payer</th>
                     <th>Année de l'exercice</th>
-                    <th></th>
+                    <th>Action</th>
                 </tr>
-
                 </thead>
                 <tbody>
-                <?php foreach ($refunds as $index => $refund): ?>
-                    <?php $member = \app\models\Member::findOne((\app\models\Borrowing::findOne($refund->borrowing_id))->member_id);
+                <?php foreach ($unpaidBorrowings as $index => $borrowing): ?>
+                    <?php 
+                    $member = \app\models\Member::findOne($borrowing->member_id);
                     $memberUser = \app\models\User::findOne($member->user_id);
-                    $exercise = \app\models\Exercise::findOne($refund->exercise_id);
+                    $session = \app\models\Session::findOne($borrowing->session_id);
+                    $exerciseYear = \app\models\Exercise::findOne($session->exercise_id);
+                    
+                    $intendedAmount = $borrowing->intendedAmount();
+                    $refundedAmount = $borrowing->refundedAmount();
+                    $remainingAmount = $intendedAmount - $refundedAmount;
                     ?>
                     <tr>
                         <th scope="row"><?= $index + 1 ?></th>
                         <td class="text-capitalize"><?= $memberUser->name . " " . $memberUser->first_name ?></td>
-                        <td class="blue-text"><?= $refund->amount ?> XAF</td>
-                        <td class="text-capitalize"><?= $exercise->year ?></td>
-                        <td><button class="btn btn-primary m-0 p-2" data-toggle="modal" data-target="#modal<?= $index?>">Regler</button></td>
+                        <td class="text-primary fw-bold"><?= number_format($borrowing->amount, 0, ',', ' ') ?> XAF</td>
+                        <td class="text-success fw-bold"><?= number_format($refundedAmount, 0, ',', ' ') ?> XAF</td>
+                        <td class="text-danger fw-bold"><?= number_format($remainingAmount, 0, ',', ' ') ?> XAF</td>
+                        <td class="text-capitalize"><?= $exerciseYear->year ?></td>
+                        <td>
+                            <a href="<?= Yii::getAlias("@administrator.borrowings_details") . "?member_id=" . $member->id . "&session_id=" . $session->id ?>" 
+                               class="btn btn-primary btn-sm">
+                                <i class="fas fa-eye"></i> Voir Détails
+                            </a>
+                        </td>
                     </tr>
-
-
-                <div class="modal  fade" id="modal<?= $index ?>" tabindex="-1" role="dialog"
-                     aria-labelledby="myModalLabel"
-                     aria-hidden="true">
-                    <div class="modal-dialog modal-lg" role="document">
-                        <div class="modal-content">
-                            <div class="modal-body">
-
-                                <p class="text-center">Êtes-vous sûr(e) de vouloir régler la dette de ce membre?
-                                </p>
-
-                                <div class="form-group text-center">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
-                                    <a href="<?= Yii::getAlias("@administrator.treat_debt")."?q=".$refund->id?>" class="btn btn-primary">Oui</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 <?php endforeach; ?>
                 </tbody>
             </table>

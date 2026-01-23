@@ -1,0 +1,4 @@
+--- Simulation Retour Formule (Dépenses / Membres) ---
+Membres Actifs: 2
+Total Dépenses: 400000
+Renflouement par membre: 200000

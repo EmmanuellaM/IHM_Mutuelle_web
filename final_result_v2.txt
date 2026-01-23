@@ -1,0 +1,8 @@
+--- Simulation Finale V2 ---
+Membres Actifs: 2
+Membres Ayant Payé (>= 150000): 3
+Montant Cotisation: 150000
+Fonds Social Total (Payé * Cotisation): 450000
+Dépenses (Agape:  + Aides: 400000): 400000
+Reste (Fonds - Dépenses): 50000
+Renflouement par membre: 25000
