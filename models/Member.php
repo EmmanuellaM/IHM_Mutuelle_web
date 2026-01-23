@@ -42,7 +42,7 @@ class Member extends ActiveRecord
     }
 
     public function activeBorrowing() {
-        return Borrowing::findOne(['member_id' => $this,'state'=>true]);
+        return Borrowing::findOne(['member_id' => $this->id,'state'=>true]);
     }
 
     public function savedAmount(Exercise $exercise=null) {
