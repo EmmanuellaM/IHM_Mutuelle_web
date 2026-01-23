@@ -333,9 +333,19 @@ Epargnes
                 <form method="get" action="<?= Yii::getAlias('@administrator.borrowings') ?>">
                     <div class="input-group mb-3">
                         <select name="session_id" class="form-control">
-                            <?php foreach ($allSessions as $session) : ?>
+                            <?php 
+                            $months = [
+                                1 => 'Janvier', 2 => 'Février', 3 => 'Mars', 4 => 'Avril', 
+                                5 => 'Mai', 6 => 'Juin', 7 => 'Juillet', 8 => 'Août', 
+                                9 => 'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Décembre'
+                            ];
+                            foreach ($allSessions as $session) : 
+                                $date = new DateTime($session->date);
+                                $monthName = $months[(int)$date->format('n')];
+                                $formattedDate = $monthName;
+                            ?>
                                 <option value="<?= Html::encode($session->id) ?>" <?= $selectedSession && $session->id == $selectedSession->id ? 'selected' : '' ?>>
-                                    Session <?= Html::encode(ucfirst((new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, 'MMMM'))->format(new DateTime($session->date)))) ?> <?= $session->active ? '<span class="text-success">(active)</span>' : '' ?>
+                                    Session <?= Html::encode(ucfirst($formattedDate)) ?> <?= $session->active ? '<span class="text-success">(active)</span>' : '' ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
