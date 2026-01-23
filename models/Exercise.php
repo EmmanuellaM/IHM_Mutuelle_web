@@ -92,15 +92,9 @@ class Exercise extends ActiveRecord
      * @return float|int
      */
     public function totalInscriptionAmount() {
-        // Vérifier si l'exercice est actif
-        if ($this->active !== 1) {
-            return 0;
-        }
-        
-        // Calculer le montant total des inscriptions pour les membres actifs
-        return (float) Member::find()
-            ->where(['inscription' => 1])
-            ->sum('inscription');
+        return (float) Registration::find()
+            ->where(['exercise_id' => $this->id])
+            ->sum('amount');
     }
 
     /**
@@ -108,15 +102,9 @@ class Exercise extends ActiveRecord
      * @return float|int
      */
     public function totalSocialCrownAmount() {
-        // Vérifier si l'exercice est actif
-        if ($this->active !== 1) {
-            return 0;
-        }
-        
-        // Calculer le montant total des fonds sociaux pour les membres actifs
-        return (float) Member::find()
-            ->where(['social_crown' => 1])
-            ->sum('social_crown');
+        return (float) SocialFund::find()
+            ->where(['exercise_id' => $this->id])
+            ->sum('amount');
     }
 
     /**
