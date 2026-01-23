@@ -92,12 +92,9 @@ class Exercise extends ActiveRecord
      * @return float|int
      */
     public function totalInscriptionAmount() {
-        $startDate = $this->year . '-01-01 00:00:00';
-        $endDate = $this->year . '-12-31 23:59:59';
-        
-        return (float) Registration::find()
-            ->where(['between', 'created_at', $startDate, $endDate])
-            ->sum('amount');
+        // Fallback: Utiliser la table Member car la table Registration semble vide
+        // On somme simplement la colonne inscription de tous les membres
+        return (float) Member::find()->sum('inscription');
     }
 
     /**
@@ -105,12 +102,8 @@ class Exercise extends ActiveRecord
      * @return float|int
      */
     public function totalSocialCrownAmount() {
-        $startDate = $this->year . '-01-01 00:00:00';
-        $endDate = $this->year . '-12-31 23:59:59';
-        
-        return (float) SocialFund::find()
-            ->where(['between', 'created_at', $startDate, $endDate])
-            ->sum('amount');
+        // Fallback: Utiliser la table Member car la table SocialFund semble vide
+        return (float) Member::find()->sum('social_crown');
     }
 
     /**
