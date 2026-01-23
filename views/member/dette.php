@@ -35,7 +35,7 @@ $inscription = $member->inscription;
 $currentYear = date('Y');
 $totalAides = FinancialAid::find()
     ->where(['member_id' => $member->id])
-    ->andWhere(['YEAR(date)' => $currentYear - 1])
+    ->andWhere('EXTRACT(YEAR FROM date) = :year', [':year' => $currentYear - 1])
     ->sum('amount') ?? 0;
 
 // Calcul des montants
