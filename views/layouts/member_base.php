@@ -218,6 +218,9 @@ $this->title = "Mutuelle - ENSPY";
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg">
             <div class="container-fluid">
+                <button class="mobile-toggle d-lg-none" onclick="document.querySelector('.admin-sidebar').classList.toggle('show')">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <a class="navbar-brand waves-effect" href="<?= Yii::getAlias("@member.home") ?>">
                     <img src="/img/icon.png" alt="ENSP" style="width: 40px; height: 40px; margin-right: 10px;">
             
@@ -287,22 +290,51 @@ $this->title = "Mutuelle - ENSPY";
                 --white: #fff;
             }
 
-            .navbar {
-                background: var(--white);
-                box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-                padding: 0 1.5rem;
-                height: var(--header-height);
-                padding-left: calc(var(--sidebar-width) + 1rem);
-            }
+                .navbar {
+                    background: var(--white);
+                    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+                    padding: 0 1.5rem;
+                    height: var(--header-height);
+                    padding-left: calc(var(--sidebar-width) + 1rem);
+                }
 
-            .navbar-brand {
-                display: flex;
-                align-items: center;
-                padding: 0.5rem 0;
-                color: #2c3e50;
-                font-weight: bold;
-                gap: 10px;
-            }
+                @media (max-width: 992px) {
+                    .navbar {
+                        padding-left: 1rem; /* Réinitialiser le padding sur mobile */
+                    }
+                    
+                    .admin-sidebar {
+                        transform: translateX(-100%);
+                        transition: transform 0.3s ease;
+                    }
+
+                    .admin-sidebar.show {
+                        transform: translateX(0);
+                    }
+                    
+                    .mobile-toggle {
+                        display: block !important;
+                    }
+                }
+                
+                .mobile-toggle {
+                    display: none;
+                    background: none;
+                    border: none;
+                    color: var(--secondary);
+                    font-size: 1.5rem;
+                    padding: 0.5rem;
+                    margin-right: 0.5rem;
+                }
+
+                .navbar-brand {
+                    display: flex;
+                    align-items: center;
+                    padding: 0.5rem 0;
+                    color: #2c3e50;
+                    font-weight: bold;
+                    gap: 10px;
+                }
 
             .navbar-brand img {
                 height: 40px;
