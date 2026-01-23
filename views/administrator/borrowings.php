@@ -437,6 +437,7 @@ Epargnes
                                     <?php
                                     $user = \app\models\User::findOne($member->user_id);
                                     $latestBorrowing = \app\models\Borrowing::find()->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])->one();
+                                    $administrator = $latestBorrowing ? \app\models\Administrator::findOne($latestBorrowing->administrator_id) : null;
                                     $administratorUser = $administrator ? \app\models\User::findOne($administrator->id) : null;
                                     $borrowingAmountUser = (float) \app\models\Borrowing::find()
                                         ->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])
