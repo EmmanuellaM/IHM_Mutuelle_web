@@ -92,8 +92,11 @@ class Exercise extends ActiveRecord
      * @return float|int
      */
     public function totalInscriptionAmount() {
+        $startDate = $this->year . '-01-01 00:00:00';
+        $endDate = $this->year . '-12-31 23:59:59';
+        
         return (float) Registration::find()
-            ->where(['exercise_id' => $this->id])
+            ->where(['between', 'created_at', $startDate, $endDate])
             ->sum('amount');
     }
 
@@ -102,8 +105,11 @@ class Exercise extends ActiveRecord
      * @return float|int
      */
     public function totalSocialCrownAmount() {
+        $startDate = $this->year . '-01-01 00:00:00';
+        $endDate = $this->year . '-12-31 23:59:59';
+        
         return (float) SocialFund::find()
-            ->where(['exercise_id' => $this->id])
+            ->where(['between', 'created_at', $startDate, $endDate])
             ->sum('amount');
     }
 
