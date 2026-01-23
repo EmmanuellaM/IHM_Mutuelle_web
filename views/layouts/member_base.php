@@ -495,6 +495,15 @@ $this->title = "Mutuelle - ENSPY";
         <script type="text/javascript">
             // Animations initialization
             new WOW().init();
+            
+            // Auto-wrap tables for responsiveness
+            $(document).ready(function() {
+                $('table.table').each(function() {
+                    if (!$(this).parent().hasClass('table-responsive')) {
+                        $(this).wrap('<div class="table-responsive"></div>');
+                    }
+                });
+            });
         </script>
 
         <?php if (isset($this->blocks['script'])): ?>

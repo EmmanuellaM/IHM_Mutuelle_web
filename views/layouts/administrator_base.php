@@ -461,6 +461,16 @@ $this->title = "Mutuelle - ENSPY";
     <?php if (isset($this->blocks['script'])) : ?>
         <?= $this->blocks['script'] ?>
     <?php endif; ?>
+    <script>
+        // Auto-wrap tables for responsiveness
+        $(document).ready(function() {
+            $('table.table').each(function() {
+                if (!$(this).parent().hasClass('table-responsive')) {
+                    $(this).wrap('<div class="table-responsive"></div>');
+                }
+            });
+        });
+    </script>
     <!-- Append modals to body to fix z-index issues -->
     <script>
     $(document).on('show.bs.modal', '.modal', function() {
