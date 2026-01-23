@@ -250,9 +250,15 @@ $socialCrownTarget = $exercise->social_crown_amount;
                         </div>
                     </div>
 
-                    <a href="<?= Url::to(['/member/process-payment', 'type' => 'social']) ?>" class="btn btn-pay">
-                        Régler le Fond Social
-                    </a>
+                    <?php if ($montantFondSocialReste > 0): ?>
+                        <a href="<?= Url::to(['/member/process-payment', 'type' => 'social']) ?>" class="btn btn-pay">
+                            Régler le Fond Social
+                        </a>
+                    <?php else: ?>
+                        <div class="text-center mt-3" style="color: var(--success-color); font-weight: 600;">
+                            ✅ Fond Social Réglé
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -286,12 +292,20 @@ $socialCrownTarget = $exercise->social_crown_amount;
                     </div>
 
                     <div class="progress">
-                        <div class="progress-bar" role="progressbar" style="width: 100%"></div>
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: <?= ($montantInscriptionPaye > 0 ? ($montantInscriptionPaye / $montantInscriptionTotal) * 100 : 0) ?>%">
+                        </div>
                     </div>
 
-                    <a href="<?= Url::to(['/member/process-payment', 'type' => 'registration']) ?>" class="btn btn-pay">
-                        Régler l'Inscription
-                    </a>
+                    <?php if ($montantInscriptionReste > 0): ?>
+                        <a href="<?= Url::to(['/member/process-payment', 'type' => 'registration']) ?>" class="btn btn-pay">
+                            Régler l'Inscription
+                        </a>
+                    <?php else: ?>
+                        <div class="text-center mt-3" style="color: var(--success-color); font-weight: 600;">
+                            ✅ Inscription Réglée
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
