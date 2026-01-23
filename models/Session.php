@@ -68,14 +68,16 @@ class Session extends ActiveRecord
     }
 
     /**
-     * AFTER SAVE: Check for renflouements and deactivate members if it's the 4th session
+     * AFTER SAVE: 
+     * 1. Check for renflouements and deactivate members if it's the 4th session
+     * 2. Apply penalties to borrowings every 3 sessions
      */
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
         
         if ($insert) {
-            // Si c'est la 4ème session de cet exercice
+            // ===== RENFLOUEMENT: Désactivation après 4 sessions =====
             if ($this->number() >= 4) {
                 // Trouver tous les renflouements liés à cet exercice qui ne sont pas encore payés
                 $renflouements = Renflouement::find()
@@ -92,7 +94,7 @@ class Session extends ActiveRecord
                             $renflouement->status = Renflouement::STATUS_LATE;
                             $renflouement->save(false);
                             
-                            Yii::warning("Membre {$member->id} désactivé car renflouement non payé à la session " . $this->number());
+                            \Yii::warning("Membre {$member->id} désactivé car renflouement non payé à la session " . $this->number());
                         }
                     }
                 }

@@ -472,11 +472,11 @@ $this->title = "Mutuelle - ENSPY";
         });
     </script>
     <!-- Append modals to body to fix z-index issues -->
-    <script>
+    <!-- <script>
     $(document).on('show.bs.modal', '.modal', function() {
-        $(this).appendTo('body');
+        // $(this).appendTo('body'); // Disabled to prevent layout shifting
     });
-    </script>
+    </script> -->
     <?php $this->endBody(); ?>
 </body>
 

@@ -16,7 +16,7 @@ class Saving extends ActiveRecord
     public function administrator() {
         return Administrator::findOne($this->administrator_id);
     }
-    public function session() {
-        return Session::findOne($this->session_id);
+    public function getSession() {
+        return $this->hasOne(Session::class, ['id' => 'session_id']);
     }
 }

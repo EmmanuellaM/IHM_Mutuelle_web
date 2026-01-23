@@ -81,7 +81,7 @@ Mes emprunts
                         <?php
                         $amount = $borrowing->amount;
                         $administrator = $borrowing->administrator()->user();
-                        $session = $borrowing->session();
+                        $session = $borrowing->session;
                         $intendedAmount = $borrowing->intendedAmount();
                         $refundedAmount = $borrowing->refundedAmount();
                         $interest = $borrowing->interest;

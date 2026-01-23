@@ -1,0 +1,8 @@
+--- Simulation Finale 2026 ---
+Membres Actifs: 2
+Membres Ayant Payé: 0
+Montant Cotisation: 150000
+Fonds Social Total (Payé * Cotisation): 0
+Dépenses (Agape:  + Aides: 400000): 400000
+Reste (Fonds - Dépenses): -400000
+Renflouement par membre: 0

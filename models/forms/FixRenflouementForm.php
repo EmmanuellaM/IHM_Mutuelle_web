@@ -11,8 +11,15 @@ class FixRenflouementForm extends Model
     public function rules()
     {
         return [
-            [['amount'], 'required', 'message' => 'Ce champ est obligatoire'],
-            ['amount', 'integer', 'min' => 1, 'message' => 'Ce champ attend un entier positif']
+            ['amount', 'required', 'message' => 'Le montant est requis'],
+            ['amount', 'number', 'min' => 1, 'message' => 'Le montant doit être supérieur à 0'],
+        ];
+    }
+
+    public function attributeLabels()
+    {
+        return [
+            'amount' => 'Montant à payer',
         ];
     }
 }

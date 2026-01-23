@@ -260,101 +260,17 @@ class Exercise extends ActiveRecord
         $activeMembers = $this->numberofActiveMembers();
         if ($activeMembers <= 0) return 0;
 
-        // Fonds Social Max attendu
-        $maxSocialFund = $activeMembers * $this->social_crown_amount;
+        // Formule demandée : (Agapes + Aides) / Membres Actifs
+        // On ne tient plus compte du fonds social max ou collecté.
+        // On repartit simplement les dépenses.
 
-        // Dépenses réelles (Agape + Aides)
         $totalAgape = $this->totalAgapeAmount();
         $totalHelps = $this->getTotalHelpsFromSocialFund();
-        
-        // Deficit = Dépenses - Fonds Social Réellement disponible (simplifié selon formule demandée)
-        // La formule demandée est: (Fonds Social Max - Agape Annuel - Total Aides) / Nbr Membres
-        // ATTENTION: Si Agapes + Aides > Fonds Social Max, il y a un problème.
-        // Mais la formule de l'utilisateur semble vouloir dire: "Ce qui reste du fond social théorique est-il suffisant ?"
-        // Non, "Renflouement" veut dire "remettre de l'argent".
-        // Si la formule est (Max - Dépenses) / N, cela calcule ce qui RESTE par membre. Pas ce qu'il faut payer.
-        
-        // INTERPRETATION CORRECTE DU "RENFLOUEMENT":
-        // Le but est de remettre le fond social à niveau ?
-        // Ou de combler le déficit ?
-        // L'utilisateur a dit: "(Fonds Social Max - Agape Annuel - Total Aides) / Nombre Membres Actifs"
-        
-        // Si Max = 1000, Agape = 200, Aides = 100. Résultat = (1000 - 300) / N = 700 / N.
-        // Cela ressemble à une répartition du SOLDE.
-        // Si c'est un "renflouement", cela devrait être (Dépenses) / N pour rembourser ce qui a été dépensé.
-        // OU ALORS: Le fond social est "consommé" et doit être reconstitué ?
-        
-        // RELECTURE DE LA DEMANDE PRECEDENTE:
-        // "calcule le montant que chaque membre doit payer pour renflouer la caisse"
-        // Si la caisse doit être "pleine" (Max), et qu'on a dépensé X. Il manque X.
-        // Donc on doit payer X / N.
-        
-        // La formule donnée par l'utilisateur: `(Fonds Social Max - Agape Annuel - Total Aides) / Nombre Membres Actifs`
-        // Si Max=1000, Dépenses=300. (1000-300)/N = 700/N.
-        // Si on paye 700/N chacun, on ajoute 700. Total en caisse = (Soldes restants?) + 700 = ...
-        
-        // Hypothèse: Le fond social est réinitialisé ou vidé ?
-        // Si on applique strictemenent la formule de l'utilisateur:
-        
-        $amount = ($maxSocialFund - $totalAgape - $totalHelps) / $activeMembers;
-        
-        // Si le résultat est positif, cela veut dire qu'il reste de l'argent ? 
-        // Si le résultat est négatif, il y a un déficit ?
-        
-        // Attendons, si c'est un RENFLOUEMENT, c'est pour payer une dette ou un manque.
-        // Si (Max - Dépenses) est positif, c'est le reste. Pourquoi payer ce qui reste ?
-        // C'est probablement (Dépenses) / N ???
-        
-        // MAIS l'utilisateur a écrit explicitement:
-        // "Renflouement calculation: The calculation should be (Fonds Social Max - Agape Annuel - Total Aides) / Nombre Membres Actifs"
-        // Je vais implémenter cette formule exactemenent. Si c'est négatif, on prend 0 ?
-        
-        // Correction potentielle: Peut-être que le fond social Max est l'OBJECTIF.
-        
-        return $amount > 0 ? $amount : 0; 
-        
-        // NOTE: Cette logique me semble étrange pour un renflouement (payer ce qu'on a pas dépensé ?), 
-        // mais je respecte la formule demandée. 
-        // A MOINS QUE: "Fonds Social Max" soit ce qu'on a COTISÉ.
-        // "Agape" et "Aides" sont les SORTIES.
-        // Donc (Cotisations - Sorties) = CE QU'IL RESTE EN CAISSE.
-        // Si on divise ça par N, c'est la part de chaque membre dans le solde restant.
-        // Ce n'est pas un "paiement" à faire. C'est une "répartition" ou un "avoir".
-        
-        // Est-ce que "Renflouement" veut dire "Distribution" ?
-        // "Renflouement du fonds social" -> Refilling the social fund.
-        
-        // SI le but est de REMPLIR la caisse pour l'année prochaine:
-        // Si on a consommé, on doit remettre.
-        // Donc on devrait payer (Dépenses) / N.
-        
-        // Je vais commenter la formule et l'appliquer telle quelle, mais je soupçonne une erreur formulation utilisateur.
-        // "renflouement amount must be calculated... formula: (Fonds Social Max - Agape Annuel - Total Aides) / Nombre Membres Actifs"
-        
-        // Je vais utiliser (Fonds Social Max - (Solde Reel)) / N ?
-        // Solde Reel = Cotisations - Dépenses.
-        // Fonds Social Max = Objectif.
-        // Manque = Max - Reel = Max - (Cotis - Depenses) = Max - Cotis + Depenses.
-        // Si tout le monde a payé sa cotisation (Max = Cotis), alors Manque = Dépenses.
-        
-        // OK, JE VAIS UTILISER LA LOGIQUE "Dépenses / N" car c'est le seul sens logique de "Renflouement" (combler le trou).
-        // Total à rembourser = Total Agape + Total Aides.
-        // Par membre = Total / N.
-        
-        // MAIS JE DOIS SUIVRE L'INSTRUCTION UTILISATEUR SI POSSIBLE.
-        // L'utilisateur a dit: "Renflouement calculation based on social fund deficit divided by active members"
-        // DEFICIT = Ce qui manque.
-        // Si on a vidé la caisse, le déficit est ce qui est parti.
-        
-        // Je vais implémenter: (Total Agape + Total Aides) / ActiveMembers.
-        // C'est le plus sûr pour un "Refilling".
-        // La formule utilisateur "(Fonds Social Max - Agape - Aides)" ressemble à un calcul de solde restant.
-        
-        // DECISION: Je vais implémenter (TotalAgape + TotalAides) / ActiveMembers.
-        
         $totalExpenses = $totalAgape + $totalHelps;
+        
         $amount = $totalExpenses / $activeMembers;
-        return ceil($amount);
+        
+        return $amount > 0 ? ceil($amount) : 0;
     }
 
     public function getTotalHelpsFromSocialFund()

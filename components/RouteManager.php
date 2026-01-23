@@ -12,7 +12,7 @@ class RouteManager {
         'guest.reset_password' => "/guest/reset_password",//C'est moi ici
 //Ici c'est le lien dans la vue connection                          //Ici c'est dans le controleur
         'guest.member_form' => "/guest/member-form",
-        'guest.administrator_form' => '/guest/adminlogin',
+        'guest.administrator_form' => '/guest/administrator-form',
 
         // ============================ ESPACE ADMINISTRATEUR ==========================
 

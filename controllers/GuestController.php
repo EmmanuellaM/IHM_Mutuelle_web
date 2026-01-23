@@ -123,6 +123,8 @@ public function actionAdministratorForm() {
                     if ($administratorModel->remember) {
                         Yii::$app->user->login($user, 3600*24*30);
                     } else {
+                        // DEBUG: Generic error for security usually, but specific here for debugging
+                        // return ['success' => false, 'message' => "Mot de passe incorrect pour l'utilisateur lié (ID: " . $user->id . ")."];
                         Yii::$app->user->login($user);
                     }
                     
@@ -135,7 +137,12 @@ public function actionAdministratorForm() {
                     // Sinon, rediriger directement (POST classique)
                     return $this->redirect(['administrator/accueil']);
                 }
+            } else {
+                // return ['success' => false, 'message' => "Administrateur '" . $administratorModel->username . "' introuvable."];
             }
+        } else {
+            $errors = implode(", ", $administratorModel->getFirstErrors());
+            return ['success' => false, 'message' => "Erreur de validation: " . $errors];
         }
         
         // En cas d'échec
