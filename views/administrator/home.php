@@ -462,6 +462,7 @@
                         if (count($borrowings)) :
                             foreach ($borrowings as $borrowing) :
                                 $member = $borrowing->member();
+                                if (!$member) continue; // Skip orphaned borrowings
                                 $user = $member->user();
                                 $intendedAmount = \app\managers\FinanceManager::intendedAmountFromBorrowing($borrowing);
                                 $refundedAmount = $borrowing->refundedAmount();

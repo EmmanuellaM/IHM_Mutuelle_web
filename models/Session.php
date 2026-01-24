@@ -99,6 +99,7 @@ class Session extends ActiveRecord
                     }
                 }
             }
+
         }
 
         // ===== NOUVELLE LOGIQUE EMPRUNTS (Exécutée sur Insert ET Update) =====

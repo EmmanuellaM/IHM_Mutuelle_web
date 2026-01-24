@@ -285,9 +285,45 @@ class Member extends ActiveRecord
             $totalDebt += ($b->amount - $b->refundedAmount());
         }
 
-        if ($totalDebt <= 0) return false; // Pas de dette = Solvable
+        // 3. Comparaison (Critère 1 : Capacité d'emprunt dépassée)
+        // On réimplémente ici la logique des paliers (identique à AdministratorController::calculateMaxBorrowingAmount)
+        $maxCapacity = 0;
+        if ($savings <= 200000) {
+            $maxCapacity = 5 * $savings;
+        } elseif ($savings <= 500000) {
+            $maxCapacity = 5 * $savings;
+        } elseif ($savings <= 1000000) {
+            $maxCapacity = 4 * $savings;
+        } elseif ($savings <= 1500000) {
+            $maxCapacity = 3 * $savings;
+        } elseif ($savings <= 2000000) {
+            $maxCapacity = 2 * $savings;
+        } else {
+            $maxCapacity = 1.5 * $savings;
+        }
 
-        // 3. Comparaison
-        return ($savings * 5) < $totalDebt;
+        if ($totalDebt > $maxCapacity) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if member has any late renflouements
+     * @return bool
+     */
+    public function hasLateRenflouement() {
+        $lateRenflouements = Renflouement::find()
+            ->where(['member_id' => $this->id])
+            ->andWhere(['!=', 'status', Renflouement::STATUS_PAID])
+            ->all();
+
+        foreach ($lateRenflouements as $renflouement) {
+            if ($renflouement->status === Renflouement::STATUS_LATE || $renflouement->isDeadlinePassed()) {
+                return true; 
+            }
+        }
+        return false;
     }
 }
