@@ -1250,7 +1250,6 @@ public function actionNouvelleEmprunt()
     $maxBorrowingAmount = $this->calculateMaxBorrowingAmount($savings);
 
     // Pour ajouter le pop up au message d'erreur
-    $model->checkBorrowingAmount($maxBorrowingAmount);
     if ($model->amount > $maxBorrowingAmount) {
         $errorMessage =
             'Le montant demandé est supérieur au montant maximum empruntable basé sur vos épargnes totales dans cet exercice : '
