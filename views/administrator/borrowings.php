@@ -534,10 +534,9 @@ Epargnes
 
 <?php $this->beginBlock('script') ?>
 <script>
-    $(document).ready(function() {
-        $('#modalLRFormDemo').on('shown.bs.modal', function () {
-            $('#modalLRFormDemo input:first').focus();
-        });
+        <?php if (isset($errorMessage)): ?>
+            alert("<?= \yii\helpers\Html::encode($errorMessage) ?>");
+        <?php endif; ?>
     });
 </script>
 <?php $this->endBlock() ?>
