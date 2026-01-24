@@ -218,6 +218,20 @@
     <?= \yii\helpers\Html::hiddenInput('SettingForm[interest]', $model->interest, ['id' => 'interest-hidden']) ?>
 </div>
 
+<!-- NOUVEAU CHAMP : Taux de pénalité -->
+<div class="field-highlight">
+    <?= $form->field($model, 'penalty_rate')->input("number", [
+        'required' => 'required',
+        'id' => 'penalty-rate-field',
+        'class' => 'form-control field-readonly',
+        'min' => '0',
+        'step' => '0.1',
+        'disabled' => true 
+    ])->label('<div class="label-with-icon"><i class="fas fa-exclamation-triangle"></i> Taux de pénalité (m) appliqué sur la dette restante (%)</div>') ?>
+    
+    <?= \yii\helpers\Html::hiddenInput('SettingForm[penalty_rate]', $model->penalty_rate, ['id' => 'penalty-rate-hidden']) ?>
+</div>
+
 <div class="field-highlight">
     <?= $form->field($model, 'social_crown')->input("number", [
         'required' => 'required',
@@ -273,19 +287,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Champs visibles
     const interestField = document.getElementById('interest-field');
+    const penaltyRateField = document.getElementById('penalty-rate-field'); // Nouveau
     const socialCrownField = document.getElementById('social-crown-field');
     const inscriptionField = document.getElementById('inscription-field');
     
-    // Champs cachés (ces champs sont ceux qui seront vraiment soumis)
+    // Champs cachés
     const interestHidden = document.getElementById('interest-hidden');
+    const penaltyRateHidden = document.getElementById('penalty-rate-hidden'); // Nouveau
     const socialCrownHidden = document.getElementById('social-crown-hidden');
     const inscriptionHidden = document.getElementById('inscription-hidden');
     
     const fieldHighlights = document.querySelectorAll('.field-highlight');
     
-    // Sauvegarde des valeurs initiales pour pouvoir annuler
+    // Sauvegarde
     const initialValues = {
         interest: interestField.value,
+        penaltyRate: penaltyRateField.value, // Nouveau
         socialCrown: socialCrownField.value,
         inscription: inscriptionField.value
     };
@@ -294,129 +311,109 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fonction pour activer le mode édition
     function enableEditMode() {
-        // Rendre les champs éditables en retirant disabled
+        // Rendre les champs éditables
         interestField.removeAttribute('disabled');
+        penaltyRateField.removeAttribute('disabled'); // Nouveau
         socialCrownField.removeAttribute('disabled');
         inscriptionField.removeAttribute('disabled');
         
-        // Retirer la classe readonly pour changer l'apparence
+        // Retirer la classe readonly
         interestField.classList.remove('field-readonly');
+        penaltyRateField.classList.remove('field-readonly'); // Nouveau
         socialCrownField.classList.remove('field-readonly');
         inscriptionField.classList.remove('field-readonly');
         
-        // Mettre en surbrillance les champs éditables
         fieldHighlights.forEach(field => {
             field.classList.add('active');
         });
 
-        // Changer le texte et l'icône du bouton
         editSaveButton.innerHTML = '<i class="fas fa-save me-1"></i> Enregistrer';
         editSaveButton.classList.remove('btn-primary');
         editSaveButton.classList.add('btn-success');
-
-        // Afficher le bouton Annuler
         cancelButton.style.display = 'inline-block';
-
-        // Activer le mode édition
         isEditMode = true;
     }
 
-    // Fonction pour désactiver le mode édition et revenir en lecture seule
+    // Fonction pour désactiver
     function disableEditMode() {
-        // Remettre en lecture seule
         interestField.setAttribute('disabled', true);
+        penaltyRateField.setAttribute('disabled', true); // Nouveau
         socialCrownField.setAttribute('disabled', true);
         inscriptionField.setAttribute('disabled', true);
         
-        // Remettre la classe readonly
         interestField.classList.add('field-readonly');
+        penaltyRateField.classList.add('field-readonly'); // Nouveau
         socialCrownField.classList.add('field-readonly');
         inscriptionField.classList.add('field-readonly');
         
-        // Supprimer la surbrillance des champs
         fieldHighlights.forEach(field => {
             field.classList.remove('active');
         });
 
-        // Restaurer les valeurs initiales si on annule
+        // Restaurer valeurs
         interestField.value = initialValues.interest;
+        penaltyRateField.value = initialValues.penaltyRate; // Nouveau
         socialCrownField.value = initialValues.socialCrown;
         inscriptionField.value = initialValues.inscription;
         
-        // Restaurer aussi les champs cachés
         interestHidden.value = initialValues.interest;
+        penaltyRateHidden.value = initialValues.penaltyRate; // Nouveau
         socialCrownHidden.value = initialValues.socialCrown;
         inscriptionHidden.value = initialValues.inscription;
 
-        // Changer le texte et l'icône du bouton
         editSaveButton.innerHTML = '<i class="fas fa-edit me-1"></i> Modifier';
         editSaveButton.classList.remove('btn-success');
         editSaveButton.classList.add('btn-primary');
-
-        // Masquer le bouton Annuler
         cancelButton.style.display = 'none';
-
-        // Désactiver le mode édition
         isEditMode = false;
     }
     
-    // Fonction pour soumettre le formulaire et enregistrer les modifications
+    // Save
     function saveChanges() {
-        // Validation basique
         const interestValue = parseFloat(interestField.value);
+        const penaltyRateValue = parseFloat(penaltyRateField.value); // Nouveau
         const socialCrownValue = parseFloat(socialCrownField.value);
         const inscriptionValue = parseFloat(inscriptionField.value);
         
-        if (interestValue < 0 || socialCrownValue < 0 || inscriptionValue < 0) {
+        if (interestValue < 0 || penaltyRateValue < 0 || socialCrownValue < 0 || inscriptionValue < 0) {
             alert("Les valeurs ne peuvent pas être négatives.");
             return;
         }
         
-        if (isNaN(interestValue) || isNaN(socialCrownValue) || isNaN(inscriptionValue)) {
+        if (isNaN(interestValue) || isNaN(penaltyRateValue) || isNaN(socialCrownValue) || isNaN(inscriptionValue)) {
             alert("Veuillez entrer des valeurs numériques valides.");
             return;
         }
         
-        // IMPORTANT : Mettre à jour les champs cachés avec les nouvelles valeurs
-        // Ce sont ces champs qui seront envoyés au serveur
         interestHidden.value = interestValue;
+        penaltyRateHidden.value = penaltyRateValue; // Nouveau
         socialCrownHidden.value = socialCrownValue;
         inscriptionHidden.value = inscriptionValue;
         
-        // Effet visuel pour indiquer l'enregistrement
         editSaveButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enregistrement...';
         editSaveButton.disabled = true;
         cancelButton.disabled = true;
         
-        // Soumettre le formulaire après un court délai pour l'effet visuel
         setTimeout(() => {
             document.getElementById('config-form').submit();
         }, 500);
     }
 
-    // Gestion du clic sur le bouton Modifier/Enregistrer
+    // Event Listeners
     editSaveButton.addEventListener('click', function() {
-        if (isEditMode) {
-            // Si on est en mode édition, enregistrer les modifications
-            saveChanges();
-        } else {
-            // Sinon, passer en mode édition
-            enableEditMode();
-        }
+        if (isEditMode) saveChanges();
+        else enableEditMode();
     });
 
-    // Gestion du clic sur le bouton Annuler
     cancelButton.addEventListener('click', function() {
-        // Annuler et revenir en lecture seule sans enregistrer
         disableEditMode();
     });
     
-    // IMPORTANT : Synchroniser les champs visibles avec les champs cachés pendant l'édition
-    // Chaque fois que l'utilisateur tape dans un champ, on met à jour le champ caché correspondant
-    [interestField, socialCrownField, inscriptionField].forEach((field, index) => {
+    // Sync
+    [interestField, penaltyRateField, socialCrownField, inscriptionField].forEach((field, index) => {
         field.addEventListener('input', function() {
             if (isEditMode) {
-                const hiddenFields = [interestHidden, socialCrownHidden, inscriptionHidden];
+                const hiddenFields = [interestHidden, penaltyRateHidden, socialCrownHidden, inscriptionHidden];
                 hiddenFields[index].value = this.value;
             }
         });

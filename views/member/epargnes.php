@@ -166,21 +166,33 @@ Mes épargnes
                                             <tr>
                                                 <th>#</th>
                                                 <th>Montant</th>
+                                                <th>Solde</th>
                                                 <th>Administrateur</th>
                                                 <th>Session</th>
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            <?php 
+                                            // Calculate running balance
+                                            $runningBalance = 0;
+                                            // Process savings to calculate balances (assuming $savings is ordered by date ASC from the controller/model)
+                                            // We need to iterate and store balances to match the display order or calculate on the fly
+                                            ?>
                                             <?php foreach ($savings as $index => $saving): ?>
                                                 <?php
                                                 $amount = $saving->amount;
-                                                $administrator = $saving->administrator()->user();
-                                                $session = $saving->session();
+                                                $runningBalance += $amount;
+                                                $adminModel = $saving->administrator();
+                                                $adminName = $adminModel && $adminModel->user() ? $adminModel->user()->name . ' ' . $adminModel->user()->first_name : 'Système';
+                                                $session = $saving->session;
                                                 ?>
                                                 <tr>
                                                     <th scope="row"><?= $index + 1 ?></th>
-                                                    <td class="amount-value"><?= $amount ? $amount : 0 ?> XAF</td>
-                                                    <td class="admin-name"><?= $administrator->name . ' ' . $administrator->first_name ?></td>
+                                                    <td class="amount-value"><?= number_format($amount, 0, ',', ' ') ?> XAF</td>
+                                                    <td class="amount-value" style="font-weight: bold; color: <?= $runningBalance >= 0 ? '#1cc88a' : '#e74a3b' ?>">
+                                                        <?= number_format($runningBalance, 0, ',', ' ') ?> XAF
+                                                    </td>
+                                                    <td class="admin-name"><?= $adminName ?></td>
                                                     <td class="session-date"><?= $session->date() ?></td>
                                                 </tr>
                                             <?php endforeach; ?>

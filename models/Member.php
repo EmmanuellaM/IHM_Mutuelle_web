@@ -257,12 +257,37 @@ class Member extends ActiveRecord
         return $total;
     }
 
-    /**
-     * Get count of unpaid help contributions
-     * @return int
-     */
     public function getUnpaidHelpContributionsCount()
     {
         return count($this->getUnpaidHelpContributions());
+    }
+
+    /**
+     * Vérifie l'état d'insolvabilité du membre (Concept Mutuelle)
+     * Règle : Si (Epargne Totale * 5) < Dette Totale Restante => INSOLVABLE
+     * @param Exercise $exercise
+     * @return bool
+     */
+    public function isInsolvent(Exercise $exercise)
+    {
+        // 1. Calcul Epargne
+        $savings = $this->savedAmount($exercise);
+
+        // 2. Calcul Dette
+        // Note: On pourrait optimiser en passant les emprunts en paramètre si déjà chargés, 
+        // mais ici on privilégie la fiabilité de l'état.
+        $activeBorrowings = Borrowing::find()
+            ->where(['member_id' => $this->id, 'state' => true])
+            ->all();
+        
+        $totalDebt = 0;
+        foreach ($activeBorrowings as $b) {
+            $totalDebt += ($b->amount - $b->refundedAmount());
+        }
+
+        if ($totalDebt <= 0) return false; // Pas de dette = Solvable
+
+        // 3. Comparaison
+        return ($savings * 5) < $totalDebt;
     }
 }

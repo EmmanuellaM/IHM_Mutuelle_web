@@ -412,7 +412,8 @@ Epargnes
                                 <tr>
                                     <th>#</th>
                                     <th>Membre</th>
-                                    <th>Total Empruntés</th>
+                                    <th>Dette Brute</th>
+                                    <th>Net Perçu</th>
                                     <th>Total Remboursés</th>
                                     <th>Total Aérés</th>
                                     <th>Net à payer</th>
@@ -433,6 +434,15 @@ Epargnes
                                         ->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])
                                         ->sum('amount');
 
+                                    // Calcul du Net Perçu (Somme des receivedAmount des emprunts)
+                                    $borrowingsUser = \app\models\Borrowing::find()
+                                        ->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])
+                                        ->all();
+                                    $receivedAmountUser = 0;
+                                    foreach($borrowingsUser as $b) {
+                                        $receivedAmountUser += $b->receivedAmount();
+                                    }
+
 
                                     $TotalrefundedAmountUser = \app\models\Refund::find()
                                         ->where(['member_id' => $member->id, 'session_id' => $selectedSession->id])
@@ -452,7 +462,8 @@ Epargnes
                                         $refundedAmountUser = \app\models\Refund::find()->where(['member_id' => $member->id, 'borrowing_id' => $borrowing->id])->sum('amount');
                                         
                                         // Calculer le montant total à rembourser (principe + intérêts)
-                                        $totalToPay = $borrowing->amount + ($borrowing->amount * ($borrowing->interest / 100));
+                                        // Nouvelle logique: Intérêts précomptés, amount est la dette totale.
+                                        $totalToPay = $borrowing->amount;
                                         
                                         // Si le montant remboursé est égal ou supérieur au total à payer, le reste est 0
                                         if ($refundedAmountUser >= $totalToPay) {
@@ -468,6 +479,7 @@ Epargnes
                                         <th><?= $index + 1 ?></th>
                                         <td><?= Html::encode($user->name . " " . $user->first_name) ?></td>
                                         <td class="blue-text amount"><?= $borrowingAmountUser ?> XAF</td>
+                                        <td class="blue-text amount"><?= $receivedAmountUser ?> XAF</td>
                                         <td class="blue-text amount"><?= $TotalrefundedAmountUser ? $TotalrefundedAmountUser : 0 ?> XAF</td>
                                         <td class="blue-text amount"><span style="color: <?= $totalRemainingAmount == 0 ? 'green' : 'red' ?>;"><?= $totalRemainingAmount ?> XAF</span></td>
                                         <td><?= $totalRemainingAmount ?> XAF</td>

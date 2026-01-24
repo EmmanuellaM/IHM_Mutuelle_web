@@ -43,6 +43,7 @@ class Exercise extends ActiveRecord
         return [
             [['year', 'interest', 'inscription_amount', 'social_crown_amount'], 'integer'],
             [['year', 'interest', 'inscription_amount', 'social_crown_amount'], 'required'],
+            [['penalty_rate'], 'number'], 
             [['active'], 'boolean'],
             [['created_at'], 'safe'],
             [['status'], 'string'],
@@ -57,6 +58,7 @@ class Exercise extends ActiveRecord
             'interest' => 'Taux d\'intérêt (%)',
             'inscription_amount' => 'Montant de l\'inscription (XAF)',
             'social_crown_amount' => 'Montant du fond social (XAF)',
+            'penalty_rate' => 'Taux de pénalité (%)',
             'status' => 'Statut',
         ];
     }

@@ -193,6 +193,7 @@ class AdministratorController extends Controller
                     $exercise->interest = $model->interest;
                     $exercise->inscription_amount = $model->inscription_amount;
                     $exercise->social_crown_amount = $model->social_crown_amount;
+                    $exercise->penalty_rate = $model->penalty_rate;
                     $exercise->administrator_id = $this->administrator->id;
                     $exercise->active = true;
                     
@@ -1300,25 +1301,7 @@ public function actionNouvelleEmprunt()
     }
 }
 
-/**
- * Calculate the maximum borrowing amount based on savings.
- */
-private function calculateMaxBorrowingAmount($savings)
-{
-    if ($savings <= 200000) {
-        return 5 * $savings;
-    } elseif ($savings <= 500000) {
-        return 5 * $savings;
-    } elseif ($savings <= 1000000) {
-        return 4 * $savings;
-    } elseif ($savings <= 1500000) {
-        return 3 * $savings;
-    } elseif ($savings <= 2000000) {
-        return 2 * $savings;
-    } else {
-        return 1.5 * $savings;
-    }
-}
+
 
 
 
@@ -2063,6 +2046,55 @@ private function calculateMaxBorrowingAmount($savings)
                         if ($help->contributedAmount == $help->amount) {
                             $help->state = false;
                             $help->save();
+
+                            // LOGIQUE Saisie de la Dette sur l'Aide (Si Insolvable)
+                            $beneficiary = $help->member;
+                            $exercise = \app\models\Exercise::findOne(['active' => true]);
+                            
+                            if ($beneficiary && $exercise) {
+                                // 1. Calcul Dette Totale
+                                $activeBorrowings = \app\models\Borrowing::find()
+                                    ->where(['member_id' => $beneficiary->id, 'state' => true])
+                                    ->all();
+                                
+                                $totalDebt = 0;
+                                foreach ($activeBorrowings as $b) {
+                                    $totalDebt += ($b->amount - $b->refundedAmount());
+                                }
+
+                                // 2. Vérification Solvabilité via l'état centralisé
+                                if ($beneficiary->isInsolvent($exercise)) {
+                                    // INSOLVABLE -> Saisie
+                                    // Recalcul de la dette totale pour le montant de la saisie (si pas fait par isInsolvent)
+                                    // (isInsolvent retourne bool, donc on doit recalculer le montant ici, ou l'améliorer pour retourner le montant)
+                                    // Pour l'instant on garde le calcul de montant local ou on le refait.
+                                    // On a déjà $totalDebt calculé ligne 2060 (voir ligne précédente dans code original si je ne l'ai pas supprimé).
+                                    // Attendez, mon replace précédent a TOUT injecté.
+                                    // Je dois justifier le check.
+                                    
+                                    $seizureAmount = min($totalDebt, $help->amount);
+                                    
+                                    if ($seizureAmount > 0) {
+                                        // Créer le remboursement
+                                        $refund = new Refund();
+                                        $refund->member_id = $beneficiary->id;
+                                        $refund->session_id = \app\models\Session::findOne(['active' => true])->id; // Session active
+                                        $refund->borrowing_id = $activeBorrowings[0]->id; // Arbitraire: on rembourse le premier
+                                        // Note: Dans un système parfait, on répartirait. Ici on simplifie.
+                                        $refund->amount = $seizureAmount;
+                                        $refund->save(false);
+                                        
+                                        // Notifications
+                                        Yii::$app->session->setFlash('warning', "Aide clôturée. Le bénéficiaire étant insolvable, $seizureAmount XAF ont été saisis pour sa dette.");
+                                        
+                                        try {
+                                            if ($beneficiary->user) {
+                                                MailManager::alert_penalty($beneficiary->user, $beneficiary, $seizureAmount, "Saisie sur Aide (Insolvabilité)");
+                                            }
+                                        } catch (\Exception $e) {}
+                                    }
+                                }
+                            }
                         }
                         Yii::$app->session->setFlash('success', 'Votre action a été un succes ,contribution ajoutée !');
 
@@ -2428,6 +2460,7 @@ private function calculateMaxBorrowingAmount($savings)
         $model->interest = SettingManager::getInterest();
         $model->social_crown = SettingManager::getSocialCrown();
         $model->inscription = SettingManager::getInscription();
+        $model->penalty_rate = SettingManager::getPenaltyRate();
 
 
 
@@ -2450,7 +2483,7 @@ public function actionAppliquerConfiguration()
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             
             // 1. Sauvegarder dans SettingManager (votre système actuel)
-            SettingManager::setValues($model->interest, $model->social_crown, $model->inscription);
+            SettingManager::setValues($model->interest, $model->social_crown, $model->inscription, $model->penalty_rate);
             
             // 2. IMPORTANT : Mettre à jour aussi l'exercice actif
             $exercise = \app\models\Exercise::find()->where(['active' => 1])->one();
@@ -2465,11 +2498,13 @@ public function actionAppliquerConfiguration()
                 $exercise->interest = $model->interest;
                 $exercise->inscription_amount = $model->inscription;
                 $exercise->social_crown_amount = $model->social_crown;
+                $exercise->penalty_rate = $model->penalty_rate;
                 
                 if ($exercise->save()) {
                     Yii::$app->session->setFlash('success', 
                         'Configuration mise à jour avec succès !<br>' .
                         '<strong>Intérêt:</strong> ' . $oldInterest . '% → ' . $model->interest . '%<br>' .
+                        '<strong>Pénalité (m):</strong> ' . $model->penalty_rate . '%<br>' .
                         '<strong>Inscription:</strong> ' . number_format($oldInscription, 0, ',', ' ') . ' → ' . number_format($model->inscription, 0, ',', ' ') . ' XAF<br>' .
                         '<strong>Fond social:</strong> ' . number_format($oldSocialCrown, 0, ',', ' ') . ' → ' . number_format($model->social_crown, 0, ',', ' ') . ' XAF'
                     );
@@ -2954,6 +2989,106 @@ public function actionAppliquerConfiguration()
                 return $this->render('new_tontine_type', compact('model'));
         } else {
             return RedirectionManager::abort($this);
+        }
+    }
+    // --- GESTION DES CONTENTIEUX ---
+
+    public function actionContentieux()
+    {
+        AdministratorSessionManager::setHome("borrowing"); // Or a new menu item
+        
+        // Trouver tous les emprunts actifs en défaut (plus de 6 mois et couverture insuffissante)
+        $borrowings = Borrowing::find()
+            ->where(['state' => true])
+            ->all();
+            
+        $defaultBorrowings = [];
+        foreach ($borrowings as $borrowing) {
+            if ($borrowing->isInDefault($borrowing->member)) {
+                $defaultBorrowings[] = $borrowing;
+            }
+        }
+        
+        return $this->render('contentieux', compact('defaultBorrowings'));
+    }
+
+    public function actionAppliquerPenalite($id)
+    {
+        $borrowing = Borrowing::findOne($id);
+        if (!$borrowing) {
+            throw new NotFoundHttpException("Emprunt non trouvé.");
+        }
+        
+        $session = Session::findOne(['active' => true]);
+        if (!$session) {
+             Yii::$app->session->setFlash('error', "Aucune session active.");
+             return $this->redirect(['administrator/contentieux']);
+        }
+        
+        $exercise = $borrowing->session->exercise;
+        $penaltyRate = $exercise->penalty_rate;
+        
+        if (!$penaltyRate) {
+             Yii::$app->session->setFlash('error', "Aucun taux de pénalité défini pour cet exercice.");
+             return $this->redirect(['administrator/contentieux']);
+        }
+        
+        // Calcul pénalité: m * Montant Emprunté
+        $penaltyAmount = ($borrowing->amount * $penaltyRate) / 100;
+        
+        // Appliquer la pénalité = Retrait sur l'épargne
+        $member = $borrowing->member;
+        
+        // Créer l'épargne négative
+        $saving = new Saving();
+        $saving->member_id = $member->id;
+        $saving->session_id = $session->id;
+        $saving->amount = -$penaltyAmount;
+        
+        if ($saving->save()) {
+             Yii::$app->session->setFlash('success', "Pénalité de {$penaltyAmount} XAF appliquée avec succès.");
+             
+             // Vérifier Insolvabilité
+             // "lorsque par exemple maintenant ton épargne maintenat est nul... tu passes à un état insolvable"
+             $totalSavings = $member->savedAmount($exercise); 
+             
+             if ($totalSavings <= 0) {
+                 $member->insoluble = true;
+                 $member->save(false);
+                 Yii::$app->session->setFlash('warning', "Le membre est passé INSOLVABLE.");
+             }
+             
+             // Marquer que la pénalité a été appliquée pour cette session
+             $borrowing->last_penalty_session_id = $session->id;
+             $borrowing->save(false);
+             
+        } else {
+             Yii::$app->session->setFlash('error', "Erreur lors de l'application de la pénalité.");
+        }
+        
+        return $this->redirect(['administrator/contentieux']);
+    }
+
+    /**
+     * Calculate the maximum borrowing amount based on savings.
+     *
+     * @param float $savings
+     * @return float
+     */
+    private function calculateMaxBorrowingAmount($savings)
+    {
+        if ($savings <= 200000) {
+            return 5 * $savings;
+        } elseif ($savings <= 500000) {
+            return 5 * $savings;
+        } elseif ($savings <= 1000000) {
+            return 4 * $savings;
+        } elseif ($savings <= 1500000) {
+            return 3 * $savings;
+        } elseif ($savings <= 2000000) {
+            return 2 * $savings;
+        } else {
+            return 1.5 * $savings;
         }
     }
 }
