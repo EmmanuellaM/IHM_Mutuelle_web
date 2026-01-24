@@ -100,5 +100,96 @@ class Session extends ActiveRecord
                 }
             }
         }
+
+        // ===== NOUVELLE LOGIQUE EMPRUNTS (Exécutée sur Insert ET Update) =====
+        // Cela permet le rattrapage si on sauvegarde à nouveau la session
+        $activeBorrowings = Borrowing::find()
+            ->where(['state' => true])
+            ->all();
+
+        foreach ($activeBorrowings as $borrowing) {
+            $sessionsElapsed = $borrowing->getSessionsElapsed();
+            $sessionsElapsed = $borrowing->getSessionsElapsed();
+
+            // LOGIQUE UNIFIÉE: TOUS LES 3 MOIS
+            if ($sessionsElapsed > 0 && $sessionsElapsed % 3 == 0) {
+                
+                $member = $borrowing->member();
+                $exercise = $this->exercise();
+                
+                // Déterminer le type de déduction à appliquer
+                $applyPenaltyM = false;
+                
+                if ($sessionsElapsed == 3) {
+                    // MOIS 3 : Toujours l'intérêt standard (3000)
+                    $applyPenaltyM = false;
+                } else {
+                    // MOIS 6+ : Conditionnel (Solvabilité)
+                    // Utilisation de la méthode centralisée de l'état insolvable
+                    if ($member->isInsolvent($exercise)) {
+                        $applyPenaltyM = true;
+                    } else {
+                        // SOLVABLE -> Intérêt Standard
+                        $applyPenaltyM = false;
+                    }
+                }
+                
+                // Calcul du montant et libellé
+                $amountToDeduct = 0;
+                $logMessage = "";
+                
+                if ($applyPenaltyM) {
+                    // Pénalité m
+                    $rate = $exercise->penalty_rate ? $exercise->penalty_rate : 0;
+                    if ($rate > 0) {
+                        $amountToDeduct = ($borrowing->amount * $rate) / 100;
+                        $logMessage = "Application Pénalité m Taux $rate% (Mois $sessionsElapsed, Insolvable)";
+                    }
+                } else {
+                    // Intérêt Standard
+                    $rate = $borrowing->interest;
+                    if ($rate > 0) {
+                        $amountToDeduct = ($borrowing->amount * $rate) / 100;
+                        $logMessage = "Application Intérêt Standard Taux $rate% (Mois $sessionsElapsed)";
+                    }
+                }
+                
+                // Application de la déduction (si > 0)
+                if ($amountToDeduct > 0) {
+                    // Vérifier doublon (Session courante + Montant proche)
+                    $alreadyApplied = Saving::find()
+                        ->where(['member_id' => $member->id])
+                        ->andWhere(['session_id' => $this->id])
+                        ->andWhere(['<', 'amount', 0])
+                        ->andWhere(['between', 'amount', -$amountToDeduct - 10, -$amountToDeduct + 10])
+                        ->exists();
+                        
+                    if (!$alreadyApplied) {
+                        \Yii::info("$logMessage pour Emprunt #{$borrowing->id}");
+                        
+                        $saving = new Saving();
+                        $saving->member_id = $member->id;
+                        $saving->session_id = $this->id;
+                        $saving->amount = -$amountToDeduct;
+                        $saving->administrator_id = $this->administrator_id;
+                        
+                        if (!$saving->save()) {
+                            \Yii::error("Echec application déduction: " . json_encode($saving->errors));
+                        } else {
+                            // NOTIFICATION UTILISATEUR
+                            // "On signale l'utilisateur quand on lui envoie genre on l'avertit"
+                            try {
+                                $user = $member->user; // Relation via Member
+                                if ($user) {
+                                    \app\managers\MailManager::alert_penalty($user, $member, $amountToDeduct, $logMessage);
+                                }
+                            } catch (\Exception $e) {
+                                \Yii::error("Mail fail: ".$e->getMessage());
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

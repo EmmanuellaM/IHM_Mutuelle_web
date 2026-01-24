@@ -35,6 +35,18 @@ class SettingManager
     }
 
     /**
+     * Retrieve the "penalty_rate" value from the app.json file.
+     */
+    public static function getPenaltyRate()
+    {
+        try {
+            return self::getJsonValue('app.json', 'penalty_rate');
+        } catch (\Exception $e) {
+            return 0; // Default if not set
+        }
+    }
+
+    /**
      * Retrieve the "amount" value from the app2.json file.
      */
     public static function getAgape()
@@ -43,14 +55,15 @@ class SettingManager
     }
 
     /**
-     * Update the app.json file with new values for interest, social_crown, and inscription.
+     * Update the app.json file with new values for interest, social_crown, inscription and penalty_rate.
      */
-    public static function setValues($interest, $social_crown, $inscription)
+    public static function setValues($interest, $social_crown, $inscription, $penalty_rate = 0)
     {
         $data = [
             'interest' => $interest,
             'social_crown' => $social_crown,
             'inscription' => $inscription,
+            'penalty_rate' => $penalty_rate,
         ];
 
         self::writeJsonData('app.json', $data);

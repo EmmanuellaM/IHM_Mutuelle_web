@@ -19,6 +19,7 @@ class NewSessionForm extends Model
     public $interest;
     public $inscription_amount;
     public $social_crown_amount;
+    public $penalty_rate;
 
     public function rules()
     {
@@ -31,8 +32,9 @@ class NewSessionForm extends Model
             return [
                 ['year', 'integer'],
                 ['date', 'date', 'format' => 'yyyy-M-d', 'message' => 'Ce champ attend une date'],
-                [['date', 'year', 'interest', 'inscription_amount', 'social_crown_amount'], 'required', 'message' => 'Ce champ est obligatoire'],
+                [['date', 'year', 'interest', 'inscription_amount', 'social_crown_amount', 'penalty_rate'], 'required', 'message' => 'Ce champ est obligatoire'],
                 ['interest', 'number', 'min' => 0, 'max' => 100, 'tooSmall' => 'Le taux d\'intérêt doit être au moins 0%', 'tooBig' => 'Le taux d\'intérêt doit être au maximum 100%'],
+                ['penalty_rate', 'number', 'min' => 0, 'max' => 100, 'tooSmall' => 'Le taux de pénalité doit être au moins 0%', 'tooBig' => 'Le taux de pénalité doit être au maximum 100%'],
                 ['inscription_amount', 'integer', 'min' => 0, 'message' => 'Le montant doit être un nombre positif'],
                 ['social_crown_amount', 'integer', 'min' => 0, 'message' => 'Le montant doit être un nombre positif'],
             ];
@@ -47,6 +49,7 @@ class NewSessionForm extends Model
             'interest' => 'Taux d\'intérêt (%)',
             'inscription_amount' => 'Montant de l\'inscription (XAF)',
             'social_crown_amount' => 'Montant du fond social (XAF)',
+            'penalty_rate' => 'Taux de pénalité (%)',
         ];
     }
 }

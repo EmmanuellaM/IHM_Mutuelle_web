@@ -79,7 +79,37 @@ class FinanceManager
 
     }
 
+    public static function totalInterestAmount(){
+        $exercise = Exercise::findOne(['active' => true]);
+        if ($exercise)
+        {
+            $borrowingInterest = (int)$exercise->interest();
+            $penaltyInterest = (int)self::totalPenaltyAmount();
+            return $borrowingInterest + $penaltyInterest;
+        }
+        else
+            return 0;
+    }
 
+    public static function totalPenaltyAmount() {
+        $exercise = Exercise::findOne(['active' => true]);
+        if ($exercise) {
+            $sessions = Session::find()->select('id')->where(['exercise_id' => $exercise->id])->column();
+            // Somme des montants négatifs (en valeur absolue)
+            $penalties = Saving::find()
+                ->where(['session_id' => $sessions])
+                ->andWhere(['<', 'amount', 0])
+                ->sum('amount');
+            return abs($penalties ? $penalties : 0);
+        }
+        return 0;
+    }
+
+    public static function exerciseSavings() {
+        $exercise = Exercise::findOne(['active' => true]);
+        $sessions = Session::find()->select('id')->where(['exercise_id' => $exercise->id])->column();
+        return Saving::find()->where(['session_id' => $sessions])->all();
+    }
 
     public static function numberOfSession(){
         $exercise = Exercise::findOne(['active' => true]);
@@ -92,11 +122,7 @@ class FinanceManager
 
 
 
-    public static function exerciseSavings() {
-        $exercise = Exercise::findOne(['active' => true]);
-        $sessions = Session::find()->select('id')->where(['exercise_id' => $exercise->id])->column();
-        return Saving::find()->where(['session_id' => $sessions])->all();
-    }
+
 
     public static function exerciseActiveBorrowings() {
         $exercise = Exercise::findOne(['active' => true]);

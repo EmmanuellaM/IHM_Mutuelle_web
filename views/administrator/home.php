@@ -342,11 +342,28 @@
                                     'readonly' => 'readonly',
                                     'value' => date('Y')
                                 ])->label('Année de l\'exercice') ?>
-                                <?= $form->field($model, 'interest')->input('number', ['required' => 'required', 'step' => '0.01'])->label("Taux d'intérêt (%)") ?>
-                                <?= $form->field($model, 'inscription_amount')->input('number', ['required' => 'required', 'min' => '0'])->label('Montant de l\'inscription (XAF)') ?>
-                                <?= $form->field($model, 'social_crown_amount')->input('number', ['required' => 'required', 'min' => '0'])->label('Montant du fond social (XAF)') ?>
+                                <?= $form->field($model, 'interest')->input('number', [
+                                    'required' => 'required', 
+                                    'step' => '0.01'
+                                ])->label("Taux d'intérêt (%)") ?>
+                                <?= $form->field($model, 'inscription_amount')->input('number', [
+                                    'required' => 'required', 
+                                    'min' => '0'
+                                ])->label('Montant de l\'inscription (XAF)') ?>
+                                <?= $form->field($model, 'social_crown_amount')->input('number', [
+                                    'required' => 'required', 
+                                    'min' => '0'
+                                ])->label('Montant du fond social (XAF)') ?>
+                                <?= $form->field($model, 'penalty_rate')->input('number', [
+                                    'required' => 'required', 
+                                    'step' => '0.01', 
+                                    'min' => '0', 
+                                    'max' => '100'
+                                ])->label('Taux de pénalité') ?>
                             <?php endif; ?>
-                            <?= $form->field($model, 'date')->input('date', ['required' => 'required'])->label("Date de la rencontre de la première session") ?>
+                            <?= $form->field($model, 'date')->input('date', [
+                                'required' => 'required'
+                            ])->label("Date de la rencontre de la première session") ?>
                             <div class="form-group text-right">
                                 <button type="button" class="btn btn-danger" data-dismiss="modal">Annuler</button>
                                 <button type="submit" class="btn btn-primary">
@@ -385,6 +402,11 @@
         <div class="white-block">
             <h3 class="text-muted">Emprunts</h3>
             <h1><?= ($t = \app\managers\FinanceManager::totalBorrowedAmount()) ? ($t > 0 ? $t : 0) : 0 ?> XAF</h1>
+        </div>
+        <!-- Intérêts (nouveau) -->
+        <div class="white-block">
+            <h3 class="text-muted">Intérêts</h3>
+            <h1><?= ($t = \app\managers\FinanceManager::totalInterestAmount()) ? ($t > 0 ? $t : 0) : 0 ?> XAF</h1>
         </div>
     </div>
 

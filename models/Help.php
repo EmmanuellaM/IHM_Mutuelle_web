@@ -115,4 +115,61 @@ class Help extends ActiveRecord
     {
         return $this->amount - $this->amount_from_social_fund - $this->getContributedAmount();
     }
+
+    /**
+     * Intercepte l'aide pour payer les dettes du membre.
+     * @return float Montant net à verser au membre après déduction des dettes.
+     */
+    public function interceptDebtDeduction()
+    {
+        $member = $this->member();
+        if (!$member) return $this->amount;
+
+        $exercise = Exercise::findOne(['active' => true]);
+        if (!$exercise) return $this->amount;
+
+        // Calculer la dette totale (restant à rembourser)
+        $totalDebt = $member->borrowedAmount($exercise) - $member->refundedAmount($exercise); // Simplifié
+        // Pour être plus précis, il faudrait itérer sur chaque emprunt et utiliser getRemainingAmount()
+        // Mais member->borrowedAmount somme tout.
+        
+        $borrowings = $member->exerciseBorrowings($exercise);
+        $realTotalDebt = 0;
+        foreach ($borrowings as $borrowing) {
+            $realTotalDebt += $borrowing->getRemainingAmount();
+        }
+
+        if ($realTotalDebt > 0) {
+            $deducted = min($this->amount, $realTotalDebt);
+            
+            // Appliquer le remboursement
+            // On doit créer des remboursements (Refund) pour chaque emprunt jusqu'à épuisement du montant déduit
+            $remainingDeduction = $deducted;
+            
+            $session = Session::findOne(['active' => true]);
+            if ($session) {
+                foreach ($borrowings as $borrowing) {
+                    if ($remainingDeduction <= 0) break;
+                    
+                    $debt = $borrowing->getRemainingAmount();
+                    if ($debt > 0) {
+                        $toPay = min($debt, $remainingDeduction);
+                        
+                        $refund = new Refund();
+                        $refund->borrowing_id = $borrowing->id;
+                        $refund->session_id = $session->id;
+                        $refund->amount = $toPay;
+                        $refund->save();
+                        
+                        $remainingDeduction -= $toPay;
+                    }
+                }
+            }
+            
+            \Yii::$app->session->setFlash('info', "Une retenue de {$deducted} XAF a été appliquée sur l'aide pour rembourser les dettes.");
+            return $this->amount - $deducted;
+        }
+
+        return $this->amount;
+    }
 }

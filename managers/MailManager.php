@@ -132,13 +132,20 @@ class MailManager
         }catch (\Exception $exception) {
 
         }
-
-
     }
 
-
-
-
+    public static function alert_penalty(User $user, Member $member, $amount, $reason) {
+        try {
+            \Yii::$app->mailer->compose('alert_penalty', compact('user', 'member', 'amount', 'reason'))
+                ->setFrom(self::$from)
+                ->setTo($user->email)
+                ->setSubject("Notification de Pénalité Mutuelle")
+                ->setTextBody("Bonjour " . $user->name . ",\n\nUne déduction a été effectuée sur votre compte d'épargne.\n\nMotif : " . $reason . "\nMontant : " . $amount . " XAF\n\nMerci de régulariser votre situation si nécessaire.")
+                ->send();
+        } catch (\Exception $exception) {
+            \Yii::error("Erreur envoi mail pénalité: " . $exception->getMessage());
+        }
+    }
 
     public static function alert_new_administrator(User $user) {
 
