@@ -2595,6 +2595,14 @@ public function actionAppliquerConfiguration()
             if ($model->load(Yii::$app->request->post()) ) {
                 $session = Session::findOne(['active' => true]);
                 if ($session) {
+                    
+                    // Validation du fond social
+                    $availableFund = FinanceManager::getAvailableSocialFund();
+                    if ($model->amount > $availableFund) {
+                        Yii::$app->session->setFlash('error', "Solde insuffisant dans le fonds social. Disponible: " . number_format($availableFund, 0, ',', ' ') . " XAF, Demandé: " . number_format($model->amount, 0, ',', ' ') . " XAF.");
+                        return $this->redirect(['@administrator.agape']);
+                    }
+
                     $model->session_id = $session->id;
                     
                     if ($model->save()) {
