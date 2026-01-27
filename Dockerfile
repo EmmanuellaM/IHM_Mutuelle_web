@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     nginx \
     supervisor \
+    gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
 # Installation des extensions PHP (MySQL et PostgreSQL)
@@ -36,7 +37,10 @@ RUN mkdir -p runtime web/assets \
     && chown -R www-data:www-data /var/www/html
 
 # Copier la configuration Nginx
-COPY docker/nginx/conf.d/default.conf /etc/nginx/sites-available/default
+# Passer la config Nginx comme template
+COPY docker/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.template
+COPY docker/startup.sh /usr/local/bin/startup.sh
+RUN chmod +x /usr/local/bin/startup.sh
 
 # Créer le script de démarrage pour Supervisor
 RUN echo '[supervisord]\n\
@@ -64,4 +68,5 @@ stderr_logfile_maxbytes=0' > /etc/supervisor/conf.d/supervisord.conf
 EXPOSE 8080
 
 # Démarrer Supervisor qui gère Nginx et PHP-FPM
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Démarrer via le script de startup
+CMD ["/usr/local/bin/startup.sh"]
