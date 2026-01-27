@@ -380,11 +380,31 @@ $this->registerJs(<<<JS
         });
     });
 
-    // Handle form submission for administrator - POST classique pour Render
+    // Handle form submission for administrator - AJAX comme pour les membres
     $('#administrator-form').on('submit', function(e) {
-        // Ne pas empêcher la soumission par défaut - laisser le formulaire se soumettre normalement
-        // Le formulaire sera soumis en POST classique vers l'action définie
-        return true;
+        e.preventDefault();
+        const form = $(this);
+        const actionUrl = form.attr('action');
+
+        $.ajax({
+            type: 'POST',
+            url: actionUrl,
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    $('#administrator-success').fadeIn();
+                    setTimeout(() => {
+                        window.location.href = response.redirect;
+                    }, 1000);
+                } else {
+                    var errorMsg = response.message ? response.message : "Le nom d'utilisateur ou le mot de passe est incorrect";
+                    $('#administrator-error').html('<i class="fas fa-exclamation-circle mr-2"></i>' + errorMsg).fadeIn().delay(3000).fadeOut();
+                }
+            },
+            error: function() {
+                $('#administrator-error').fadeIn().delay(3000).fadeOut();
+            }
+        });
     });
 JS
 );
