@@ -174,14 +174,12 @@ class AdministratorController extends Controller
     // }
 
     // Nouvelle Session (new)
-    // Nouvelle Session (new)
     public function actionNouvelleSession()
     {
         if (Yii::$app->request->getIsPost()) {
             $idModel = new IdForm();
             $model = new NewSessionForm();
             $session = null;
-            
             
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
 
@@ -209,6 +207,7 @@ class AdministratorController extends Controller
                     $exercise->active = true;
                     
                     if (!$exercise->save()) {
+                        Yii::$app->session->setFlash('error', "Erreur lors de la création de l'exercice: " . json_encode($exercise->errors));
                         $model->addErrors($exercise->errors);
                         return $this->render('home', compact('session', 'model', 'idModel'));
                     }
@@ -220,25 +219,22 @@ class AdministratorController extends Controller
                 $session->exercise_id = $exercise->id;
                 $session->date = $model->date;
                 $session->active = true;
+                $session->state = 'SAVING'; // État initial de la session
 
                 // Vérifier si c'est la première session de l'exercice
                 $sessionCount = count(Session::findAll(['exercise_id' => $exercise->id]));
 
                 if ($sessionCount == 0) {
                     // Pas de vérification de mois précédent pour la première session
-                    if ($session->save()) {
-                        /*
-                        foreach (Member::find()->all() as $member) {
-                            try {
-                                MailManager::alert_new_session($member->user(), $session);
-                            } catch (\Exception $e) {
-                                // $log("Mail error: " . $e->getMessage());
-                            }
+                    try {
+                        if ($session->save()) {
+                            Yii::$app->session->setFlash('success', 'Session créée avec succès !');
+                            return $this->redirect("@administrator.home");
+                        } else {
+                            Yii::$app->session->setFlash('error', "Erreur lors de la création de la session: " . json_encode($session->errors));
                         }
-                        */
-                        return $this->redirect("@administrator.home");
-                    } else {
-                        // $log("Session save failed: " . json_encode($session->errors));
+                    } catch (\Exception $e) {
+                        Yii::$app->session->setFlash('error', "Exception: " . $e->getMessage());
                     }
                 } else {
                     // Pour les sessions suivantes, vérifier que le mois suit immédiatement le mois précédent
@@ -255,37 +251,34 @@ class AdministratorController extends Controller
                         ->one();
                     
                     if (!$prevSession) {
-                        // $log("Previous session not found in previous month.");
                         $model->addError('date', 'Le mois de cette session doit directement suivre celui de la session précédente.');
+                        Yii::$app->session->setFlash('error', 'Le mois de cette session doit directement suivre celui de la session précédente.');
                         return $this->render('home', compact('session', 'model', 'idModel'));
                     }
                     
-                    if ($session->save()) {
-                        // $log("Session saved: " . $session->id);
-                        /*
-                        foreach (Member::find()->all() as $member) {
-                            try {
-                                MailManager::alert_new_session($member->user(), $session);
-                            } catch (\Exception $e) {
-                                // $log("Mail error: " . $e->getMessage());
-                            }
+                    try {
+                        if ($session->save()) {
+                            Yii::$app->session->setFlash('success', 'Session créée avec succès !');
+                            return $this->redirect("@administrator.home");
+                        } else {
+                            Yii::$app->session->setFlash('error', "Erreur lors de la création de la session: " . json_encode($session->errors));
                         }
-                        */
-                        return $this->redirect("@administrator.home");
-                    } else {
-                        // $log("Session save failed: " . json_encode($session->errors));
+                    } catch (\Exception $e) {
+                        Yii::$app->session->setFlash('error', "Exception: " . $e->getMessage());
                     }
                 }
 
                 $model->addErrors($session->errors);
                 return $this->render('home', compact('session', 'model', 'idModel'));
             } else {
+                Yii::$app->session->setFlash('error', "Erreur de validation: " . json_encode($model->errors));
                 return $this->render('home', compact('session', 'model', 'idModel'));
             }
         } else {
             return RedirectionManager::abort($this);
         }
     }
+
 
 
     public function actionModifierSession($id)
