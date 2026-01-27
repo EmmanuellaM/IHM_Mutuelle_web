@@ -308,15 +308,8 @@ $this->title = "Mutuelle - ENSPY";
         }
 
         /* --- Loading Overlay Styles --- */
-        html {
-            scrollbar-gutter: stable;
-        }
-        
-        body.loading-active {
-            overflow: hidden;
-        }
-        
         #loading-overlay {
+
             position: fixed;
             top: 0;
             left: 0;
