@@ -1,6 +1,13 @@
 html,
 body {
     height: 100%;
+    scrollbar-gutter: stable;
+}
+
+/* Prevent layout shift when modals are open */
+body.modal-open {
+    padding-right: 0 !important;
+    overflow-y: scroll !important;
 }
 
 .wrap {
@@ -10,7 +17,7 @@ body {
     padding: 0 0 60px;
 }
 
-.wrap > .container {
+.wrap>.container {
     padding: 70px 15px 20px;
 }
 
@@ -37,7 +44,8 @@ body {
 }
 
 /* add sorting icons to gridview sort links */
-a.asc:after, a.desc:after {
+a.asc:after,
+a.desc:after {
     position: relative;
     top: 1px;
     display: inline-block;
@@ -49,11 +57,15 @@ a.asc:after, a.desc:after {
 }
 
 a.asc:after {
-    content: /*"\e113"*/ "\e151";
+    content:
+        /*"\e113"*/
+        "\e151";
 }
 
 a.desc:after {
-    content: /*"\e114"*/ "\e152";
+    content:
+        /*"\e114"*/
+        "\e152";
 }
 
 .sort-numerical a.asc:after {
@@ -91,27 +103,27 @@ a.desc:after {
 }
 
 /* align the logout "link" (button in form) of the navbar */
-.nav li > form > button.logout {
+.nav li>form>button.logout {
     padding: 15px;
     border: none;
 }
 
 @media(max-width:767px) {
-    .nav li > form > button.logout {
-        display:block;
+    .nav li>form>button.logout {
+        display: block;
         text-align: left;
         width: 100%;
         padding: 10px 15px;
     }
 }
 
-.nav > li > form > button.logout:focus,
-.nav > li > form > button.logout:hover {
+.nav>li>form>button.logout:focus,
+.nav>li>form>button.logout:hover {
     text-decoration: none;
 }
 
 
-.nav > li > form > button.logout:focus {
+.nav>li>form>button.logout:focus {
     outline: none;
 }
 
@@ -126,7 +138,8 @@ a.desc:after {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     z-index: 9999;
-    display: none; /* Hidden by default */
+    display: none;
+    /* Hidden by default */
     justify-content: center;
     align-items: center;
     color: white;
@@ -158,14 +171,22 @@ a.desc:after {
     opacity: 0.2;
 }
 
-.dot:nth-child(2) { animation-delay: 0.2s; }
-.dot:nth-child(3) { animation-delay: 0.4s; }
+.dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
 
 @keyframes glow {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 0.2;
         transform: scale(1);
     }
+
     50% {
         opacity: 1;
         transform: scale(1.3);
