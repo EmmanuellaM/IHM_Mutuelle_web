@@ -26,7 +26,20 @@ AppAsset::register($this);
 <body>
 <?php $this->beginBody() ?>
 
+<!-- Loading Overlay -->
+<div id="loading-overlay">
+    <div class="loading-content">
+        <span class="loading-text">Mutuelle Web</span>
+        <span class="loading-dots">
+            <span class="dot">.</span>
+            <span class="dot">.</span>
+            <span class="dot">.</span>
+        </span>
+    </div>
+</div>
+
 <div class="wrap">
+
     <?php
     NavBar::begin([
         'brandLabel' => Yii::$app->name,
@@ -75,6 +88,35 @@ AppAsset::register($this);
         <p class="pull-right"><?= Yii::powered() ?></p>
     </div>
 </footer>
+
+<script>
+$(document).ready(function() {
+    // Show overlay on form submission
+    $('form').on('submit', function() {
+        if (!$(this).hasClass('no-loader')) {
+            $('#loading-overlay').css('display', 'flex').hide().fadeIn(300);
+        }
+    });
+
+    // Show overlay on link clicks (excluding relative hashes, modals, and target blank)
+    $('a').on('click', function() {
+        var href = $(this).attr('href');
+        var target = $(this).attr('target');
+        
+        if (href && href !== '#' && !href.startsWith('javascript:') && !href.startsWith('#') && 
+            !$(this).data('toggle') && !$(this).data('dismiss') && target !== '_blank') {
+            $('#loading-overlay').css('display', 'flex').hide().fadeIn(300);
+        }
+    });
+
+    // Hide overlay if the page is shown from cache (back button)
+    window.onpageshow = function(event) {
+        if (event.persisted) {
+            $('#loading-overlay').fadeOut(200);
+        }
+    };
+});
+</script>
 
 <?php $this->endBody() ?>
 </body>
