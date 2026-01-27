@@ -128,6 +128,9 @@ public function actionAdministratorForm() {
                         Yii::$app->user->login($user);
                     }
                     
+                    // Message de succès
+                    Yii::$app->session->setFlash('success', 'Connexion réussie !');
+                    
                     // Si c'est une requête AJAX, retourner JSON
                     if (Yii::$app->request->isAjax) {
                         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
