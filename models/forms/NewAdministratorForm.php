@@ -22,6 +22,7 @@ class NewAdministratorForm extends Model
     public $avatar;
     public $password;
     public $confirm_password;
+    public $operator; // Added for dynamic phone input
 
     // public function rules()
     // {
@@ -36,7 +37,7 @@ class NewAdministratorForm extends Model
     public function rules()
     {
         return [
-            [['username', 'name', 'first_name', 'tel', 'password', 'email', 'address'], 'string', 'message' => 'Ce champ doit être du texte'],
+            [['username', 'name', 'first_name', 'tel', 'password', 'email', 'address', 'operator'], 'string', 'message' => 'Ce champ doit être du texte'],
             [['username', 'name', 'first_name', 'tel', 'password', 'email'], 'required', 'message' => 'Ce champ est obligatoire'],
             [['email'], 'email', 'message' => 'Ce champ doit être un email'],
             [['tel'],'match', 'pattern' => '/^[0-9]{9}$/', 'message' => 'Le numéro de téléphone doit avoir exactement 9 chiffres.'],
