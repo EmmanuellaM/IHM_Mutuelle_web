@@ -308,12 +308,20 @@ $this->title = "Mutuelle - ENSPY";
         }
 
         /* --- Loading Overlay Styles --- */
+        html {
+            scrollbar-gutter: stable;
+        }
+        
+        body.loading-active {
+            overflow: hidden;
+        }
+        
         #loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
@@ -323,6 +331,7 @@ $this->title = "Mutuelle - ENSPY";
             align-items: center;
             color: white;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            overflow: hidden;
         }
 
         .loading-content {
@@ -366,6 +375,7 @@ $this->title = "Mutuelle - ENSPY";
             }
         }
     </style>
+
 
     <?php if (isset($this->blocks['style'])) : ?>
         <?= $this->blocks['style'] ?>
@@ -552,6 +562,13 @@ $this->title = "Mutuelle - ENSPY";
     $(document).ready(function() {
         // Hide overlay on load (just in case)
         $('#loading-overlay').fadeOut(100);
+        $('body').removeClass('loading-active');
+
+        // Function to show loading overlay
+        function showLoadingOverlay() {
+            $('body').addClass('loading-active');
+            $('#loading-overlay').css('display', 'flex').hide().fadeIn(300);
+        }
 
         // Show overlay on form submission
         $('form').on('submit', function() {
@@ -560,7 +577,7 @@ $this->title = "Mutuelle - ENSPY";
                 if (this.checkValidity && !this.checkValidity()) {
                     return;
                 }
-                $('#loading-overlay').css('display', 'flex').hide().fadeIn(300);
+                showLoadingOverlay();
             }
         });
 
@@ -571,7 +588,7 @@ $this->title = "Mutuelle - ENSPY";
             
             if (href && href !== '#' && !href.startsWith('javascript:') && !href.startsWith('#') && 
                 !$(this).data('toggle') && !$(this).data('dismiss') && target !== '_blank') {
-                $('#loading-overlay').css('display', 'flex').hide().fadeIn(300);
+                showLoadingOverlay();
             }
         });
 
@@ -579,6 +596,7 @@ $this->title = "Mutuelle - ENSPY";
         window.onpageshow = function(event) {
             if (event.persisted) {
                 $('#loading-overlay').fadeOut(200);
+                $('body').removeClass('loading-active');
             }
         };
 
@@ -586,11 +604,13 @@ $this->title = "Mutuelle - ENSPY";
         setTimeout(function() {
             if ($('#loading-overlay').is(':visible')) {
                 $('#loading-overlay').fadeOut(500);
+                $('body').removeClass('loading-active');
             }
         }, 15000);
     });
     </script>
     <?php $this->endBody(); ?>
+
 </body>
 
 </html>
