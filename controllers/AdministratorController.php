@@ -177,14 +177,6 @@ class AdministratorController extends Controller
     // Nouvelle Session (new)
     public function actionNouvelleSession()
     {
-        // Debug Log
-        $logFile = \Yii::getAlias('@runtime/logs/session_debug.log');
-        $log = function($msg) use ($logFile) {
-            file_put_contents($logFile, date('[Y-m-d H:i:s] ') . $msg . "\n", FILE_APPEND);
-        };
-        
-        $log("Starting actionNouvelleSession");
-
         if (Yii::$app->request->getIsPost()) {
             $idModel = new IdForm();
             $model = new NewSessionForm();
