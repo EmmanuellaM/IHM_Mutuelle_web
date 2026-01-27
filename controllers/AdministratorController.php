@@ -182,10 +182,8 @@ class AdministratorController extends Controller
             $model = new NewSessionForm();
             $session = null;
             
-            $log("Is POST request");
             
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-                $log("Model loaded and validated. Date: " . $model->date);
 
                 // Check if date is greater than current date
                 $today = new DateTime();
@@ -195,13 +193,11 @@ class AdministratorController extends Controller
                 $exercise = Exercise::findOne(['active' => true]);
                 
                 if ($exercise && $exercise->sessionNumber() >= 12) {
-                     $log("Max sessions reached for exercise " . $exercise->id);
                      Yii::$app->session->setFlash('warning', "L'exercice actuel a atteint 12 sessions. Veuillez le clôturer avant de continuer.");
                      return $this->redirect(['administrator/cloturer-exercice', 'q' => $exercise->id]);
                 }
 
                 if (!$exercise) {
-                    $log("No active exercise. Creating new one.");
                     // Création d'un nouvel exercice
                     $exercise = new Exercise();
                     $exercise->year = $model->year;
@@ -213,11 +209,9 @@ class AdministratorController extends Controller
                     $exercise->active = true;
                     
                     if (!$exercise->save()) {
-                        $log("Exercise save failed: " . json_encode($exercise->errors));
                         $model->addErrors($exercise->errors);
                         return $this->render('home', compact('session', 'model', 'idModel'));
                     }
-                    $log("New exercise saved: " . $exercise->id);
                 }
 
                 // Créer la nouvelle session
@@ -229,12 +223,10 @@ class AdministratorController extends Controller
 
                 // Vérifier si c'est la première session de l'exercice
                 $sessionCount = count(Session::findAll(['exercise_id' => $exercise->id]));
-                $log("Session count for exercise: " . $sessionCount);
 
                 if ($sessionCount == 0) {
                     // Pas de vérification de mois précédent pour la première session
                     if ($session->save()) {
-                        // $log("First session saved: " . $session->id);
                         /*
                         foreach (Member::find()->all() as $member) {
                             try {
@@ -288,11 +280,9 @@ class AdministratorController extends Controller
                 $model->addErrors($session->errors);
                 return $this->render('home', compact('session', 'model', 'idModel'));
             } else {
-                $log("Model validation failed: " . json_encode($model->errors));
                 return $this->render('home', compact('session', 'model', 'idModel'));
             }
         } else {
-            $log("Not a POST request");
             return RedirectionManager::abort($this);
         }
     }
