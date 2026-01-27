@@ -1,10 +1,15 @@
-html,
+html {
+    overflow-y: scroll;
+    /* Force scrollbar to prevent layout shift */
+}
+
 body {
     height: 100%;
 }
 
-/* Prevent layout shift when modals are open - Bootstrap adds padding-right to compensate for scrollbar, we override this */
+/* Prevent layout shift when modals are open */
 body.modal-open {
+    padding-right: 0 !important;
     overflow: auto !important;
 }
 

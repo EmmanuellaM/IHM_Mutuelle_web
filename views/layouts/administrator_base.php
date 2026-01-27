@@ -309,12 +309,11 @@ $this->title = "Mutuelle - ENSPY";
 
         /* --- Loading Overlay Styles --- */
         #loading-overlay {
-
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
