@@ -95,5 +95,76 @@ class Borrowing extends ActiveRecord
     public function member() {
         return Member::findOne($this->member_id);
     }
+
+    /**
+     * Détermine si l'emprunt doit subir une pénalité lors de la clôture de session.
+     * Basé sur la règle unifiée des 3 mois.
+     */
+    public function shouldApplyPenaltyInterest()
+    {
+        if (!$this->state) return false; // Uniquement si actif
+        $elapsed = $this->getSessionsElapsed();
+        return ($elapsed > 0 && $elapsed % 3 == 0);
+    }
+
+    /**
+     * Applique la pénalité (Intérêt ou pénalité m)
+     * @param float $interestRate Taux d'intérêt standard
+     */
+    public function applyPenaltyInterest($interestRate)
+    {
+        $member = $this->member();
+        $session = Session::findOne(['active' => true]); // La session en cours
+        if (!$session || !$member) {
+            // Fallback si aucune session active (cas de clôture en cours)
+            // On essaie de trouver la dernière session liée à l'exercice actif
+            $exercise = Exercise::findOne(['active' => true]);
+            if ($exercise) {
+                $session = Session::find()
+                    ->where(['exercise_id' => $exercise->id])
+                    ->orderBy(['date' => SORT_DESC])
+                    ->one();
+            }
+        }
+        
+        if (!$session || !$member) return;
+
+        $exercise = $session->exercise();
+        $elapsed = $this->getSessionsElapsed();
+
+        // Déterminer le taux
+        $rate = $interestRate;
+        if ($elapsed >= 6 && $member->isInsolvent($exercise)) {
+            $penaltyRate = $exercise->penalty_rate ?: 0;
+            if ($penaltyRate > 0) $rate = $penaltyRate;
+        }
+
+        $amountToDeduct = ($this->amount * $rate) / 100;
+        
+        if ($amountToDeduct > 0) {
+            // On vérifie si déjà appliqué pour cette session (pour éviter le double prélèvement avec afterSave)
+            $alreadyApplied = Saving::find()
+                ->where(['member_id' => $member->id, 'session_id' => $session->id])
+                ->andWhere(['<', 'amount', 0])
+                ->exists();
+
+            if (!$alreadyApplied) {
+                $saving = new Saving();
+                $saving->member_id = $member->id;
+                $saving->session_id = $session->id;
+                $saving->amount = -$amountToDeduct;
+                $saving->administrator_id = \Yii::$app->user->id ?? 1;
+                
+                if ($saving->save()) {
+                    try {
+                        $logMessage = ($rate == $interestRate) ? "Intérêt Standard" : "Pénalité m";
+                        \app\managers\MailManager::alert_penalty($member->user(), $member, $amountToDeduct, $logMessage);
+                    } catch (\Exception $e) {
+                        \Yii::error("Mail penalty fail: " . $e->getMessage());
+                    }
+                }
+            }
+        }
+    }
 }
 
