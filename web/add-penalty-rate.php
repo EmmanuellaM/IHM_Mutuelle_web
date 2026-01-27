@@ -27,15 +27,16 @@ try {
     if (isset($tableSchema->columns['penalty_rate'])) {
         echo "<p style='color:green'>Column 'penalty_rate' already exists. No action needed.</p>";
     } else {
-        // Add the column
-        $db->createCommand("ALTER TABLE `exercise` ADD `penalty_rate` FLOAT NULL DEFAULT NULL")->execute();
+        // Add the column - PostgreSQL syntax (no backticks)
+        $db->createCommand("ALTER TABLE exercise ADD COLUMN penalty_rate FLOAT DEFAULT NULL")->execute();
         echo "<p style='color:green'>SUCCESS: Column 'penalty_rate' added to 'exercise' table!</p>";
     }
     
     // Also check for 'state' column in session table
     $sessionSchema = $db->getTableSchema('session');
     if ($sessionSchema && !isset($sessionSchema->columns['state'])) {
-        $db->createCommand("ALTER TABLE `session` ADD `state` VARCHAR(20) NULL DEFAULT 'SAVING'")->execute();
+        // PostgreSQL syntax
+        $db->createCommand("ALTER TABLE session ADD COLUMN state VARCHAR(20) DEFAULT 'SAVING'")->execute();
         echo "<p style='color:green'>SUCCESS: Column 'state' added to 'session' table!</p>";
     } else if ($sessionSchema && isset($sessionSchema->columns['state'])) {
         echo "<p style='color:green'>Column 'state' already exists in 'session' table.</p>";
