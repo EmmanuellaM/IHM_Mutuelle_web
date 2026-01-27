@@ -766,6 +766,21 @@ class AdministratorController extends Controller
         return $this->render("administrators", compact("administrators"));
     }
 
+    public function actionAdministrator($administrator)
+    {
+        AdministratorSessionManager::setAdministrators();
+        $adminModel = Administrator::findOne($administrator);
+        if (!$adminModel) {
+            throw new \yii\web\NotFoundHttpException("Administrateur introuvable.");
+        }
+        $userModel = $adminModel->user();
+        
+        return $this->render('administrator_view', [
+            'adminModel' => $adminModel,
+            'userModel' => $userModel,
+        ]);
+    }
+
     /*************************action Epargne **************************************************** */
     public function actionEpargnes()
     {
