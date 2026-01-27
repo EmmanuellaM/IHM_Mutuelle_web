@@ -91,9 +91,16 @@ AppAsset::register($this);
 
 <script>
 $(document).ready(function() {
+    // Hide overlay on load (just in case)
+    $('#loading-overlay').fadeOut(100);
+
     // Show overlay on form submission
     $('form').on('submit', function() {
         if (!$(this).hasClass('no-loader')) {
+            // If the form has native validation and it's invalid, don't show overlay
+            if (this.checkValidity && !this.checkValidity()) {
+                return;
+            }
             $('#loading-overlay').css('display', 'flex').hide().fadeIn(300);
         }
     });
@@ -115,6 +122,13 @@ $(document).ready(function() {
             $('#loading-overlay').fadeOut(200);
         }
     };
+
+    // Safety: Hide overlay after 10 seconds (something went wrong)
+    setTimeout(function() {
+        if ($('#loading-overlay').is(':visible')) {
+            $('#loading-overlay').fadeOut(500);
+        }
+    }, 10000);
 });
 </script>
 

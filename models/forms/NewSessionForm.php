@@ -25,13 +25,13 @@ class NewSessionForm extends Model
     {
         if (Exercise::findOne(['active' => true])) {
             return [
-                ['date', 'date', 'format' => 'yyyy-M-d', 'message' => 'Ce champ attend une date'],
+                ['date', 'date', 'format' => 'php:Y-m-d', 'message' => 'Ce champ attend une date (AAAA-MM-JJ)'],
                 ['date', 'required', 'message' => 'Ce champ est obligatoire']
             ];
         } else {
             return [
                 ['year', 'integer'],
-                ['date', 'date', 'format' => 'yyyy-M-d', 'message' => 'Ce champ attend une date'],
+                ['date', 'date', 'format' => 'php:Y-m-d', 'message' => 'Ce champ attend une date (AAAA-MM-JJ)'],
                 [['date', 'year', 'interest', 'inscription_amount', 'social_crown_amount', 'penalty_rate'], 'required', 'message' => 'Ce champ est obligatoire'],
                 ['interest', 'number', 'min' => 0, 'max' => 100, 'tooSmall' => 'Le taux d\'intérêt doit être au moins 0%', 'tooBig' => 'Le taux d\'intérêt doit être au maximum 100%'],
                 ['penalty_rate', 'number', 'min' => 0, 'max' => 100, 'tooSmall' => 'Le taux de pénalité doit être au moins 0%', 'tooBig' => 'Le taux de pénalité doit être au maximum 100%'],
