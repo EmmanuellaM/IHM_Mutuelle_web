@@ -203,7 +203,7 @@
 </style>
 <?php $this->endBlock() ?>
 
-<div class="container mt-5 mb-5">
+<div class="container-fluid mt-5 mb-5">
     <div class="row mb-4">
         <div class="col-12 white-block blue-gradient">
             <?php if ($session) : ?>

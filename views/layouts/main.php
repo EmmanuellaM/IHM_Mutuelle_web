@@ -26,7 +26,17 @@ AppAsset::register($this);
 <body>
 <?php $this->beginBody() ?>
 
-
+<!-- Loading Overlay -->
+<div id="loading-overlay">
+    <div class="loading-content">
+        <span class="loading-text">Mutuelle Web</span>
+        <span class="loading-dots">
+            <span class="dot">.</span>
+            <span class="dot">.</span>
+            <span class="dot">.</span>
+        </span>
+    </div>
+</div>
 
 <div class="wrap">
 
@@ -79,11 +89,48 @@ AppAsset::register($this);
     </div>
 </footer>
 
-    <script>
-    $(document).ready(function() {
-        // Original checks or empty
+<script>
+$(document).ready(function() {
+    // Hide overlay on load (just in case)
+    $('#loading-overlay').fadeOut(100);
+
+    // Show overlay on form submission
+    $('form').on('submit', function() {
+        if (!$(this).hasClass('no-loader')) {
+            // If the form has native validation and it's invalid, don't show overlay
+            if (this.checkValidity && !this.checkValidity()) {
+                return;
+            }
+            $('#loading-overlay').css('display', 'flex').hide().fadeIn(300);
+        }
     });
-    </script>
+
+    // Show overlay on link clicks (excluding relative hashes, modals, and target blank)
+    $('a').on('click', function() {
+        var href = $(this).attr('href');
+        var target = $(this).attr('target');
+        
+        if (href && href !== '#' && !href.startsWith('javascript:') && !href.startsWith('#') && 
+            !$(this).data('toggle') && !$(this).data('dismiss') && target !== '_blank') {
+            $('#loading-overlay').css('display', 'flex').hide().fadeIn(300);
+        }
+    });
+
+    // Hide overlay if the page is shown from cache (back button)
+    window.onpageshow = function(event) {
+        if (event.persisted) {
+            $('#loading-overlay').fadeOut(200);
+        }
+    };
+
+    // Safety: Hide overlay after 10 seconds (something went wrong)
+    setTimeout(function() {
+        if ($('#loading-overlay').is(':visible')) {
+            $('#loading-overlay').fadeOut(500);
+        }
+    }, 10000);
+});
+</script>
 
 <?php $this->endBody() ?>
 </body>
