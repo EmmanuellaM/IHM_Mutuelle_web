@@ -82,11 +82,8 @@ class Exercise extends ActiveRecord
         // Calculer le montant total des inscriptions
         $inscriptionAmount = $this->totalInscriptionAmount();
         
-        // Calculer le montant total des fonds sociaux
-        $socialCrownAmount = $this->totalSocialCrownAmount();
-        
-        // Calculer le solde final
-        return $inscriptionAmount + $socialCrownAmount + $this->totalSavedAmount() + $this->totalRefundedAmount() - $this->totalBorrowedAmount() - $this->totalAgapeAmount();
+        // Calculer le solde final (Exclut Epargne et Fond Social comme demandé)
+        return $inscriptionAmount + $this->totalRefundedAmount() - $this->totalBorrowedAmount() - $this->totalAgapeAmount();
     }
 
     /**
