@@ -2606,35 +2606,26 @@ public function actionAppliquerConfiguration()
     {
         if (Yii::$app->request->getIsPost()) {
             $model = new Agape();
-            if ($model->load(Yii::$app->request->post()) ) {
+            if ($model->load(Yii::$app->request->post())) {
                 $session = Session::findOne(['active' => true]);
                 if ($session) {
-                    
                     // Validation du fond social
                     $availableFund = FinanceManager::getAvailableSocialFund();
                     if ($model->amount > $availableFund) {
-                        Yii::$app->session->setFlash('error', "Solde insuffisant dans le fonds social. Disponible: " . number_format($availableFund, 0, ',', ' ') . " XAF, Demandé: " . number_format($model->amount, 0, ',', ' ') . " XAF.");
-                        return $this->redirect(['@administrator.agape']);
+                        Yii::$app->session->setFlash('error', "Impossible d'enregistrer l'agape : Solde insuffisant dans le fonds social. Disponible : " . number_format($availableFund, 0, ',', ' ') . " XAF. Montant demandé : " . number_format($model->amount, 0, ',', ' ') . " XAF.");
+                        return $this->redirect("@administrator.agape");
                     }
 
                     $model->session_id = $session->id;
-                    
                     if ($model->save()) {
-                        // Enregistrer la dépense (optionnel si calculé dynamiquement, mais bon pour la cohérence)
-                        FinanceManager::registerSocialFundExpense(
-                            $model->amount, 
-                            "Agape session du " . $session->date, 
-                            $session->exercise()
-                        );
-
                         Yii::$app->session->setFlash('success', 'Agape enregistrée avec succès.');
                     } else {
-                        Yii::$app->session->setFlash('error', 'Erreur lors de l\'enregistrement de l\'agape.');
+                        Yii::$app->session->setFlash('error', "Erreur lors de l'enregistrement : " . implode(', ', $model->getErrorSummary(true)));
                     }
                 } else {
-                    Yii::$app->session->setFlash('error', 'Aucune session active.');
+                    Yii::$app->session->setFlash('error', 'Aucune session active. Impossible d\'enregistrer une agape.');
                 }
-                return $this->redirect(['@administrator.agape']);
+                return $this->redirect("@administrator.agape");
             }
         }
         return RedirectionManager::abort($this);
@@ -2643,13 +2634,26 @@ public function actionAppliquerConfiguration()
     public function actionUpdateAgape($id)
     {
         $agapeForm = $this->findModelAgape($id);
+        $oldAmount = $agapeForm->amount;
 
         if ($agapeForm->load(Yii::$app->request->post()) && $agapeForm->validate()) {
+            // Validation du fond social (on tient compte de l'ancien montant déjà déduit)
+            $availableFund = FinanceManager::getAvailableSocialFund() + $oldAmount;
+            
+            if ($agapeForm->amount > $availableFund) {
+                Yii::$app->session->setFlash('error', "Modification impossible : Solde insuffisant dans le fonds social. Disponible : " . number_format($availableFund, 0, ',', ' ') . " XAF.");
+                return $this->redirect("@administrator.agape");
+            }
+
             // Get the session ID and assign it to the model
             $agapeForm->session_id = Yii::$app->request->post('session_id');
-            $agapeForm->save();
+            if ($agapeForm->save()) {
+                Yii::$app->session->setFlash('success', "Agape mise à jour avec succès.");
+            } else {
+                Yii::$app->session->setFlash('error', "Erreur lors de la mise à jour.");
+            }
 
-            return $this->redirect(['@administrator.agape']);
+            return $this->redirect("@administrator.agape");
         }
 
         // Retrieve the list of sessions for the dropdown
