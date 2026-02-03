@@ -79,11 +79,8 @@ class Exercise extends ActiveRecord
      */
     public function exerciseAmount()
     {
-        // Calculer le montant total des inscriptions
-        $inscriptionAmount = $this->totalInscriptionAmount();
-        
-        // Calculer le solde final (Exclut Epargne et Fond Social comme demandé)
-        return $inscriptionAmount + $this->totalRefundedAmount() - $this->totalBorrowedAmount() - $this->totalAgapeAmount();
+        // Calculer le solde final (Epargnes + Remboursements - Emprunts)
+        return $this->totalSavedAmount() + $this->totalRefundedAmount() - $this->totalBorrowedAmount();
     }
 
     /**
