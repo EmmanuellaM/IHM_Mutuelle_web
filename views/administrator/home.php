@@ -265,11 +265,18 @@
                     <div class="modal fade" id="modal-cloturer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
-                                    <div class="modal-body">
-                                        <p>Êtes-vous sûr(e) de vouloir cloturer la session? Vous ne pourrez plus faire aucun enregistrement.</p>
-                                        <div class="mt-3">
-                                            <button type="button" class="btn btn-danger" data-dismiss="modal">Non</button>
-                                            <a href="<?= Yii::getAlias("@administrator.cloture_session") . "?q=" . $session->id ?>" class="btn btn-primary">Oui</a>
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Confirmation de clôture</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <p style="font-size: 1.2rem;">Êtes-vous sûr(e) de vouloir clôturer la session ?</p>
+                                        <p class="text-muted">Vous ne pourrez plus faire aucun enregistrement pour cette session.</p>
+                                        <div class="mt-4">
+                                            <button type="button" class="btn btn-secondary mr-2" data-dismiss="modal">Non</button>
+                                            <a href="<?= Yii::getAlias("@administrator.cloture_session") . "?q=" . $session->id ?>" class="btn btn-primary">Oui, clôturer</a>
                                         </div>
                                     </div>
                                 </div>

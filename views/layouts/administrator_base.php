@@ -10,9 +10,9 @@ $this->title = "Mutuelle - ENSPY";
 <html lang="<?= Yii::$app->language ?>">
 
 <head>
-    <?php $this->head() ?>
     <?php include Yii::getAlias("@app") . "/includes/links.php"; ?>
-    <link href="<?= Yii::getAlias("@web") . '/css/admin.css' ?>" rel="stylesheet">
+    <?php $this->head() ?>
+    <!-- <link href="<?= Yii::getAlias("@web") . '/css/admin.css' ?>" rel="stylesheet"> -->
     <title>
         <?php if (isset($this->blocks['title'])) : ?>
             <?= $this->blocks['title'] ?>
