@@ -1295,6 +1295,20 @@ public function actionNouvelleEmprunt()
         );
     }
 
+    // ✅ NOUVEAU : Vérifier si le FOND TOTAL est suffisant
+    $availableFunds = $exercise->exerciseAmount();
+    if ($model->amount > $availableFunds) {
+        $errorMessage = "Impossible d'effectuer cet emprunt. Le fond total disponible est insuffisant : " 
+            . number_format($availableFunds, 0, ',', ' ') . " XAF.";
+        
+        $model->addError('amount', $errorMessage);
+
+        return $this->render(
+            "borrowings",
+            compact("model", "sessions", "pagination", "members", "errorMessage")
+        );
+    }
+
     $borrowing = new Borrowing();
     $borrowing->interest = SettingManager::getInterest();
     $borrowing->amount = $model->amount;
