@@ -256,6 +256,14 @@ class AdministratorController extends Controller
                     return $this->render('home', compact('session', 'model', 'idModel'));
                 }
 
+                // CORRECTION : Instanciation de la session manquante
+                $session = new Session();
+                $session->date = $model->date;
+                $session->exercise_id = $exercise->id;
+                $session->administrator_id = $this->administrator->id;
+                $session->active = true;
+                $session->state = "SAVING"; // État initial
+
                 try {
                     if ($session->save()) {
                         Yii::$app->session->setFlash('success', 'Session créée avec succès !');
