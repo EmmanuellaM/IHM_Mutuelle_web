@@ -762,6 +762,25 @@ class MemberController extends Controller
                     Yii::$app->session->remove('contribution_id');
                     Yii::$app->session->remove('payment_type_category');
                 }
+            } elseif ($payment_category === 'renflouement') {
+                $renflouement_id = Yii::$app->session->get('renflouement_id');
+                if ($renflouement_id) {
+                    $renflouement = \app\models\Renflouement::findOne($renflouement_id);
+                    if ($renflouement && $renflouement->member_id == $this->member->id) {
+                        // Pay the renflouement
+                        if ($renflouement->pay($amount)) {
+                            // ✅ Add amount to user's Social Fund (Fond Social)
+                            $this->member->social_crown += $amount;
+                            if (!$this->member->save()) {
+                                Yii::error("Failed to update social crown for member {$this->member->id} after renflouement payment.", __METHOD__);
+                            }
+                        }
+                    }
+                    
+                    // Clear renflouement session data
+                    Yii::$app->session->remove('renflouement_id');
+                    Yii::$app->session->remove('payment_type_category');
+                }
             }
 
             // Stocker les informations de paiement en session
@@ -797,7 +816,7 @@ class MemberController extends Controller
             return $this->redirect(['site/login']);
         }
 
-        // Handle GET request for help_contribution type
+        // Handle GET request for help_contribution type or renflouement type
         $type = Yii::$app->request->get('type');
         if ($type === 'help_contribution') {
             $contribution_id = Yii::$app->request->get('contribution_id');
@@ -811,6 +830,23 @@ class MemberController extends Controller
                 
                 // Redirect to payment page (assuming there's a pay action)
                 return $this->redirect(['member/pay']);
+            }
+        } elseif ($type === 'renflouement') {
+            $renflouement_id = Yii::$app->request->get('id');
+            
+            if ($renflouement_id) {
+                $renflouement = \app\models\Renflouement::findOne($renflouement_id);
+                if ($renflouement && $renflouement->member_id == $this->member->id) {
+                    $amount = $renflouement->getRemainingAmount();
+                    
+                    // Store in session for later use
+                    Yii::$app->session->set('payment_type_category', 'renflouement');
+                    Yii::$app->session->set('renflouement_id', $renflouement_id);
+                    Yii::$app->session->set('payment_amount', $amount);
+                    
+                    // Redirect to payment page
+                    return $this->redirect(['member/pay']);
+                }
             }
         }
 

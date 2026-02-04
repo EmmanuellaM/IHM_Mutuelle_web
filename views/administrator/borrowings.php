@@ -537,6 +537,5 @@ Epargnes
         <?php if (isset($errorMessage)): ?>
             alert("<?= \yii\helpers\Html::encode($errorMessage) ?>");
         <?php endif; ?>
-    });
 </script>
 <?php $this->endBlock() ?>

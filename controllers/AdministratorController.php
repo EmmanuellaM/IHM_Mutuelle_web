@@ -1240,6 +1240,7 @@ public function actionNouvelleEmprunt()
     $maxBorrowingAmount = $this->calculateMaxBorrowingAmount($savings);
 
     // Pour ajouter le pop up au message d'erreur
+    // Pour ajouter le pop up au message d'erreur
     if ($model->amount > $maxBorrowingAmount) {
         $errorMessage =
             'Le montant demandé est supérieur au montant maximum empruntable basé sur vos épargnes totales dans cet exercice : '
@@ -1247,11 +1248,9 @@ public function actionNouvelleEmprunt()
             . number_format($savings, 0, ',', ' ') . ' XAF)';
 
         $model->addError('amount', $errorMessage);
+        Yii::$app->session->setFlash('error', $errorMessage);
 
-        return $this->render(
-            "borrowings",
-            compact("model", "sessions", "pagination", "members", "errorMessage")
-        );
+        return $this->redirect(['administrator/borrowings']);
     }
 
     // ✅ NOUVEAU : Vérifier si le FOND TOTAL est suffisant
@@ -1261,11 +1260,9 @@ public function actionNouvelleEmprunt()
             . number_format($availableFunds, 0, ',', ' ') . " XAF.";
         
         $model->addError('amount', $errorMessage);
+        Yii::$app->session->setFlash('error', $errorMessage);
 
-        return $this->render(
-            "borrowings",
-            compact("model", "sessions", "pagination", "members", "errorMessage")
-        );
+        return $this->redirect(['administrator/borrowings']);
     }
 
     $borrowing = new Borrowing();
