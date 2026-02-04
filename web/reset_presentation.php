@@ -63,10 +63,9 @@ try {
     foreach ($tables as $table) {
         $db->createCommand("DELETE FROM {$table}")->execute();
     }
-    
-    try {
-        $db->createCommand("DELETE FROM agape3")->execute();
-    } catch (\Exception $e) { /* ignore */ }
+    // Suppression spécifique Agapé3 ignorée pour éviter erreur transaction Postgres
+    // (sur Postgres, une erreur dans une transaction annule toute la transaction)
+
 
     $memberUserIds = $db->createCommand('SELECT user_id FROM member')->queryColumn();
     $db->createCommand('DELETE FROM member')->execute();
