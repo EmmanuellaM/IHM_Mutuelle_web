@@ -10,6 +10,11 @@ $user = $member->user();
 
 <div class="page-container">
     <div class="container">
+        <div class="mb-4">
+            <a href="<?= Yii::getAlias('@administrator.members') ?>" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+            </a>
+        </div>
         <div class="member-profile">
             <div class="member-header">
                 <img src="<?= \app\managers\FileManager::loadAvatar($user,"256")?>" 
