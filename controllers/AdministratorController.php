@@ -221,51 +221,15 @@ class AdministratorController extends Controller
                 $session->active = true;
                 $session->state = 'SAVING'; // État initial de la session
 
-                // Vérifier si c'est la première session de l'exercice
-                $sessionCount = count(Session::findAll(['exercise_id' => $exercise->id]));
-
-                if ($sessionCount == 0) {
-                    // Pas de vérification de mois précédent pour la première session
-                    try {
-                        if ($session->save()) {
-                            Yii::$app->session->setFlash('success', 'Session créée avec succès !');
-                            return $this->redirect("@administrator.home");
-                        } else {
-                            Yii::$app->session->setFlash('error', "Erreur lors de la création de la session: " . json_encode($session->errors));
-                        }
-                    } catch (\Exception $e) {
-                        Yii::$app->session->setFlash('error', "Exception: " . $e->getMessage());
+                try {
+                    if ($session->save()) {
+                        Yii::$app->session->setFlash('success', 'Session créée avec succès !');
+                        return $this->redirect("@administrator.home");
+                    } else {
+                        Yii::$app->session->setFlash('error', "Erreur lors de la création de la session: " . json_encode($session->errors));
                     }
-                } else {
-                    // Pour les sessions suivantes, vérifier que le mois suit immédiatement le mois précédent
-                    $prevMonth = clone $submittedDate;
-                    $prevMonth->modify('-1 month');
-                    
-                    $prevSession = Session::find()
-                        ->where([
-                            'AND',
-                            ['>=', 'date', $prevMonth->format('Y-m-01')],
-                            ['<', 'date', $submittedDate->format('Y-m-01')],
-                            ['exercise_id' => $exercise->id]
-                        ])
-                        ->one();
-                    
-                    if (!$prevSession) {
-                        $model->addError('date', 'Le mois de cette session doit directement suivre celui de la session précédente.');
-                        Yii::$app->session->setFlash('error', 'Le mois de cette session doit directement suivre celui de la session précédente.');
-                        return $this->render('home', compact('session', 'model', 'idModel'));
-                    }
-                    
-                    try {
-                        if ($session->save()) {
-                            Yii::$app->session->setFlash('success', 'Session créée avec succès !');
-                            return $this->redirect("@administrator.home");
-                        } else {
-                            Yii::$app->session->setFlash('error', "Erreur lors de la création de la session: " . json_encode($session->errors));
-                        }
-                    } catch (\Exception $e) {
-                        Yii::$app->session->setFlash('error', "Exception: " . $e->getMessage());
-                    }
+                } catch (\Exception $e) {
+                    Yii::$app->session->setFlash('error', "Exception: " . $e->getMessage());
                 }
 
                 $model->addErrors($session->errors);
@@ -312,23 +276,7 @@ class AdministratorController extends Controller
                     return $this->render('home', compact('session', 'model', 'idModel'));
                 }
 
-                // Vérifier que la date de la session est juste après la date de la session précédente
-                $prevMonth = clone $submittedDate;
-                $prevMonth->modify('-1 month');
-                
-                $prevSession = Session::find()
-                    ->where([
-                        'AND',
-                        ['>=', 'date', $prevMonth->format('Y-m-01')],
-                        ['<', 'date', $submittedDate->format('Y-m-01')],
-                        ['!=', 'id', $session->id], // Exclure la session en cours
-                    ])
-                    ->one();
-
-                if (!$prevSession && !$OSession) {
-                    $model->addError('date', 'Le mois de cette session doit directement suivre celui de la session précédente.');
-                    return $this->render('home', compact('session', 'model', 'idModel'));
-                }
+                // On ne vérifie plus la succession des mois pour permettre plus de flexibilité
 
                 // verifier que le jour de création de la session actuelle ne soit par à un jour après le jour current
                 if ($submittedDate1 < $today1) {
@@ -2763,7 +2711,7 @@ public function actionAppliquerConfiguration()
     {
         AdministratorSessionManager::setHome("tontine");
         $model = new NewTontineForm();
-        return $this->render("new_Tontine", compact("model"));
+        return $this->render("new_tontine", compact("model"));
     }
 
     /********************************ajouter une tontine ********************************************************** */
@@ -2889,10 +2837,21 @@ public function actionAppliquerConfiguration()
         $tontine->administrator_id = $this->administrator->id;
 
         $members = Member::find()->where(['!=', 'id', $model->member_id])->andWhere(['active' => true])->all();
-        $unit_amount = (int)ceil((float)($tontine_type->amount) / count($members));
-        $tontine->amount = $unit_amount * count($members);
+        
+        $memberCount = count($members);
+        if ($memberCount === 0) {
+            Yii::$app->session->setFlash('error', "Impossible de créer la tontine : aucun autre membre actif trouvé pour contribuer.");
+            return null;
+        }
+
+        $unit_amount = (int)ceil((float)($tontine_type->amount) / $memberCount);
+        $tontine->amount = $unit_amount * $memberCount;
         $tontine->unit_amount = $unit_amount;
-        $tontine->save();
+        
+        if (!$tontine->save()) {
+            Yii::$app->session->setFlash('error', "Erreur lors de l'enregistrement de la tontine.");
+            return null;
+        }
 
         foreach ($members as $member) {
             $contribution = new ContributionTontine();
