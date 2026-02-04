@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Final</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+        }
+
+        .test {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            min-height: 50px;
+        }
+
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Test Final de Connexion</h1>
+
+    <div class="test">
+        <h2>Test 1: Action de test simple</h2>
+        <button onclick="testSimple()">Tester actionTestSimple</button>
+    </div>
+
+    <div class="test">
+        <h2>Test 2: Formulaire administrateur</h2>
+        <button onclick="testAdmin()">Tester actionAdministratorForm</button>
+    </div>
+
+    <div id="result"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function testSimple() {
+            $('#result').html('Test en cours...');
+            $.ajax({
+                url: '/Mutuelle_web/web/index.php?r=guest/test-simple',
+                type: 'GET',
+                success: function (data) {
+                    $('#result').html('<p class="success">✓ SUCCÈS!</p><pre>' + JSON.stringify(data, null, 2) + '</pre>');
+                },
+                error: function (xhr) {
+                    $('#result').html('<p class="error">✗ ÉCHEC</p><p>Status: ' + xhr.status + '</p><pre>' + xhr.responseText.substring(0, 500) + '</pre>');
+                }
+            });
+        }
+
+        function testAdmin() {
+            $('#result').html('Test en cours...');
+            $.ajax({
+                url: '/Mutuelle_web/web/index.php?r=guest/administrator-form',
+                type: 'POST',
+                data: {
+                    username: 'root',
+                    password: 'root',
+                    rememberMe: false
+                },
+                success: function (data) {
+                    $('#result').html('<p class="success">✓ SUCCÈS!</p><pre>' + JSON.stringify(data, null, 2) + '</pre>');
+                },
+                error: function (xhr) {
+                    $('#result').html('<p class="error">✗ ÉCHEC</p><p>Status: ' + xhr.status + '</p><pre>' + xhr.responseText.substring(0, 500) + '</pre>');
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

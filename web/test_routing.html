@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test de routing Yii2</title>
+</head>
+
+<body>
+    <h1>Test des différentes URLs</h1>
+
+    <h2>Test 1: Page d'accueil (actionAccueil)</h2>
+    <button onclick="window.location.href='/Mutuelle_web/web/index.php?r=guest/accueil'">Aller à guest/accueil</button>
+
+    <h2>Test 2: Page de connexion (actionConnexion)</h2>
+    <button onclick="window.location.href='/Mutuelle_web/web/index.php?r=guest/connexion'">Aller à
+        guest/connexion</button>
+
+    <h2>Test 3: Formulaire administrateur (actionAdministratorForm)</h2>
+    <button onclick="testAdminForm()">Test AJAX administrator-form</button>
+
+    <h2>Test 4: Formulaire membre (actionMemberForm)</h2>
+    <button onclick="testMemberForm()">Test AJAX member-form</button>
+
+    <div id="result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc; background: #f0f0f0;"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function testAdminForm() {
+            var resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Test administrator-form...';
+
+            $.ajax({
+                type: 'POST',
+                url: '/Mutuelle_web/web/index.php?r=guest/administrator-form',
+                data: {
+                    username: 'root',
+                    password: 'root'
+                },
+                success: function (response) {
+                    resultDiv.innerHTML = '<h3>✓ Succès!</h3><pre>' + JSON.stringify(response, null, 2) + '</pre>';
+                },
+                error: function (xhr) {
+                    resultDiv.innerHTML = '<h3>✗ Erreur</h3><p>Status: ' + xhr.status + '</p><pre>' + xhr.responseText.substring(0, 500) + '</pre>';
+                }
+            });
+        }
+
+        function testMemberForm() {
+            var resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Test member-form...';
+
+            $.ajax({
+                type: 'POST',
+                url: '/Mutuelle_web/web/index.php?r=guest/member-form',
+                data: {
+                    username: 'test',
+                    password: 'test'
+                },
+                success: function (response) {
+                    resultDiv.innerHTML = '<h3>✓ Succès!</h3><pre>' + JSON.stringify(response, null, 2) + '</pre>';
+                },
+                error: function (xhr) {
+                    resultDiv.innerHTML = '<h3>✗ Erreur</h3><p>Status: ' + xhr.status + '</p><pre>' + xhr.responseText.substring(0, 500) + '</pre>';
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

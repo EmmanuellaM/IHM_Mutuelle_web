@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test de connexion</title>
+</head>
+<body>
+    <h1>Test de connexion administrateur</h1>
+    
+    <form id="test-form" method="post" action="/Mutuelle_web/web/guest/administrator-form">
+        <div>
+            <label>Username:</label>
+            <input type="text" name="username" value="root">
+        </div>
+        <div>
+            <label>Password:</label>
+            <input type="text" name="password" value="root">
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" name="rememberMe" value="1">
+                Remember Me
+            </label>
+        </div>
+        <button type="submit">Se connecter (POST normal)</button>
+    </form>
+    
+    <hr>
+    
+    <button onclick="testAjax()">Test AJAX</button>
+    
+    <div id="result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc;"></div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    function testAjax() {
+        var resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = 'Envoi de la requête...';
+        
+        $.ajax({
+            type: 'POST',
+            url: '/Mutuelle_web/web/guest/administrator-form',
+            data: {
+                username: 'root',
+                password: 'root',
+                rememberMe: false
+            },
+            success: function(response) {
+                resultDiv.innerHTML = '<h3>Réponse:</h3><pre>' + JSON.stringify(response, null, 2) + '</pre>';
+                console.log('Response:', response);
+            },
+            error: function(xhr, status, error) {
+                resultDiv.innerHTML = '<h3>Erreur:</h3><p>' + error + '</p><pre>' + xhr.responseText + '</pre>';
+                console.error('Error:', error);
+            }
+        });
+    }
+    </script>
+</body>
+</html>

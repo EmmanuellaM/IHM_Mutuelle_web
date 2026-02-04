@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test des variantes de noms</title>
+</head>
+
+<body>
+    <h1>Test des différentes variantes de noms d'actions</h1>
+
+    <button onclick="test('guest/administrator-form')">Test: administrator-form</button><br><br>
+    <button onclick="test('guest/administratorform')">Test: administratorform</button><br><br>
+    <button onclick="test('guest/administratorForm')">Test: administratorForm</button><br><br>
+    <button onclick="test('guest/AdministratorForm')">Test: AdministratorForm</button><br><br>
+
+    <div id="result"
+        style="margin-top: 20px; padding: 10px; border: 1px solid #ccc; background: #f0f0f0; min-height: 100px;"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function test(action) {
+            var resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Test de: ' + action + '...';
+
+            $.ajax({
+                type: 'POST',
+                url: '/Mutuelle_web/web/index.php?r=' + action,
+                data: {
+                    username: 'root',
+                    password: 'root'
+                },
+                success: function (response) {
+                    resultDiv.innerHTML = '<h3>✓ Succès avec: ' + action + '</h3><pre>' + JSON.stringify(response, null, 2) + '</pre>';
+                },
+                error: function (xhr) {
+                    resultDiv.innerHTML = '<h3>✗ Erreur avec: ' + action + '</h3><p>Status: ' + xhr.status + '</p>';
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

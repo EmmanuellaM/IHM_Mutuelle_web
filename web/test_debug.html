@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Debug Administrator Form</title>
+</head>
+
+<body>
+    <h1>Test Debug</h1>
+
+    <h2>Test avec différents noms</h2>
+    <button onclick="test('guest/administrator-form')">guest/administrator-form</button><br><br>
+    <button onclick="test('guest/administratorform')">guest/administratorform</button><br><br>
+    <button onclick="test('guest/test-admin')">guest/test-admin</button><br><br>
+
+    <div id="result" style="margin-top: 20px; padding: 15px; background: #f0f0f0; min-height: 100px;"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function test(action) {
+            $('#result').html('Test de: ' + action + '...');
+
+            $.ajax({
+                type: 'POST',
+                url: '/Mutuelle_web/web/index.php?r=' + action,
+                data: {
+                    username: 'root',
+                    password: 'root'
+                },
+                success: function (response) {
+                    $('#result').html('<h3 style="color:green">✓ SUCCÈS avec: ' + action + '</h3><pre>' + JSON.stringify(response, null, 2) + '</pre>');
+                },
+                error: function (xhr) {
+                    $('#result').html('<h3 style="color:red">✗ ERREUR avec: ' + action + '</h3><p>Status: ' + xhr.status + '</p><p>Response:</p><pre>' + xhr.responseText.substring(0, 1000) + '</pre>');
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

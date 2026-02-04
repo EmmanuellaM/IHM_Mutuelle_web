@@ -46,11 +46,11 @@
                                         <i class="fas fa-eye me-2"></i>Voir
                                     </a>
                                     <?php if ($this->params['administrator']->root): ?>
-                                        <button type="button"
-                                                onclick="deleteAdministrator(<?= $administrator->id ?>, '<?= htmlspecialchars($administrator->username) ?>')"
-                                                class="btn btn-danger">
+                                        <a href="<?= Yii::$app->urlManager->createUrl(['administrator/supprimer-admin', 'q' => $administrator->id]) ?>" 
+                                           class="btn btn-danger"
+                                           onclick="return confirm('Voulez-vous vraiment supprimer cet administrateur ?');">
                                             <i class="fas fa-trash me-2"></i>Supprimer
-                                        </button>
+                                        </a>
                                     <?php endif; ?>
                                 </div>
                             <?php endif; ?>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Connexion Admin - Test Simple</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 40px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin: 15px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Connexion Administrateur</h1>
+    <p>Test simple sans modal ni validation complexe</p>
+
+    <form id="login-form">
+        <div class="form-group">
+            <label>Username:</label>
+            <input type="text" id="username" value="admin" required>
+        </div>
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="password" value="admin123" required>
+        </div>
+        <button type="submit">Se connecter</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $('#login-form').on('submit', function (e) {
+            e.preventDefault();
+
+            var username = $('#username').val();
+            var password = $('#password').val();
+
+            $('#result').html('Connexion en cours...');
+
+            $.ajax({
+                type: 'POST',
+                url: '/Mutuelle_web/web/index.php?r=guest/login',
+                data: {
+                    username: username,
+                    password: password,
+                    remember: false
+                },
+                success: function (response) {
+                    console.log('Full response:', response);
+
+                    if (response.debug) {
+                        console.log('DEBUG:', response.debug);
+                        $('#result').html('<div class="error"><strong>Debug Info:</strong><pre>' + JSON.stringify(response.debug, null, 2) + '</pre></div>');
+                    }
+
+                    if (response.success) {
+                        $('#result').html('<div class="success">✓ Connexion réussie! Redirection...</div>');
+                        setTimeout(function () {
+                            window.location.href = response.redirect;
+                        }, 1000);
+                    } else {
+                        if (!response.debug) {
+                            $('#result').html('<div class="error">✗ ' + (response.message || 'Erreur de connexion') + '</div>');
+                        }
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $('#result').html('<div class="error">✗ Erreur: ' + error + '<br>Status: ' + xhr.status + '</div>');
+                    console.error('Error:', xhr.responseText);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

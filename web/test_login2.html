@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test de connexion - Version 2</title>
+</head>
+
+<body>
+    <h1>Test de connexion administrateur (avec index.php)</h1>
+
+    <button onclick="testAjax()">Test AJAX avec index.php</button>
+
+    <div id="result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc;"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function testAjax() {
+            var resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Envoi de la requête...';
+
+            $.ajax({
+                type: 'POST',
+                url: '/Mutuelle_web/web/index.php?r=guest/administrator-form',
+                data: {
+                    username: 'root',
+                    password: 'root',
+                    rememberMe: false
+                },
+                success: function (response) {
+                    resultDiv.innerHTML = '<h3>Réponse:</h3><pre>' + JSON.stringify(response, null, 2) + '</pre>';
+                    console.log('Response:', response);
+                },
+                error: function (xhr, status, error) {
+                    resultDiv.innerHTML = '<h3>Erreur:</h3><p>Status: ' + status + '</p><p>Error: ' + error + '</p><pre>' + xhr.responseText + '</pre>';
+                    console.error('Error:', error);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -118,6 +118,8 @@ $this->endBlock()
                     <th>Nom</th>
                     <th>État Inscription</th>
                     <th>État Fond Social</th>
+                    <th>Montant Epargne</th>
+                    <th>Montant Dette</th>
                     <th>Montant Inscription</th>
                     <th>Montant Fond Social</th>
                 </tr>
