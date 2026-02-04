@@ -213,6 +213,30 @@ class AdministratorController extends Controller
                     }
                 }
 
+                // ==================================================================================
+                // REGLE 4: APPLICATION AUTOMATIQUE DES PENALITES
+                // Au moment de créer une nouvelle session, on considère que la précédente est close.
+                // On vérifie tous les emprunts actifs pour appliquer les pénalités si nécessaire.
+                // ==================================================================================
+                try {
+                    $previousSession = Session::find()->orderBy(['date' => SORT_DESC])->one();
+                    if ($previousSession) {
+                        $activeBorrowings = \app\models\Borrowing::find()->where(['state' => true])->all();
+                        foreach ($activeBorrowings as $borrowing) {
+                            if ($borrowing->shouldApplyPenaltyInterest()) {
+                                // Cette fonction gère déjà la logique : 
+                                // - Vérification mois 3, 6, 9...
+                                // - Vérification insolvabilité à partir du mois 6
+                                // - Application pénalité standard ou majorée
+                                $borrowing->applyPenaltyInterest($exercise->interest);
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Yii::error("Erreur lors de l'application des pénalités automatiques: " . $e->getMessage());
+                    // On ne bloque pas la création de session pour ça, mais on log l'erreur
+                }
+
                 // Vérifier s'il existe déjà une session pour ce mois dans cet exercice
                 $submittedMonth = $submittedDate->format('m');
                 $submittedYear = $submittedDate->format('Y');
@@ -1953,6 +1977,64 @@ public function actionNouvelleEmprunt()
                     $help->state = false; // Fermé car entièrement financé par le fond social
                     
                     $help->save();
+
+                    // ==================================================================================
+                    // REGLE 5: INTERCEPTION DES AIDES POUR REMBOURSEMENT DE DETTE
+                    // Avant de payer l'aide, on vérifie si le membre a une dette active.
+                    // Si oui, on prélève le montant de la dette sur l'aide.
+                    // ==================================================================================
+                    
+                    $activeBorrowing = $member->activeBorrowing();
+                    if ($activeBorrowing) {
+                        $remainingDebt = $activeBorrowing->getRemainingAmount();
+                        
+                        // S'assurer que la dette est > 0
+                        if ($remainingDebt > 0) {
+                            $interceptedAmount = 0;
+                            
+                            if ($targetAmount >= $remainingDebt) {
+                                // L'aide couvre toute la dette
+                                $interceptedAmount = $remainingDebt;
+                                
+                                // Créer le remboursement total
+                                $refund = new \app\models\Refund();
+                                $refund->borrowing_id = $activeBorrowing->id;
+                                $refund->amount = $interceptedAmount;
+                                $refund->session_id = \app\managers\FinanceManager::currentSessionId() ?: 
+                                                      (\app\models\Session::find()->orderBy(['date' => SORT_DESC])->one()->id); 
+                                $refund->administrator_id = $this->administrator->id;
+                                $refund->save();
+                                
+                                // Fermer l'emprunt
+                                $activeBorrowing->state = false;
+                                $activeBorrowing->save();
+                                
+                            } else {
+                                // L'aide ne couvre qu'une partie de la dette
+                                $interceptedAmount = $targetAmount;
+                                
+                                // Créer le remboursement partiel
+                                $refund = new \app\models\Refund();
+                                $refund->borrowing_id = $activeBorrowing->id;
+                                $refund->amount = $interceptedAmount;
+                                $refund->session_id = \app\managers\FinanceManager::currentSessionId() ?: 
+                                                      (\app\models\Session::find()->orderBy(['date' => SORT_DESC])->one()->id);
+                                $refund->administrator_id = $this->administrator->id;
+                                $refund->save();
+                            }
+                            
+                            // Mettre à jour le commentaire de l'aide pour transparence
+                            $help->comments .= " [AUTO-PRELEVEMENT] " . number_format($interceptedAmount, 0, ',', ' ') . 
+                                               " XAF ont été saisis pour rembourser la dette du membre.";
+                            $help->save();
+
+                            $netReceived = $targetAmount - $interceptedAmount;
+                            Yii::$app->session->setFlash('info', 
+                                "Une dette de " . number_format($remainingDebt, 0, ',', ' ') . " XAF a été détectée. " .
+                                number_format($interceptedAmount, 0, ',', ' ') . " XAF ont été déduits de l'aide. " .
+                                "Le membre reçoit : " . number_format($netReceived, 0, ',', ' ') . " XAF.");
+                        }
+                    }
 
                     // Enregistrer la transaction de sortie du fond social
                     FinanceManager::registerSocialFundExpense(
