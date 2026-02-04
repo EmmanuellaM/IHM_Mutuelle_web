@@ -130,6 +130,8 @@ $this->endBlock()
                         <td><?= Html::encode($member->username) ?></td>
                         <td><?= $member->inscription >= $data['exercise']->inscription_amount ? 'Payé' : 'En retard' ?></td>
                         <td><?= $member->social_crown >= $data['exercise']->social_crown_amount ? 'Payé' : 'En retard' ?></td>
+                        <td><?= number_format($member->savedAmount($data['exercise']), 0, ',', ' ') ?> XAF</td>
+                        <td><?= number_format($member->borrowedAmount($data['exercise']), 0, ',', ' ') ?> XAF</td>
                         <td><?= number_format($member->inscription, 0, ',', ' ') ?> XAF</td>
                         <td><?= number_format($member->social_crown, 0, ',', ' ') ?> XAF</td>
                     </tr>
