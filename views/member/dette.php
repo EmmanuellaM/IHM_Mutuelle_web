@@ -403,7 +403,48 @@ $socialCrownTarget = $exercise->social_crown_amount;
             </div>
 
             <div class="text-center">
-                <a href="#" class="btn btn-pay">Régler ma dette</a>
+                <a href="<?= Url::to(['/member/accueil']) ?>" class="btn btn-secondary px-5">Retour à l'accueil</a>
+            </div>
+        </div>
+
+        <!-- Carte Renflouements -->
+        <div class="col-md-4">
+            <div class="debt-card">
+                <div class="debt-header" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
+                    <h3>Renflouements</h3>
+                </div>
+                <div class="debt-body">
+                    <?php if (empty($renflouements)): ?>
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-3x mb-3" style="color: var(--success-color);"></i>
+                            <p class="font-weight-bold">Aucun renflouement à régler</p>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($renflouements as $renflouement): ?>
+                            <div class="mb-3 p-3 border rounded">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Exercice : <?= $renflouement->exercise->year ?></span>
+                                    <span class="badge badge-warning"><?= ucfirst($renflouement->status) ?></span>
+                                </div>
+                                <div class="amount-display py-2">
+                                    <div class="amount-label">Reste à payer</div>
+                                    <div class="amount-value" style="color: #e67e22;">
+                                        <?= number_format($renflouement->getRemainingAmount(), 0, ',', ' ') ?> XAF
+                                    </div>
+                                </div>
+                                <div class="progress mb-2" style="height: 5px;">
+                                    <?php 
+                                    $percent = ($renflouement->amount > 0) ? ($renflouement->paid_amount / $renflouement->amount) * 100 : 0;
+                                    ?>
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: <?= $percent ?>%"></div>
+                                </div>
+                                <a href="<?= Url::to(['/member/process-payment', 'type' => 'renflouement', 'id' => $renflouement->id]) ?>" class="btn btn-sm btn-pay mt-2">
+                                    Payer ce renflouement
+                                </a>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </div>

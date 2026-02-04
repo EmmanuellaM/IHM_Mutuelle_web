@@ -449,10 +449,17 @@ class MemberController extends Controller
         // Récupérer le montant cible du fond social depuis les paramètres
         $socialCrownTarget = SettingManager::getSocialCrown();
 
+        // Récupérer les renflouements du membre
+        $renflouements = \app\models\Renflouement::find()
+            ->where(['member_id' => $member->id])
+            ->andWhere(['!=', 'status', \app\models\Renflouement::STATUS_PAID])
+            ->all();
+
         return $this->render('dette', [
             'member' => $member,
             'exercise' => $exercise,
             'socialCrownTarget' => $socialCrownTarget,
+            'renflouements' => $renflouements,
         ]);
     }
 

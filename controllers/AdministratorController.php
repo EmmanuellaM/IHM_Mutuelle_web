@@ -213,13 +213,24 @@ class AdministratorController extends Controller
                     }
                 }
 
-                // Créer la nouvelle session
-                $session = new Session();
-                $session->administrator_id = $this->administrator->id;
-                $session->exercise_id = $exercise->id;
-                $session->date = $model->date;
-                $session->active = true;
-                $session->state = 'SAVING'; // État initial de la session
+                // Vérifier s'il existe déjà une session pour ce mois dans cet exercice
+                $submittedMonth = $submittedDate->format('m');
+                $submittedYear = $submittedDate->format('Y');
+
+                $sessionExists = Session::find()
+                    ->where([
+                        'AND',
+                        ['exercise_id' => $exercise->id],
+                        ['EXTRACT(MONTH FROM date)' => $submittedMonth],
+                        ['EXTRACT(YEAR FROM date)' => $submittedYear]
+                    ])
+                    ->exists();
+
+                if ($sessionExists) {
+                    $model->addError('date', 'Une session existe déjà pour ce mois dans cet exercice.');
+                    Yii::$app->session->setFlash('error', 'Une session existe déjà pour ce mois dans cet exercice.');
+                    return $this->render('home', compact('session', 'model', 'idModel'));
+                }
 
                 try {
                     if ($session->save()) {
