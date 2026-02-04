@@ -2272,12 +2272,37 @@ public function actionNouvelleEmprunt()
     }
 
     /************************supprimer les membres de la mutuelle **************************************************** */
+    /************************supprimer les membres de la mutuelle **************************************************** */
     public function actionSupprimerMembre($q = 0)
     {
         $member = Member::findOne($q);
         if ($member) {
-            $member->active = false;
-            $member->save(false);
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $user = $member->user();
+                
+                // Tentative de suppression définitive
+                // On supprime d'abord le membre
+                $member->delete();
+                
+                // Puis l'utilisateur associé
+                if ($user) {
+                    $user->delete();
+                }
+                
+                $transaction->commit();
+                Yii::$app->session->setFlash('success', 'Membre supprimé définitivement.');
+            } catch (\Exception $e) {
+                $transaction->rollBack();
+                // En cas d'échec (ex: données liées), on désactive simplement
+                $member = Member::findOne($q); // Recharger car potentiellement modifié
+                if ($member) {
+                    $member->active = false;
+                    $member->save(false);
+                }
+                Yii::$app->session->setFlash('warning', 'Le membre a été désactivé, mais impossible de le supprimer car il possède un historique (épargnes, emprunts...).');
+            }
+            
             return $this->redirect("@administrator.members");
         }
     }
