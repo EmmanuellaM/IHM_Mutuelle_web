@@ -94,6 +94,13 @@ try {
         $user->password = $passwordHash;
         $user->type = 'MEMBER'; 
         
+        // CORRECTION: Utilisation des attributs corrects (voir User et Member models)
+        // User: name, first_name, email, password, tel, address
+        // Member: user_id, username, active, inscription, social_crown
+        
+        $user->tel = $phone;
+        $user->address = trim($data[4]);
+        
         if (!$user->save()) {
              echo "❌ Erreur User ({$data[0]}): " . json_encode($user->errors) . "\n";
              continue;
@@ -101,23 +108,19 @@ try {
         
         $member = new Member();
         $member->user_id = $user->id;
-        $member->active = false;
-        $member->inscription = 0;
-        $member->social_crown = 0;
-        
-        if ($member->hasAttribute('phone')) $member->phone = $phone;
-        if ($member->hasAttribute('address')) $member->address = trim($data[4]);
-        
-        if ($user->hasAttribute('phone')) $user->phone = $phone;
-        if ($user->hasAttribute('address')) $user->address = trim($data[4]);
-        
-        if ($user->isAttributeChanged('phone') || $user->isAttributeChanged('address')) {
-            $user->save();
+        $member->username = explode('@', $user->email)[0]; // Génération pseudo via email
+        // Si le pseudo existe déjà, on ajoute un suffixe (rare ici mais bon)
+        if (Member::find()->where(['username' => $member->username])->exists()) {
+             $member->username .= rand(10,99);
         }
-
+        
+        $member->active = false;
+        $member->inscription = 0; // Pas payé
+        $member->social_crown = 0; // Pas payé
+        
         if ($member->save()) {
             $count++;
-            echo "   ✅ {$user->name} {$user->first_name}\n";
+            echo "   ✅ {$user->name} {$user->first_name} ({$user->email})\n";
         } else {
              echo "❌ Erreur Member ({$data[0]}): " . json_encode($member->errors) . "\n";
         }

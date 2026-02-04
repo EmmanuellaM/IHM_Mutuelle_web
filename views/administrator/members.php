@@ -33,24 +33,24 @@ Membres
                                 <div class="card-text">
                                     <p>
                                         <span class="info-label">Pseudo :</span>
-                                        <span class="info-value"><?= htmlspecialchars($member->username) ?></span>
+                                        <span class="info-value"><?= htmlspecialchars($member->username ?? '') ?></span>
                                     </p>
                                     <?php if ($user->tel): ?>
                                         <p>
                                             <span class="info-label">Téléphone :</span>
-                                            <span class="info-value secondary"><?= htmlspecialchars($user->tel) ?></span>
+                                            <span class="info-value secondary"><?= htmlspecialchars($user->tel ?? '') ?></span>
                                         </p>
                                     <?php endif; ?>
                                     <?php if ($user->email): ?>
                                         <p>
                                             <span class="info-label">Email :</span>
-                                            <span class="info-value"><?= htmlspecialchars($user->email) ?></span>
+                                            <span class="info-value"><?= htmlspecialchars($user->email ?? '') ?></span>
                                         </p>
                                     <?php endif; ?>
                                     <?php if ($user->address): ?>
                                         <p>
                                             <span class="info-label">Adresse :</span>
-                                            <span class="info-value secondary"><?= htmlspecialchars($user->address) ?></span>
+                                            <span class="info-value secondary"><?= htmlspecialchars($user->address ?? '') ?></span>
                                         </p>
                                     <?php endif; ?>
                                     <p>
