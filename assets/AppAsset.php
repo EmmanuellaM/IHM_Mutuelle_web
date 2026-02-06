@@ -9,14 +9,17 @@ class AppAsset extends AssetBundle
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
-        'css/site.css',
+        'css/bootstrap/bootstrap.min.css',
+        'css/all.min.css',
         'css/mdb.min.css',
         'css/main.css',
-        'css/admin-styles.css',
         ['css/print.css', 'media' => 'print'],
     ];
 
     public $js = [
+        'js/bootstrap/popper.min.js',
+        'js/bootstrap/bootstrap.min.js',
+        'js/font_awesome/all.min.js',
         'js/mdb/mdb.min.js',
         'js/app.js',
         'js/main.js',
@@ -25,6 +28,17 @@ class AppAsset extends AssetBundle
 
     public $depends = [
         'yii\web\YiiAsset',
-        'yii\bootstrap\BootstrapAsset',
+    ];
+}
+
+class AdminAsset extends AssetBundle
+{
+    public $basePath = '@webroot';
+    public $baseUrl = '@web';
+    public $css = [
+        'css/admin-styles.css',
+    ];
+    public $depends = [
+        'app\assets\AppAsset',
     ];
 }

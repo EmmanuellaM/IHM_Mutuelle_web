@@ -4,7 +4,7 @@ use app\assets\AppAsset;
 use yii\helpers\Html;
 
 AppAsset::register($this);
-$this->title = "Mutuelle - ENSPY"
+$this->title = "Mutuelle - ENSPY";
 ?>
 
 <?php $this->beginPage() ?>

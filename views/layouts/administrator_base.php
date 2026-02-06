@@ -1,10 +1,10 @@
 <?php
 
-use app\assets\AppAsset;
+use app\assets\AdminAsset;
 use app\managers\AdministratorSessionManager;
 use yii\helpers\Html;
 
-AppAsset::register($this);
+AdminAsset::register($this);
 $this->title = "Mutuelle - ENSPY";
 ?>
 
