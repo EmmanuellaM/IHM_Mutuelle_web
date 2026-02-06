@@ -30,15 +30,3 @@ class AppAsset extends AssetBundle
         'yii\web\YiiAsset',
     ];
 }
-
-class AdminAsset extends AssetBundle
-{
-    public $basePath = '@webroot';
-    public $baseUrl = '@web';
-    public $css = [
-        'css/admin-styles.css',
-    ];
-    public $depends = [
-        'app\assets\AppAsset',
-    ];
-}
