@@ -55,7 +55,7 @@ tests/_support/_generated
 
 /vendor/
 /runtime/
-/assets/
+/web/assets/*
 /tests/runtime/
 /nbproject/
 /.idea/
