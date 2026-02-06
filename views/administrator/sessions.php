@@ -227,8 +227,11 @@ Sessions
                         </div>
                     </div>
                     <div>
+                        <button class="btn btn-print-exercise mr-2" data-toggle="modal" data-target="#modal-new-session">
+                            <i class="fas fa-plus-circle me-1"></i> Nouvelle Session
+                        </button>
                         <a href="<?= Yii::$app->urlManager->createUrl(['administrator/print-report', 'type' => 'exercise']) ?>" 
-                           class="btn btn-print-exercise" 
+                           class="btn btn-print" 
                            target="_blank">
                             <i class="fas fa-print me-1"></i> Imprimer le bilan de l'exercice
                         </a>
@@ -342,5 +345,64 @@ Sessions
                 </div>
             </div>
         <?php endif; ?>
+    </div>
+</div>
+<!-- Modal for creating a new session -->
+<div class="modal fade" id="modal-new-session" tabindex="-1" role="dialog" aria-labelledby="newSessionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newSessionModalLabel">Créer une nouvelle session</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <?php $form = \yii\widgets\ActiveForm::begin([
+                'errorCssClass' => 'text-secondary',
+                'method' => 'post',
+                'action' => '@administrator.new_session',
+                'options' => ['class' => 'modal-body']
+            ]) ?>
+            
+            <?php 
+            $exercise = count($exercises) ? $exercises[0] : null;
+            if (!$exercise) : ?>
+                <?= $form->field($model, 'year')->input('text', [
+                    'required' => 'required',
+                    'readonly' => 'readonly',
+                    'value' => date('Y')
+                ])->label('Année de l\'exercice') ?>
+                <?= $form->field($model, 'interest')->input('number', [
+                    'required' => 'required', 
+                    'step' => '0.01'
+                ])->label("Taux d'intérêt (%)") ?>
+                <?= $form->field($model, 'inscription_amount')->input('number', [
+                    'required' => 'required', 
+                    'min' => '0'
+                ])->label('Montant de l\'inscription (XAF)') ?>
+                <?= $form->field($model, 'social_crown_amount')->input('number', [
+                    'required' => 'required', 
+                    'min' => '0'
+                ])->label('Montant du fond social (XAF)') ?>
+                <?= $form->field($model, 'penalty_rate')->input('number', [
+                    'required' => 'required', 
+                    'step' => '0.01', 
+                    'min' => '0', 
+                    'max' => '100'
+                ])->label('Taux de pénalité') ?>
+            <?php endif; ?>
+            
+            <?= $form->field($model, 'date')->input('date', [
+                'required' => 'required'
+            ])->label("Date de la rencontre") ?>
+            
+            <div class="form-group text-right">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-primary">
+                    <?= $exercise ? 'Créer la session' : 'Créer l\'exercice' ?>
+                </button>
+            </div>
+            <?php \yii\widgets\ActiveForm::end(); ?>
+        </div>
     </div>
 </div>

@@ -1360,8 +1360,13 @@ public function actionNouvelleEmprunt()
             ->offset($pagination->offset)
             ->limit($pagination->limit)
             ->all();
-        $member = \app\models\Member::findOne(['user_id' => Yii::$app->user->id]);
-        return $this->render("sessions", compact('exercises', 'pagination', 'member'));
+        $model = new NewSessionForm();
+        $model->interest = SettingManager::getInterest();
+        $model->inscription_amount = SettingManager::getInscription();
+        $model->social_crown_amount = SettingManager::getSocialCrown();
+        $model->penalty_rate = SettingManager::getPenaltyRate();
+
+        return $this->render("sessions", compact('exercises', 'pagination', 'member', 'model'));
     }
 
     /****************************Details sur les sessions ****************************************************************** */
