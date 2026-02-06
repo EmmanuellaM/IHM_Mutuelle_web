@@ -1,7 +1,9 @@
 <?php
 
+use app\assets\AppAsset;
 use yii\helpers\Html;
 
+AppAsset::register($this);
 $this->title = "Mutuelle - ENSPY"
 ?>
 
@@ -9,15 +11,12 @@ $this->title = "Mutuelle - ENSPY"
     <!DOCTYPE html>
     <html lang="<?= Yii::$app->language ?>">
     <head>
-        <?php include Yii::getAlias("@app") . "/includes/links.php"; ?>
-
-        <title>
-            <?php if (isset($this->blocks['title'])): ?>
-                <?= $this->blocks['title'] ?>
-            <?php else: ?>
-                <?= Html::encode($this->title) ?>
-            <?php endif; ?>
-        </title>
+        <meta charset="<?= Yii::$app->charset ?>">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <?= Html::csrfMetaTags() ?>
+        <title><?= Html::encode($this->title) ?></title>
+        <?php $this->head() ?>
 
         <!-- Add modern fonts -->
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -174,7 +173,6 @@ $this->title = "Mutuelle - ENSPY"
 
     <?= $content ?>
 
-    <?php include Yii::getAlias("@app") . "/includes/scripts.php"; ?>
     <?php if (isset($this->blocks['script'])): ?>
         <?= $this->blocks['script'] ?>
     <?php endif; ?>
