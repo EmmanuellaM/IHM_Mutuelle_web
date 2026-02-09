@@ -78,6 +78,7 @@ class RouteManager {
         'administrator.treat_debt' => '/administrator/traiter-dette',
 
         'administrator.member' => '/administrator/membre',
+        'administrator.member_ajax' => '/administrator/membre-ajax',
         'administrator.saving_member' => '/administrator/epargne-membre',
         'administrator.savings_details' => '/administrator/epargne-detail',
         'administrator.borrowing_member' => '/administrator/emprunt-membre',

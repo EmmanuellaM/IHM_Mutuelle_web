@@ -1,10 +1,8 @@
 <?php
-use app\assets\AppAsset;
 use app\managers\MemberSessionManager;
 use yii\helpers\Html;
 use app\models\FinancialAid;
 
-AppAsset::register($this);
 $this->title = "Mutuelle - ENSPY";
 ?>
 
@@ -12,13 +10,17 @@ $this->title = "Mutuelle - ENSPY";
     <!DOCTYPE html>
     <html lang="<?= Yii::$app->language ?>">
     <head>
-        <meta charset="<?= Yii::$app->charset ?>">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <?= Html::csrfMetaTags() ?>
-        <title><?= Html::encode($this->title) ?></title>
-        <?php $this->head() ?>
+        <?php include Yii::getAlias("@app") . "/includes/links.php"; ?>
+
         <link href="<?= Yii::getAlias("@web").'/css/member.css' ?>" rel="stylesheet">
+
+        <title>
+            <?php if (isset($this->blocks['title'])): ?>
+                <?= $this->blocks['title'] ?>
+            <?php else: ?>
+                <?= Html::encode($this->title) ?>
+            <?php endif; ?>
+        </title>
 
         <style>
             :root {
@@ -450,6 +452,7 @@ $this->title = "Mutuelle - ENSPY";
             <?= $content ?>
         </div>
 
+        <?php include Yii::getAlias("@app") . "/includes/scripts.php"; ?>
         <style>
         /* Ne surcharge pas le z-index du modal, laisse Bootstrap gérer */
         .admin-sidebar {

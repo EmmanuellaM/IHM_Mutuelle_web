@@ -1809,6 +1809,15 @@ public function actionNouvelleEmprunt()
             return RedirectionManager::abort($this);
     }
 
+    public function actionMemberAjax($q)
+    {
+        $member = Member::findOne($q);
+        if ($member) {
+            return $this->renderPartial('_member_details', compact('member'));
+        }
+        return '';
+    }
+
     /****************************action des membres de la mutuelle **************************************** */
     public function actionEpargneDetail($session_id = 0, $member_id = 0)
     {
