@@ -136,6 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.add('active');
 
             const memberId = this.getAttribute('data-id');
+            // alert('Member clicked: ' + memberId); // Temporary debug
             loadMemberDetails(memberId);
         });
     });
@@ -146,29 +147,39 @@ document.addEventListener('DOMContentLoaded', function() {
         detailsLoader.classList.remove('d-none');
         detailsLoader.classList.add('d-flex');
 
-        fetch(`<?= \yii\helpers\Url::to(['/administrator/membre-ajax']) ?>?q=${id}`, {
+        const finalUrl = "<?= \yii\helpers\Url::to(['/administrator/membre-ajax']) ?>" + ( "<?= \yii\helpers\Url::to(['/administrator/membre-ajax']) ?>".includes('?') ? '&' : '?') + 'q=' + id;
+        
+        fetch(finalUrl, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
         .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok');
+            if (!response.ok) {
+                throw new Error('Erreur HTTP ' + response.status + ' pour ' + finalUrl);
+            }
             return response.text();
         })
         .then(html => {
             detailsLoader.classList.remove('d-flex');
             detailsLoader.classList.add('d-none');
-            detailsContent.innerHTML = html;
-            detailsContent.classList.remove('d-none');
             
-            // Re-initialize any dynamic components if needed (like tooltips or modals)
-            // Bootstrap 5 modals don't need re-init usually if used with data-attributes
+            if (html.trim() === '') {
+                detailsContent.innerHTML = '<div class="alert alert-warning m-4">Aucun détail trouvé pour ce membre.</div>';
+            } else {
+                detailsContent.innerHTML = html;
+            }
+            detailsContent.classList.remove('d-none');
         })
         .catch(error => {
             console.error('Error loading member details:', error);
             detailsLoader.classList.remove('d-flex');
             detailsLoader.classList.add('d-none');
-            detailsContent.innerHTML = '<div class="alert alert-danger m-4">Une erreur est survenue lors du chargement des détails.</div>';
+            detailsContent.innerHTML = `
+                <div class="alert alert-danger m-4">
+                    <p><strong>Une erreur est survenue :</strong></p>
+                    <code>${error.message}</code>
+                </div>`;
             detailsContent.classList.remove('d-none');
         });
     }
