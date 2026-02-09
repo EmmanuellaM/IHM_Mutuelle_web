@@ -124,25 +124,37 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Handle member click using Event Delegation (for robustness against FA mutations)
-    membersList.addEventListener('click', function(e) {
-        const item = e.target.closest('.member-item');
-        if (!item) return;
+    if (membersList) {
+        membersList.addEventListener('click', function(e) {
+            const item = e.target.closest('.member-item');
+            if (!item) return;
 
-        // UI Updates
-        document.querySelectorAll('.member-item').forEach(i => i.classList.remove('member-selected'));
-        item.classList.add('member-selected');
+            // alert('DEBUG: Clic sur membre ID: ' + item.getAttribute('data-id')); 
 
-        const memberId = item.getAttribute('data-id');
-        loadMemberDetails(memberId);
-    });
+            // UI Updates
+            document.querySelectorAll('.member-item').forEach(i => i.classList.remove('member-selected'));
+            item.classList.add('member-selected');
+
+            const memberId = item.getAttribute('data-id');
+            loadMemberDetails(memberId);
+        });
+    } else {
+        console.error('Element #membersList non trouvé !');
+        // alert('ERREUR: Liste des membres non trouvée dans le DOM.');
+    }
 
     function loadMemberDetails(id) {
+        console.log('Tentative de chargement du membre:', id);
+        
         detailsPlaceholder.classList.add('d-none');
         detailsContent.classList.add('d-none');
         detailsLoader.classList.remove('d-none');
         detailsLoader.classList.add('d-flex');
 
-        const finalUrl = "<?= \yii\helpers\Url::to(['/administrator/membre-ajax']) ?>" + ( "<?= \yii\helpers\Url::to(['/administrator/membre-ajax']) ?>".includes('?') ? '&' : '?') + 'q=' + id;
+        const baseUrl = "<?= \yii\helpers\Url::to(['/administrator/membre-ajax']) ?>";
+        const finalUrl = baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'q=' + id;
+        
+        console.log('URL AJAX:', finalUrl);
         
         fetch(finalUrl, {
             headers: {
@@ -172,8 +184,11 @@ document.addEventListener('DOMContentLoaded', function() {
             detailsLoader.classList.add('d-none');
             detailsContent.innerHTML = `
                 <div class="alert alert-danger m-4">
-                    <p><strong>Une erreur est survenue :</strong></p>
-                    <code>${error.message}</code>
+                    <p><strong>Une erreur est survenue lors du chargement :</strong></p>
+                    <code class="d-block mb-3">${error.message}</code>
+                    <a href="?q=${id}" class="btn btn-danger btn-sm">
+                        <i class="fas fa-sync me-2"></i>Utiliser la méthode classique (recharge la page)
+                    </a>
                 </div>`;
             detailsContent.classList.remove('d-none');
         });
