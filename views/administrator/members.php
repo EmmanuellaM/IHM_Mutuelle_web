@@ -145,12 +145,15 @@ document.addEventListener('DOMContentLoaded', function() {
         detailsLoader.classList.remove('d-none');
         detailsLoader.classList.add('d-flex');
 
-        fetch(`<?= Yii::getAlias("@administrator.member_ajax") ?>?q=${id}`, {
+        fetch(`<?= \yii\helpers\Url::to(['/administrator/membre-ajax']) ?>?q=${id}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.text())
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.text();
+        })
         .then(html => {
             detailsLoader.classList.remove('d-flex');
             detailsLoader.classList.add('d-none');
