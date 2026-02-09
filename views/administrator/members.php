@@ -81,11 +81,6 @@ Membres
     </div>
 </div>
 
-<?php 
-$memberAjaxUrl = Yii::getAlias('@administrator.member').'Ajax'; // Construire /administrator/membre-ajax
-// Note: RouteManager.php says 'administrator.member' => '/administrator/membre'
-// So 'administrator.member'.'Ajax' is /administrator/membreAjax which matches actionMemberAjax
-?>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -128,17 +123,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Handle member click
-    memberItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // UI Updates
-            memberItems.forEach(i => i.classList.remove('active'));
-            this.classList.add('active');
+    // Handle member click using Event Delegation (for robustness against FA mutations)
+    membersList.addEventListener('click', function(e) {
+        const item = e.target.closest('.member-item');
+        if (!item) return;
 
-            const memberId = this.getAttribute('data-id');
-            // alert('Member clicked: ' + memberId); // Temporary debug
-            loadMemberDetails(memberId);
-        });
+        // UI Updates
+        document.querySelectorAll('.member-item').forEach(i => i.classList.remove('member-selected'));
+        item.classList.add('member-selected');
+
+        const memberId = item.getAttribute('data-id');
+        loadMemberDetails(memberId);
     });
 
     function loadMemberDetails(id) {
@@ -190,7 +185,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (selectedId) {
         const item = document.querySelector(`.member-item[data-id="${selectedId}"]`);
         if (item) {
-            item.click();
+            // Trigger load directly (click() might be intercepted by standard handling)
+            loadMemberDetails(selectedId);
+            item.classList.add('member-selected');
             // Scroll to item if needed
             item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }

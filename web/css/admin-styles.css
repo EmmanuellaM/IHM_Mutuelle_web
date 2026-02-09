@@ -31,7 +31,7 @@
     background-color: #f1f3f5;
 }
 
-.member-item.active {
+.member-item.member-selected {
     background-color: rgba(78, 115, 223, 0.1);
     border-left-color: #4e73df;
 }
