@@ -8,7 +8,7 @@
 <div class="admin-content-wrapper">
     <div class="container-fluid py-4">
         <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap">
-            <h1 class="section-title mb-0">Équipe Administrative</h1>
+            <h1 class="section-title mb-0">Administrateurs</h1>
             <?php if ($this->params['administrator']->root): ?>
                 <a href="<?= Yii::$app->urlManager->createUrl(['/administrator/nouvel-administrateur']) ?>" 
                    class="btn btn-primary shadow-sm mt-2" style="border-radius: 12px; padding: 0.8rem 1.5rem;">

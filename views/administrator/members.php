@@ -33,10 +33,9 @@ Membres
                         <?php foreach ($members as $member):
                             $user = $member->user();
                             $fullName = htmlspecialchars($user->name.' '.$user->first_name);
-                            $isSelected = (isset($_GET['q']) && $_GET['q'] == $member->id);
                         ?>
-                            <a href="?q=<?= $member->id ?>" 
-                               class="list-group-item list-group-item-action member-item p-3 border-bottom-0 no-loader <?= $isSelected ? 'member-selected' : '' ?>" 
+                            <a href="<?= Yii::getAlias('@administrator.member') . '?q=' . $member->id ?>" 
+                               class="list-group-item list-group-item-action member-item p-3 border-bottom-0 no-loader" 
                                data-id="<?= $member->id ?>"
                                data-name="<?= strtolower($fullName) ?>">
                                 <div class="d-flex align-items-center">
@@ -61,31 +60,6 @@ Membres
                 <?php endif; ?>
             </div>
         </div>
-
-        <!-- Content: Member Details -->
-        <div class="members-content">
-            <?php if (isset($_GET['q']) && is_numeric($_GET['q'])): 
-                $selectedMember = \app\models\Member::findOne($_GET['q']);
-                if ($selectedMember):
-            ?>
-                <div class="p-4">
-                    <?= $this->render('_member_details', ['member' => $selectedMember]) ?>
-                </div>
-            <?php else: ?>
-                <div class="h-100 d-flex flex-column justify-content-center align-items-center text-muted p-5 text-center">
-                    <i class="fas fa-exclamation-triangle fa-5x mb-4 opacity-25"></i>
-                    <h3>Membre introuvable</h3>
-                    <p>Le membre sélectionné n'existe pas ou a été supprimé.</p>
-                </div>
-            <?php endif; ?>
-            <?php else: ?>
-                <div class="h-100 d-flex flex-column justify-content-center align-items-center text-muted p-5 text-center">
-                    <i class="fas fa-user-circle fa-5x mb-4 opacity-25"></i>
-                    <h3>Sélectionnez un membre</h3>
-                    <p>Cliquez sur un nom dans la liste pour voir ses informations détaillées et ses activités.</p>
-                </div>
-            <?php endif; ?>
-        </div>
     </div>
 </div>
 
@@ -95,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const memberItems = document.querySelectorAll('.member-item');
     const membersList = document.getElementById('membersList');
 
-    // Search functionality only
+    // Search functionality
     if (searchInput && memberItems.length > 0) {
         searchInput.addEventListener('input', function(e) {
             const query = e.target.value.toLowerCase().trim();
@@ -127,12 +101,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 noResults.remove();
             }
         });
-    }
-
-    // Auto-scroll to selected member if present
-    const selectedItem = document.querySelector('.member-item.member-selected');
-    if (selectedItem) {
-        selectedItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 });
 </script>
