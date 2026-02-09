@@ -97,7 +97,7 @@ $user = $member->user();
     <div class="d-flex flex-wrap gap-2 mt-4 justify-content-between">
         <div class="d-flex gap-2">
             <a href="<?= Yii::getAlias("@administrator.member")."?q=".$member->id ?>" 
-               class="btn btn-primary">
+               class="btn btn-primary" style="background-color: #4e73df; border-color: #4e73df;">
                 <i class="fas fa-external-link-alt me-2"></i>Voir profil complet
             </a>
         </div>

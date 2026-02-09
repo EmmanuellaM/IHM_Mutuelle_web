@@ -12,7 +12,8 @@ Membres
             <div class="sidebar-header p-3 border-bottom bg-white sticky-top">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="mb-0">Membres</h4>
-                    <a href="<?= Yii::getAlias("@administrator.new_member") ?>" class="btn btn-sm btn-primary rounded-circle" title="Ajouter un membre">
+                    <a href="<?= Yii::getAlias("@administrator.new_member") ?>" class="btn btn-sm btn-primary rounded-circle no-loader" 
+                       style="background-color: #4e73df; border-color: #4e73df;" title="Ajouter un membre">
                         <i class="fas fa-plus"></i>
                     </a>
                 </div>
@@ -68,7 +69,7 @@ Membres
                 <p>Cliquez sur un nom dans la liste pour voir ses informations détaillées et ses activités.</p>
             </div>
             <div id="memberDetailsLoader" class="h-100 d-none flex-column justify-content-center align-items-center bg-white">
-                <div class="spinner-border text-primary mb-3" role="status">
+                <div class="spinner-border mb-3" role="status" style="color: #4e73df;">
                     <span class="visually-hidden">Chargement...</span>
                 </div>
                 <p>Chargement des détails...</p>
