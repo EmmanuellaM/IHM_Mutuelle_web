@@ -208,3 +208,25 @@
     background: linear-gradient(90deg, #4e73df, #224abe);
     border-radius: 2px;
 }
+
+/* Fix for overlapping layout on administrators page */
+.admin-content-wrapper {
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.admin-content-wrapper .row {
+    margin-right: -15px;
+    margin-left: -15px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+@media (min-width: 993px) {
+    .main-content {
+        margin-left: 250px !important;
+        padding-top: 100px !important;
+        /* var(--header-height) + padding */
+    }
+}
