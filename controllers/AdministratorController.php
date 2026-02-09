@@ -1366,7 +1366,7 @@ public function actionNouvelleEmprunt()
         $model->social_crown_amount = SettingManager::getSocialCrown();
         $model->penalty_rate = SettingManager::getPenaltyRate();
 
-        return $this->render("sessions", compact('exercises', 'pagination', 'member', 'model'));
+        return $this->render("sessions", compact('exercises', 'pagination', 'model'));
     }
 
     /****************************Details sur les sessions ****************************************************************** */
