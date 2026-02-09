@@ -155,6 +155,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const finalUrl = baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'q=' + id;
         
         console.log('URL AJAX:', finalUrl);
+
+        // --- DUAL LOADING STRATEGY ---
+        // Si l'AJAX ne répond pas en 2 secondes, on recharge la page proprement
+        let ajaxSuccess = false;
+        const fallbackTimer = setTimeout(() => {
+            if (!ajaxSuccess) {
+                console.warn('AJAX trop lent, repli sur rechargement de page...');
+                window.location.href = "?q=" + id;
+            }
+        }, 2000);
         
         fetch(finalUrl, {
             headers: {
@@ -162,8 +172,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .then(response => {
+            ajaxSuccess = true;
+            clearTimeout(fallbackTimer);
             if (!response.ok) {
-                throw new Error('Erreur HTTP ' + response.status + ' pour ' + finalUrl);
+                throw new Error('Erreur HTTP ' + response.status);
             }
             return response.text();
         })
@@ -172,22 +184,23 @@ document.addEventListener('DOMContentLoaded', function() {
             detailsLoader.classList.add('d-none');
             
             if (html.trim() === '') {
-                detailsContent.innerHTML = '<div class="alert alert-warning m-4">Aucun détail trouvé pour ce membre.</div>';
+                detailsContent.innerHTML = '<div class="alert alert-warning m-4">Aucun détail trouvé.</div>';
             } else {
                 detailsContent.innerHTML = html;
             }
             detailsContent.classList.remove('d-none');
         })
         .catch(error => {
-            console.error('Error loading member details:', error);
+            clearTimeout(fallbackTimer);
+            console.error('Error:', error);
             detailsLoader.classList.remove('d-flex');
             detailsLoader.classList.add('d-none');
             detailsContent.innerHTML = `
                 <div class="alert alert-danger m-4">
-                    <p><strong>Une erreur est survenue lors du chargement :</strong></p>
+                    <p><strong>Erreur de chargement :</strong></p>
                     <code class="d-block mb-3">${error.message}</code>
                     <a href="?q=${id}" class="btn btn-danger btn-sm">
-                        <i class="fas fa-sync me-2"></i>Utiliser la méthode classique (recharge la page)
+                        <i class="fas fa-sync me-2"></i>Essayer la méthode classique
                     </a>
                 </div>`;
             detailsContent.classList.remove('d-none');

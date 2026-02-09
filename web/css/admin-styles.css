@@ -230,3 +230,27 @@
         /* var(--header-height) + padding */
     }
 }
+
+/* Strict sizes for Admin Cards to prevent breakage */
+.admin-card {
+    min-height: 420px;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.admin-profile-img {
+    width: 140px !important;
+    height: 140px !important;
+    min-width: 140px;
+    min-height: 140px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.admin-info p {
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
