@@ -33,11 +33,12 @@ Membres
                         <?php foreach ($members as $member):
                             $user = $member->user();
                             $fullName = htmlspecialchars($user->name.' '.$user->first_name);
+                            $isSelected = (isset($_GET['q']) && $_GET['q'] == $member->id);
                         ?>
-                            <button type="button" 
-                                    class="list-group-item list-group-item-action member-item p-3 border-bottom-0 no-loader" 
-                                    data-id="<?= $member->id ?>"
-                                    data-name="<?= strtolower($fullName) ?>">
+                            <a href="?q=<?= $member->id ?>" 
+                               class="list-group-item list-group-item-action member-item p-3 border-bottom-0 no-loader <?= $isSelected ? 'member-selected' : '' ?>" 
+                               data-id="<?= $member->id ?>"
+                               data-name="<?= strtolower($fullName) ?>">
                                 <div class="d-flex align-items-center">
                                     <img src="<?= \app\managers\FileManager::loadAvatar($user, "64") ?>" 
                                          class="rounded-circle me-3" 
@@ -49,7 +50,7 @@ Membres
                                     </div>
                                     <div class="status-indicator <?= $member->active ? 'bg-success' : 'bg-danger' ?> rounded-circle" style="width: 8px; height: 8px;"></div>
                                 </div>
-                            </button>
+                            </a>
                         <?php endforeach; ?>
                     </div>
                 <?php else: ?>
@@ -63,162 +64,75 @@ Membres
 
         <!-- Content: Member Details -->
         <div class="members-content">
-            <div id="memberDetailsPlaceholder" class="h-100 d-flex flex-column justify-content-center align-items-center text-muted p-5 text-center">
-                <i class="fas fa-user-circle fa-5x mb-4 opacity-25"></i>
-                <h3>Sélectionnez un membre</h3>
-                <p>Cliquez sur un nom dans la liste pour voir ses informations détaillées et ses activités.</p>
-            </div>
-            <div id="memberDetailsLoader" class="h-100 d-none flex-column justify-content-center align-items-center bg-white">
-                <div class="spinner-border mb-3" role="status" style="color: #4e73df;">
-                    <span class="visually-hidden">Chargement...</span>
+            <?php if (isset($_GET['q']) && is_numeric($_GET['q'])): 
+                $selectedMember = \app\models\Member::findOne($_GET['q']);
+                if ($selectedMember):
+            ?>
+                <div class="p-4">
+                    <?= $this->render('_member_details', ['member' => $selectedMember]) ?>
                 </div>
-                <p>Chargement des détails...</p>
-            </div>
-            <div id="memberDetailsContent" class="p-4 d-none">
-                <!-- Ajax content goes here -->
-            </div>
+            <?php else: ?>
+                <div class="h-100 d-flex flex-column justify-content-center align-items-center text-muted p-5 text-center">
+                    <i class="fas fa-exclamation-triangle fa-5x mb-4 opacity-25"></i>
+                    <h3>Membre introuvable</h3>
+                    <p>Le membre sélectionné n'existe pas ou a été supprimé.</p>
+                </div>
+            <?php endif; ?>
+            <?php else: ?>
+                <div class="h-100 d-flex flex-column justify-content-center align-items-center text-muted p-5 text-center">
+                    <i class="fas fa-user-circle fa-5x mb-4 opacity-25"></i>
+                    <h3>Sélectionnez un membre</h3>
+                    <p>Cliquez sur un nom dans la liste pour voir ses informations détaillées et ses activités.</p>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
-
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('memberSearch');
     const memberItems = document.querySelectorAll('.member-item');
-    const detailsPlaceholder = document.getElementById('memberDetailsPlaceholder');
-    const detailsLoader = document.getElementById('memberDetailsLoader');
-    const detailsContent = document.getElementById('memberDetailsContent');
     const membersList = document.getElementById('membersList');
 
-    // Search mapping
-    searchInput.addEventListener('input', function(e) {
-        const query = e.target.value.toLowerCase().trim();
-        let foundCount = 0;
+    // Search functionality only
+    if (searchInput && memberItems.length > 0) {
+        searchInput.addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase().trim();
+            let foundCount = 0;
 
-        memberItems.forEach(item => {
-            const name = item.getAttribute('data-name');
-            if (name.includes(query)) {
-                item.classList.remove('d-none');
-                item.classList.add('d-flex');
-                foundCount++;
-            } else {
-                item.classList.remove('d-flex');
-                item.classList.add('d-none');
+            memberItems.forEach(item => {
+                const name = item.getAttribute('data-name');
+                if (name && name.includes(query)) {
+                    item.classList.remove('d-none');
+                    foundCount++;
+                } else {
+                    item.classList.add('d-none');
+                }
+            });
+
+            // Show "no results" if needed
+            let noResults = document.getElementById('noSearchResults');
+            if (foundCount === 0 && query !== '') {
+                if (!noResults) {
+                    noResults = document.createElement('div');
+                    noResults.id = 'noSearchResults';
+                    noResults.className = 'p-4 text-center text-muted';
+                    noResults.innerHTML = '<i class="fas fa-search mb-2 opacity-50"></i><p>Aucun résultat</p>';
+                    if (membersList) {
+                        membersList.appendChild(noResults);
+                    }
+                }
+            } else if (noResults) {
+                noResults.remove();
             }
-        });
-
-        // Show "no results" if needed
-        let noResults = document.getElementById('noSearchResults');
-        if (foundCount === 0) {
-            if (!noResults) {
-                noResults = document.createElement('div');
-                noResults.id = 'noSearchResults';
-                noResults.className = 'p-4 text-center text-muted';
-                noResults.innerHTML = '<i class="fas fa-search mb-2 opacity-50"></i><p>Aucun résultat</p>';
-                membersList.appendChild(noResults);
-            }
-        } else if (noResults) {
-            noResults.remove();
-        }
-    });
-
-    // Handle member click using Event Delegation (for robustness against FA mutations)
-    if (membersList) {
-        membersList.addEventListener('click', function(e) {
-            const item = e.target.closest('.member-item');
-            if (!item) return;
-
-            // alert('DEBUG: Clic sur membre ID: ' + item.getAttribute('data-id')); 
-
-            // UI Updates
-            document.querySelectorAll('.member-item').forEach(i => i.classList.remove('member-selected'));
-            item.classList.add('member-selected');
-
-            const memberId = item.getAttribute('data-id');
-            loadMemberDetails(memberId);
-        });
-    } else {
-        console.error('Element #membersList non trouvé !');
-        // alert('ERREUR: Liste des membres non trouvée dans le DOM.');
-    }
-
-    function loadMemberDetails(id) {
-        console.log('Tentative de chargement du membre:', id);
-        
-        detailsPlaceholder.classList.add('d-none');
-        detailsContent.classList.add('d-none');
-        detailsLoader.classList.remove('d-none');
-        detailsLoader.classList.add('d-flex');
-
-        const baseUrl = "<?= \yii\helpers\Url::to(['/administrator/membre-ajax']) ?>";
-        const finalUrl = baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'q=' + id;
-        
-        console.log('URL AJAX:', finalUrl);
-
-        // --- DUAL LOADING STRATEGY ---
-        // Si l'AJAX ne répond pas en 2 secondes, on recharge la page proprement
-        let ajaxSuccess = false;
-        const fallbackTimer = setTimeout(() => {
-            if (!ajaxSuccess) {
-                console.warn('AJAX trop lent, repli sur rechargement de page...');
-                window.location.href = "?q=" + id;
-            }
-        }, 2000);
-        
-        fetch(finalUrl, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => {
-            ajaxSuccess = true;
-            clearTimeout(fallbackTimer);
-            if (!response.ok) {
-                throw new Error('Erreur HTTP ' + response.status);
-            }
-            return response.text();
-        })
-        .then(html => {
-            detailsLoader.classList.remove('d-flex');
-            detailsLoader.classList.add('d-none');
-            
-            if (html.trim() === '') {
-                detailsContent.innerHTML = '<div class="alert alert-warning m-4">Aucun détail trouvé.</div>';
-            } else {
-                detailsContent.innerHTML = html;
-            }
-            detailsContent.classList.remove('d-none');
-        })
-        .catch(error => {
-            clearTimeout(fallbackTimer);
-            console.error('Error:', error);
-            detailsLoader.classList.remove('d-flex');
-            detailsLoader.classList.add('d-none');
-            detailsContent.innerHTML = `
-                <div class="alert alert-danger m-4">
-                    <p><strong>Erreur de chargement :</strong></p>
-                    <code class="d-block mb-3">${error.message}</code>
-                    <a href="?q=${id}" class="btn btn-danger btn-sm">
-                        <i class="fas fa-sync me-2"></i>Essayer la méthode classique
-                    </a>
-                </div>`;
-            detailsContent.classList.remove('d-none');
         });
     }
 
-    // Optional: Check if a member ID is in URL to auto-select
-    const urlParams = new URLSearchParams(window.location.search);
-    const selectedId = urlParams.get('q');
-    if (selectedId) {
-        const item = document.querySelector(`.member-item[data-id="${selectedId}"]`);
-        if (item) {
-            // Trigger load directly (click() might be intercepted by standard handling)
-            loadMemberDetails(selectedId);
-            item.classList.add('member-selected');
-            // Scroll to item if needed
-            item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
+    // Auto-scroll to selected member if present
+    const selectedItem = document.querySelector('.member-item.member-selected');
+    if (selectedItem) {
+        selectedItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 });
 </script>
