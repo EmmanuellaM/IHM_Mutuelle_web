@@ -579,7 +579,7 @@ $this->title = "Mutuelle - ENSPY";
             var target = $(this).attr('target');
             
             if (href && href !== '#' && !href.startsWith('javascript:') && !href.startsWith('#') && 
-                !$(this).data('toggle') && !$(this).data('dismiss') && target !== '_blank') {
+                !$(this).data('toggle') && !$(this).data('dismiss') && target !== '_blank' && !$(this).hasClass('no-loader')) {
                 showLoadingOverlay();
             }
         });

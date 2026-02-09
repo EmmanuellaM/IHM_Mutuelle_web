@@ -1809,7 +1809,7 @@ public function actionNouvelleEmprunt()
             return RedirectionManager::abort($this);
     }
 
-    public function actionMemberAjax($q)
+    public function actionMembreAjax($q)
     {
         $member = Member::findOne($q);
         if ($member) {

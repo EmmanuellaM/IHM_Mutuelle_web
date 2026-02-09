@@ -34,7 +34,7 @@ Membres
                             $fullName = htmlspecialchars($user->name.' '.$user->first_name);
                         ?>
                             <button type="button" 
-                                    class="list-group-item list-group-item-action member-item p-3 border-bottom-0" 
+                                    class="list-group-item list-group-item-action member-item p-3 border-bottom-0 no-loader" 
                                     data-id="<?= $member->id ?>"
                                     data-name="<?= strtolower($fullName) ?>">
                                 <div class="d-flex align-items-center">
