@@ -1802,7 +1802,10 @@ public function actionNouvelleEmprunt()
             $member = Member::findOne($q);
 
             if ($member) {
-                return $this->render("member", compact("member"));
+                $exercise = Exercise::findOne(['active' => true]);
+                $inscriptionModel = new FixInscriptionForm();
+                $socialModel = new \app\models\forms\FixSocialCrownForm();
+                return $this->render("member", compact("member", "exercise", "inscriptionModel", "socialModel"));
             } else
                 return RedirectionManager::abort($this);
         } else
@@ -1813,7 +1816,10 @@ public function actionNouvelleEmprunt()
     {
         $member = Member::findOne($q);
         if ($member) {
-            return $this->renderPartial('_member_details', compact('member'));
+            $exercise = Exercise::findOne(['active' => true]);
+            $inscriptionModel = new FixInscriptionForm();
+            $socialModel = new \app\models\forms\FixSocialCrownForm();
+            return $this->renderPartial('_member_details', compact('member', 'exercise', 'inscriptionModel', 'socialModel'));
         }
         return '';
     }
@@ -2522,14 +2528,14 @@ public function actionNouvelleEmprunt()
                     $member->inscription += $model->amount;
                     if ($member->inscription > $exercise->inscription_amount) $member->inscription = $exercise->inscription_amount;
                     $member->save();
-                    return $this->redirect("@administrator.exercise_debts");
+                    return $this->redirect(Yii::$app->request->referrer ?: "@administrator.exercise_debts");
                 } else {
                     Yii::$app->session->setFlash('error', 'Impossible de régler l\'inscription. Vérifiez le montant ou l\'exercice actif.');
-                    return $this->redirect("@administrator.exercise_debts");
+                    return $this->redirect(Yii::$app->request->referrer ?: "@administrator.exercise_debts");
                 }
             } else {
                 Yii::$app->session->setFlash('error', 'Données invalides');
-                return $this->redirect("@administrator.exercise_debts");
+                return $this->redirect(Yii::$app->request->referrer ?: "@administrator.exercise_debts");
             }
         } else
             return RedirectionManager::abort($this);
@@ -2548,7 +2554,7 @@ public function actionNouvelleEmprunt()
                     
                     if ($model->amount > $remaining) {
                         Yii::$app->session->setFlash('error', "Le montant saisi ({$model->amount} XAF) dépasse le montant restant à payer ({$remaining} XAF).");
-                        return $this->redirect("@administrator.exercise_debts");
+                        return $this->redirect(Yii::$app->request->referrer ?: "@administrator.exercise_debts");
                     }
                     
                     $member->social_crown += $model->amount;
@@ -2558,14 +2564,14 @@ public function actionNouvelleEmprunt()
                     }
                     
                     $member->save();
-                    return $this->redirect("@administrator.exercise_debts");
+                    return $this->redirect(Yii::$app->request->referrer ?: "@administrator.exercise_debts");
                 } else {
                     Yii::$app->session->setFlash('error', 'Impossible de régler le fond social. Vérifiez le montant ou l\'exercice actif.');
-                    return $this->redirect("@administrator.exercise_debts");
+                    return $this->redirect(Yii::$app->request->referrer ?: "@administrator.exercise_debts");
                 }
             } else {
                 Yii::$app->session->setFlash('error', 'Données invalides');
-                return $this->redirect("@administrator.exercise_debts");
+                return $this->redirect(Yii::$app->request->referrer ?: "@administrator.exercise_debts");
             }
         } else
             return RedirectionManager::abort($this);

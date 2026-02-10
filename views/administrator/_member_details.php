@@ -96,10 +96,28 @@ $user = $member->user();
 
     <div class="d-flex flex-wrap gap-2 mt-4 justify-content-between">
         <div class="d-flex gap-2">
-            <a href="<?= Yii::getAlias("@administrator.member")."?q=".$member->id ?>" 
-               class="btn btn-primary" style="background-color: #4e73df; border-color: #4e73df;">
-                <i class="fas fa-external-link-alt me-2"></i>Voir profil complet
-            </a>
+            <?php 
+            // Check if exercise is active and valid
+            if (isset($exercise) && $exercise instanceof \app\models\Exercise): 
+                // Inscription Payment Button
+                if ($member->inscription < $exercise->inscription_amount):
+            ?>
+                <button class="btn btn-primary" data-toggle="modal" data-target="#modal-pay-inscription-<?= $member->id ?>">
+                    <i class="fas fa-file-signature me-2"></i>Payer Inscription
+                </button>
+            <?php 
+                endif; 
+                
+                // Social Fund Payment Button
+                if ($member->social_crown < $exercise->social_crown_amount):
+            ?>
+                <button class="btn btn-info text-white" data-toggle="modal" data-target="#modal-pay-social-<?= $member->id ?>">
+                    <i class="fas fa-hand-holding-heart me-2"></i>Payer Fond Social
+                </button>
+            <?php 
+                endif;
+            endif; 
+            ?>
         </div>
         <div class="d-flex gap-2">
             <?php if ($member->active): ?>
@@ -142,4 +160,137 @@ $user = $member->user();
             </div>
         </div>
     </div>
+
+    <?php if (isset($exercise) && $exercise instanceof \app\models\Exercise): ?>
+        <!-- Modal Paiement Inscription -->
+        <?php if ($member->inscription < $exercise->inscription_amount): ?>
+        <div class="modal fade" id="modal-pay-inscription-<?= $member->id ?>" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <?php
+                    $form = \yii\widgets\ActiveForm::begin([
+                        'errorCssClass' => 'text-secondary',
+                        'method' => 'post',
+                        'action' => ['@administrator.fix_inscription', 'id' => $member->id],
+                        'options' => [
+                            'class' => 'col-12',
+                            'data-current-amount' => $member->inscription,
+                            'data-max-amount' => $exercise->inscription_amount - $member->inscription,
+                        ],
+                    ]);
+                    ?>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Paiement Inscription</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center mb-4">
+                            <p class="text-muted">Membre : <strong><?= htmlspecialchars($user->name . " " . $user->first_name) ?></strong></p>
+                            <p class="mb-1">Déjà payé : <span class="text-success"><?= number_format($member->inscription, 0, ',', ' ') ?> XAF</span></p>
+                            <p>Reste à payer : <span class="text-danger font-weight-bold"><?= number_format($exercise->inscription_amount - $member->inscription, 0, ',', ' ') ?> XAF</span></p>
+                        </div>
+
+                        <?= $form->field($inscriptionModel ?? new \app\models\forms\FixInscriptionForm(), 'amount')->input('number', [
+                            'required' => 'required',
+                            'min' => 1,
+                            'max' => $exercise->inscription_amount - $member->inscription,
+                            'class' => 'form-control',
+                            'placeholder' => 'Montant à payer'
+                        ])->label("Montant à payer (XAF)") ?>
+
+                        <?= $form->field($inscriptionModel ?? new \app\models\forms\FixInscriptionForm(), 'id')->hiddenInput(['value' => $member->id])->label(false) ?>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check-circle me-2"></i>Valider
+                        </button>
+                    </div>
+                    <?php \yii\widgets\ActiveForm::end(); ?>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- Modal Paiement Fond Social -->
+        <?php if ($member->social_crown < $exercise->social_crown_amount): ?>
+        <div class="modal fade" id="modal-pay-social-<?= $member->id ?>" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <?php
+                    $formSocial = \yii\widgets\ActiveForm::begin([
+                        'errorCssClass' => 'text-secondary',
+                        'method' => 'post',
+                        'action' => ['@administrator.fix_social_crown', 'id' => $member->id],
+                        'options' => [
+                            'data-max-fund' => $exercise->social_crown_amount - $member->social_crown,
+                        ]
+                    ]);
+                    ?>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Paiement Fond Social</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                         <div class="text-center mb-4">
+                            <p class="text-muted">Membre : <strong><?= htmlspecialchars($user->name . " " . $user->first_name) ?></strong></p>
+                            <p class="mb-1">Déjà payé : <span class="text-success"><?= number_format($member->social_crown, 0, ',', ' ') ?> XAF</span></p>
+                            <p>Reste à payer : <span class="text-danger font-weight-bold"><?= number_format($exercise->social_crown_amount - $member->social_crown, 0, ',', ' ') ?> XAF</span></p>
+                        </div>
+
+                        <?= $formSocial->field($socialModel ?? new \app\models\forms\FixSocialCrownForm(), 'amount')->input('number', [
+                            'required' => 'required',
+                            'min' => 1,
+                            'max' => $exercise->social_crown_amount - $member->social_crown,
+                            'class' => 'form-control',
+                            'placeholder' => 'Montant à payer'
+                        ])->label("Montant à payer (XAF)") ?>
+
+                        <?= $formSocial->field($socialModel ?? new \app\models\forms\FixSocialCrownForm(), 'id')->hiddenInput(['value' => $member->id])->label(false) ?>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-info text-white">
+                            <i class="fas fa-check-circle me-2"></i>Valider
+                        </button>
+                    </div>
+                    <?php \yii\widgets\ActiveForm::end(); ?>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <!-- Script de validation pour les formulaires -->
+        <script>
+        // Use event delegation or check if script is already running to avoid duplicates if partial loaded multiple times
+        // Simple check for now
+        if (typeof paymentValidationInitialized === 'undefined') {
+            document.addEventListener('submit', function(e) {
+                if (e.target.matches('form[data-max-amount]')) {
+                    const form = e.target;
+                    const input = form.querySelector('input[name="FixInscriptionForm[amount]"]');
+                    const maxAmount = parseInt(form.dataset.maxAmount, 10);
+                    if (parseInt(input.value, 10) > maxAmount) {
+                        e.preventDefault();
+                        alert(`Le montant saisi dépasse le montant restant (${maxAmount} XAF).`);
+                    }
+                }
+                if (e.target.matches('form[data-max-fund]')) {
+                    const form = e.target;
+                    const input = form.querySelector('input[name="FixSocialCrownForm[amount]"]');
+                    const maxFund = parseInt(form.dataset.maxFund, 10);
+                    if (parseInt(input.value, 10) > maxFund) {
+                        e.preventDefault();
+                        alert(`Le montant saisi dépasse le montant restant (${maxFund} XAF).`);
+                    }
+                }
+            });
+            window.paymentValidationInitialized = true;
+        }
+        </script>
+    <?php endif; ?>
 </div>
