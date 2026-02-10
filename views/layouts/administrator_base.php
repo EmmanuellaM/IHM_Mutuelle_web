@@ -2,6 +2,10 @@
 
 use app\managers\AdministratorSessionManager;
 use yii\helpers\Html;
+use app\assets\AppAsset;
+
+AppAsset::register($this);
+
 $this->title = "Mutuelle - ENSPY";
 ?>
 
@@ -10,9 +14,14 @@ $this->title = "Mutuelle - ENSPY";
 <html lang="<?= Yii::$app->language ?>">
 
 <head>
-    <?php include Yii::getAlias("@app") . "/includes/links.php"; ?>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <?= Html::csrfMetaTags() ?>
+    <link rel="icon" href="<?= Yii::getAlias("@web")."/img/icon.png"?>">
+    
     <?php $this->head() ?>
-    <!-- <link href="<?= Yii::getAlias("@web") . '/css/admin.css' ?>" rel="stylesheet"> -->
+    
     <title>
         <?php if (isset($this->blocks['title'])) : ?>
             <?= $this->blocks['title'] ?>
@@ -530,7 +539,6 @@ $this->title = "Mutuelle - ENSPY";
         <?= $content ?>
     </div>
 
-    <?php include Yii::getAlias("@app") . "/includes/scripts.php"; ?>
     <?php if (isset($this->blocks['script'])) : ?>
         <?= $this->blocks['script'] ?>
     <?php endif; ?>
@@ -544,12 +552,6 @@ $this->title = "Mutuelle - ENSPY";
             });
         });
     </script>
-    <!-- Append modals to body to fix z-index issues -->
-    <!-- <script>
-    $(document).on('show.bs.modal', '.modal', function() {
-        // $(this).appendTo('body'); // Disabled to prevent layout shifting
-    });
-    </script> -->
     <script>
     $(document).ready(function() {
         // Hide overlay on load (just in case)

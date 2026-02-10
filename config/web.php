@@ -39,6 +39,16 @@ $config = [
         '@uploadedfilesdir' => '@app/uploadedfiles'
     ],
     'components' => [
+        'assetManager' => [
+            'bundles' => [
+                'yii\bootstrap\BootstrapAsset' => [
+                    'css' => [],
+                ],
+                'yii\bootstrap5\BootstrapAsset' => [
+                    'css' => [],
+                ],
+            ],
+        ],
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'NPw5Q4QuH0MTkg7i1Bgrh_m1kdxAjz8v',

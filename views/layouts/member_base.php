@@ -2,6 +2,9 @@
 use app\managers\MemberSessionManager;
 use yii\helpers\Html;
 use app\models\FinancialAid;
+use app\assets\AppAsset;
+
+AppAsset::register($this);
 
 $this->title = "Mutuelle - ENSPY";
 ?>
@@ -10,8 +13,11 @@ $this->title = "Mutuelle - ENSPY";
     <!DOCTYPE html>
     <html lang="<?= Yii::$app->language ?>">
     <head>
-        <?php include Yii::getAlias("@app") . "/includes/links.php"; ?>
-
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <?= Html::csrfMetaTags() ?>
+        <link rel="icon" href="<?= Yii::getAlias("@web")."/img/icon.png"?>">
         <link href="<?= Yii::getAlias("@web").'/css/member.css' ?>" rel="stylesheet">
 
         <title>
@@ -269,6 +275,8 @@ $this->title = "Mutuelle - ENSPY";
         <?php if (isset($this->blocks['style'])): ?>
             <?= $this->blocks['style'] ?>
         <?php endif; ?>
+        
+        <?php $this->head() ?>
     </head>
     <body  class="grey lighten-3">
     <?php $this->beginBody() ?>
@@ -524,7 +532,6 @@ $this->title = "Mutuelle - ENSPY";
             <?= $content ?>
         </div>
 
-        <?php include Yii::getAlias("@app") . "/includes/scripts.php"; ?>
         <style>
         /* Ne surcharge pas le z-index du modal, laisse Bootstrap gérer */
         .admin-sidebar {
@@ -566,7 +573,9 @@ $this->title = "Mutuelle - ENSPY";
         <!-- Initializations -->
         <script type="text/javascript">
             // Animations initialization
-            new WOW().init();
+            if (typeof WOW === 'function') {
+                new WOW().init();
+            }
             
             // Auto-wrap tables for responsiveness
             $(document).ready(function() {
