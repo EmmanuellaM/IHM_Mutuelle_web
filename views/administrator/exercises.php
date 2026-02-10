@@ -72,30 +72,6 @@ Exercices
         color: white;
     }
 
-    .search-section {
-        background: linear-gradient(to right, #f8f9fa, #ffffff);
-        padding: 2rem;
-        border-radius: 12px;
-        margin-bottom: 2rem;
-    }
-
-    .search-title {
-        color: var(--secondary-color);
-        margin-bottom: 1rem;
-        font-size: 1.2rem;
-    }
-
-    .search-input {
-        border-radius: 8px;
-        border: 1px solid #dee2e6;
-        transition: all 0.3s ease;
-    }
-
-    .search-input:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
-    }
-
     .modern-table {
         width: 100%;
         border-collapse: separate;
@@ -127,46 +103,6 @@ Exercices
         vertical-align: middle;
     }
 
-    .amount {
-        font-weight: 600;
-        color: var(--primary-color);
-    }
-
-    .remaining {
-        color: var(--warning-color);
-        font-weight: 600;
-    }
-
-    .btn-floating {
-        position: fixed !important;
-        bottom: 2rem;
-        right: 2rem;
-        z-index: 1000;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        font-size: 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        transition: all 0.3s ease;
-    }
-
-    .btn-floating:hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-    }
-
-    .modal-content {
-        border-radius: 12px;
-        border: none;
-    }
-
-    .modal-body {
-        padding: 2rem;
-    }
-
     .form-control {
         border-radius: 8px;
         padding: 0.75rem 1rem;
@@ -195,74 +131,7 @@ Exercices
         padding: 3rem;
         color: var(--text-muted);
     }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-top: 2rem;
-    }
-
-    .info-card {
-        background-color: #f8f9fa;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        text-align: center;
-    }
-
-    .info-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .info-card h5 {
-        font-size: 1.1rem;
-        color: var(--secondary-color);
-        margin-bottom: 0.5rem;
-    }
-
-    .info-card h2 {
-        font-size: 1.8rem;
-        color: var(--primary-color);
-        margin-bottom: 0;
-    }
-
-    .info-card i {
-        font-size: 2rem;
-        color: var(--primary-color);
-        margin-bottom: 0.5rem;
-    }
-
-    .chart-container {
-        background-color: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        padding: 2rem;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .chart-container:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .chart-title {
-        font-size: 1.5rem;
-        color: var(--primary-color);
-        margin-bottom: 1.5rem;
-        text-align: center;
-        
-    }
-
-
-
-
-
-
-
-
+    
     .renflouement-complete {
         color: #4CAF50 !important; /* Vert pour payé */
         font-weight: 600;
@@ -276,21 +145,11 @@ Exercices
     .status-icon {
         margin-left: 0.5rem;
     }
-
-
-
-
-
 </style>
 <?php $this->endBlock() ?>
 
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="section-title">Exercices</h1>
-        </div>
-    </div>
-</div>
+<?php // Utilisation du nouveau partiel d'en-tête ?>
+<?= $this->render('_page_header', ['title' => 'Exercices']) ?>
 
 <div class="container mt-5 mb-5">
     <div class="row">
@@ -298,7 +157,9 @@ Exercices
             <?php
             $exercise = $exercises[0];
             $members = \app\models\Member::find()->all();  ?>
-            <div class="col-12 white-block">
+            
+            <!-- CASE 'EN COURS' -->
+            <div class="col-12 white-block mb-4">
                 <div class="session-header">
                     <div class="session-title">
                         Exercice de l'année
@@ -306,6 +167,7 @@ Exercices
                             <?= $exercise->active ? 'En cours' : 'Terminé' ?>
                         </span>
                     </div>
+                    <!-- Note: Le montant et le sous-titre faisaient partie de la "case" visuelle, je les garde car c'est un bloc cohérent -->
                     <div class="session-amount">
                         <?= number_format($exercise->exerciseAmount() ?: 0, 0, ',', ' ') ?> XAF
                     </div>
@@ -313,88 +175,16 @@ Exercices
                 </div>
             </div>
 
-            <div class="col-12 mb-2">
-                <div class="row">
-                    <?php if (count($members)): ?>
-                    <div class="col-md-8 p-1">
-                        <div class="chart-container">
-                            <h3 class="chart-title">Répartition des intérêts</h3>
-                            <canvas id="pieChart"></canvas>
-                        </div>
-                        <div class="chart-container mt-2">
-                            <h3 class="chart-title">Évolution des entrées durant l'exercice</h3>
-                            <canvas id="lineChart"></canvas>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                    <div class="col-md-4 p-1">
-                        <div class="info-grid">
-                            <div class="info-card">
-                                <i class="fas fa-wallet"></i>
-                                <h5>Fond total</h5>
-                                <h2><?= number_format($exercise->exerciseAmount() ?: 0, 0, ',', ' ') ?> XAF</h2>
-                            </div>
-                            <div class="info-card">
-                                <i class="fas fa-piggy-bank"></i>
-                                <h5>Montant épargné</h5>
-                                <h2><?= number_format($exercise->totalSavedAmount() ?: 0, 0, ',', ' ') ?> XAF</h2>
-                            </div>
-                            <div class="info-card">
-                                <i class="fas fa-hand-holding-usd"></i>
-                                <h5>Montant emprunté</h5>
-                                <h2><?= number_format($exercise->totalBorrowedAmount() ?: 0, 0, ',', ' ') ?> XAF</h2>
-                            </div>
-                            <div class="info-card">
-                                <i class="fas fa-undo-alt"></i>
-                                <h5>Montant remboursé</h5>
-                                <h2><?= number_format($exercise->totalRefundedAmount() ?: 0, 0, ',', ' ') ?> XAF</h2>
-                            </div>
-                            <div class="info-card">
-                                <i class="fas fa-percentage"></i>
-                                <h5>Intérêt produit</h5>
-                                <h2><?= number_format($exercise->interest() ?: 0, 0, ',', ' ') ?> XAF</h2>
-                            </div>
-                            <div class="info-card">
-                                <i class="fas fa-gift"></i>
-                                <h5>Montant Agapè</h5>
-                                <h2><?= number_format($exercise->totalAgapeAmount() ?: 0, 0, ',', ' ') ?> XAF</h2>
-                            </div>
-                            <?php if($exercise && \app\managers\FinanceManager::numberOfSession() == 12): ?>
-                            <div class="info-card">
-                                <i class="fas fa-money-check-alt"></i>
-                                <h5>Inscription pour le prochain Exercice</h5>
-                                <h2><?= number_format($exercise->renflouementAmount() ?: 0, 0, ',', ' ') ?> XAF</h2>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-                        <div class="d-flex flex-column gap-2 mt-3">
-                            <?php if ($exercise->active): ?>
-                                <?php if ($exercise->canBeClosed()): ?>
-                                    <a href="<?= Yii::$app->urlManager->createUrl(['administrator/cloturer-exercice', 'q' => $exercise->id]) ?>" 
-                                       class="btn btn-danger"
-                                       data-confirm="Êtes-vous sûr de vouloir clôturer cet exercice ? Cette action est irréversible et générera les renflouements."
-                                       >
-                                        <i class="fas fa-lock"></i> Clôturer l'exercice
-                                    </a>
-                                <?php endif; ?>
-                            <?php else: ?>
-                                 <a href="<?= Yii::$app->urlManager->createUrl(['administrator/renflouements', 'q' => $exercise->id]) ?>" 
-                                   class="btn btn-warning" 
-                                   >
-                                    <i class="fas fa-money-bill-wave"></i> Voir Renflouements
-                                </a>
-                            <?php endif; ?>
-                            
-                            <a href="<?= Yii::$app->urlManager->createUrl(['administrator/print-report', 'type' => 'exercise']) ?>" 
-                               class="btn btn-primary" 
-                               target="_blank">
-                                <i class="fas fa-print"></i> Imprimer le bilan de l'exercice
-                            </a>
-                        </div>
-                    </div>
-                </div>
+            <!-- BOUTON IMPRIMER -->
+            <div class="col-12 mb-4 text-center">
+                 <a href="<?= Yii::$app->urlManager->createUrl(['administrator/print-report', 'type' => 'exercise']) ?>" 
+                   class="btn btn-primary btn-lg" 
+                   target="_blank">
+                    <i class="fas fa-print"></i> Imprimer le bilan de l'exercice (Fond social)
+                </a>
             </div>
 
+            <!-- TABLEAU -->
             <?php if (count($members)): ?>
                 <div class="col-12 white-block">
                     <h3 class="text-center my-4 blue-text">Bilan de l'exercice</h3>
@@ -437,15 +227,9 @@ Exercices
                                 $sc = $member->social_crown;
                                 $insc = $member->inscription;
 
-
-
-
-
-
-
                             // CALCUL DU RENFLOUEMENT
                               $montantRenflouementTotal = \app\managers\SettingManager::getSocialCrown();
-                              $montantRenflouementPaye = $sc; // Ce que le membre a déjà payé
+                              $montantRenflouementPaye = $sc;
                               $montantRenflouementRestant = $montantRenflouementTotal - $montantRenflouementPaye;
     
                             // DÉTERMINER SI C'EST PAYÉ COMPLÈTEMENT
@@ -457,13 +241,6 @@ Exercices
                             // DÉTERMINER SI RÉGLÉ (INSCRIPTION)
                             $montantInscriptionTotal = \app\managers\SettingManager::getInscription();
                             $inscriptionComplete = ($insc >= $montantInscriptionTotal);
-
-                            // FILTRE SUPPRIMÉ : On affiche tout le monde comme demandé !
-
-
-
-
-
 
                                 $labels[] = $user->name . " " . $user->first_name;
                                 $data[] = $interest ?: 0;
@@ -478,10 +255,6 @@ Exercices
                                     <td class="blue-text"><?= number_format($insc ?: 0, 0, ',', ' ') ?> XAF</td>
                                     <td class="blue-text"><?= number_format($sc ?: 0, 0, ',', ' ') ?> XAF</td>
                                     
-
-                                
-
-
                                      <!-- COLONNE RESTE FOND SOCIAL -->
                                      <td class="<?= $renflouementClass ?>">
                                        <?= number_format($montantRenflouementRestant, 0, ',', ' ') ?> XAF
@@ -509,10 +282,6 @@ Exercices
                                             -
                                         <?php endif; ?>
                                      </td>
-
-
-                                     
-
                                 </tr>
                             <?php endforeach; ?>
                             </tbody>
@@ -554,68 +323,6 @@ Exercices
 </div>
 
 <?php $this->beginBlock('script') ?>
-<script>
-    <?php
-
-    $lLabels = [];
-    $lData = [];
-
-    if(isset($exercise))
-    {
-        $sessions = \app\models\Session::find()->where(['exercise_id' => $exercise->id])->orderBy('created_at',SORT_ASC)->all();
-        $sum = 0;
-
-        foreach ($sessions as $index => $session) {
-            $lLabels[] = "Session ".($index+1);
-            $lData[] = ($session->totalAmount());
-        }
-    }
-
-    ?>
-    //line
-    var ctxL = document.getElementById("lineChart").getContext('2d');
-    var myLineChart = new Chart(ctxL, {
-        type: 'line',
-        data: {
-            labels: <?= json_encode($lLabels) ?>,
-            datasets: [
-                {
-                    backgroundColor: [
-                        'rgba(120, 137, 132, .3)',
-                    ],
-                    borderColor: [
-                        'rgba(0, 10, 130, .7)',
-                    ],
-                    data: <?= json_encode($lData) ?>
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            legend: false
-        }
-    });
-
-
-    var ctxP = document.getElementById("pieChart").getContext('2d');
-    var myPieChart = new Chart(ctxP, {
-        type: 'pie',
-        data: {
-            labels: <?= json_encode($labels) ?>,
-            datasets: [{
-                data:  <?= json_encode($data) ?>,
-                backgroundColor: <?= json_encode($colors) ?>
-            }]
-        },
-        options: {
-            responsive: true,
-            legend: {
-                display : true
-            }
-        }
-    });
-
-</script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('memberSearchInput');
