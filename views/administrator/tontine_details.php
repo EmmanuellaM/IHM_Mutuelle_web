@@ -9,6 +9,7 @@ $this->beginBlock('title') ?>
     Tontine
 <?php $this->endBlock() ?>
 <?php $this->beginBlock('style') ?>
+    <link rel="stylesheet" href="<?= Yii::getAlias('@web/css/admin-styles.css') ?>">
     <style>
         #btn-add {
             position: fixed!important;
@@ -71,6 +72,14 @@ $member = $tontine->member();
 $user = $member->user();
 $TontineType = $tontine->TontineType();
 ?>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="section-title">Détails de la tontine</h1>
+        </div>
+    </div>
+</div>
+
 <div class="container mb-5 mt-5">
     <div class="row">
         <div class="col-12 white-block">

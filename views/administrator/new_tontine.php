@@ -9,6 +9,7 @@ $this->beginBlock('title') ?>
 Nouvelle Tontine
 <?php $this->endBlock() ?>
 <?php $this->beginBlock('style') ?>
+<link rel="stylesheet" href="<?= Yii::getAlias('@web/css/admin-styles.css') ?>">
 <style>
     :root {
         --primary-color: #2196F3;
@@ -191,6 +192,14 @@ Nouvelle Tontine
     }
 </style>
 <?php $this->endBlock() ?>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="section-title">Nouvelle tontine</h1>
+        </div>
+    </div>
+</div>
 
 <div class="container">
     <div class="row justify-content-center">

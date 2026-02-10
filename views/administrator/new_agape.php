@@ -1,11 +1,23 @@
 <?php
 ?>
-  <div class="col-10">
-            <div class="col-12 mb-3">
-                <h3 class="text-muted text-center">Agape</h3>
-            </div>
-            <div class="col-12">
-                <div class="row justify-content-center">
+</style>
+<?php $this->beginBlock('style') ?>
+<link rel="stylesheet" href="<?= Yii::getAlias('@web/css/admin-styles.css') ?>">
+<style>
+</style>
+<?php $this->endBlock() ?>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="section-title">Nouvelle agape</h1>
+        </div>
+    </div>
+</div>
+
+<div class="col-10">
+    <div class="col-12">
+        <div class="row justify-content-center">
                     <?php
                     $formAgape = \yii\widgets\ActiveForm::begin([
                         'method' => 'post',

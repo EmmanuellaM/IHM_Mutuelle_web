@@ -3,6 +3,7 @@ Profil
 <?php $this->endBlock()?>
 
 <?php $this->beginBlock('style')?>
+<link rel="stylesheet" href="<?= Yii::getAlias('@web/css/admin-styles.css') ?>">
 <style>
     .profile-container {
         background: #fff;
@@ -81,6 +82,14 @@ Profil
     }
 </style>
 <?php $this->endBlock()?>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="section-title">Profil</h1>
+        </div>
+    </div>
+</div>
 
 <div class="container mt-5 mb-5">
     <div class="profile-container">

@@ -1,4 +1,5 @@
 <?php $this->beginBlock('style') ?>
+<link rel="stylesheet" href="<?= Yii::getAlias('@web/css/admin-styles.css') ?>">
 <style>
     :root {
         --primary-gradient: linear-gradient(135deg, #2193b0, #6dd5ed);
@@ -202,6 +203,14 @@
     }
 </style>
 <?php $this->endBlock() ?>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="section-title">Tableau de bord</h1>
+        </div>
+    </div>
+</div>
 
 <div class="container-fluid mt-5 mb-5">
     <div class="row mb-4">

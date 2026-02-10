@@ -11,6 +11,20 @@ $this->params['breadcrumbs'][] = ['label' => 'Exercices', 'url' => ['exercices']
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
+<?php $this->beginBlock('style') ?>
+<link rel="stylesheet" href="<?= Yii::getAlias('@web/css/admin-styles.css') ?>">
+<style>
+</style>
+<?php $this->endBlock() ?>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="section-title">Renflouements</h1>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-md-12">
         <div class="white-block">

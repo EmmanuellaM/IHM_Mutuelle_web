@@ -59,6 +59,14 @@ $this->beginBlock('title') ?>
     </style>
 <?php $this->endBlock() ?>
 
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="section-title">Nouvelle aide financière</h1>
+        </div>
+    </div>
+</div>
+
 <div class="container mt-5 mb-5">
     <div class="row justify-content-center">
         <?php if (count(\app\models\Member::find()->where(['active' => true]) ->all()) >1 ):?>

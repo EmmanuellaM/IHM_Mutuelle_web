@@ -2,6 +2,7 @@
     Configuration de la Mutuelle
 <?php $this->endBlock() ?>
 <?php $this->beginBlock('style') ?>
+    <link rel="stylesheet" href="<?= Yii::getAlias('@web/css/admin-styles.css') ?>">
     <style>
         :root {
             --primary-color: #1a73e8;
@@ -145,6 +146,14 @@
         }
     </style>
 <?php $this->endBlock() ?>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="section-title">Paramètres</h1>
+        </div>
+    </div>
+</div>
 
 <div class="container">
     <div class="row justify-content-center animate-fade-in">

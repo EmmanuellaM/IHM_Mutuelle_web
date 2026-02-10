@@ -9,6 +9,7 @@ $this->beginBlock('title') ?>
     Détails Emprunt
 <?php $this->endBlock() ?>
 <?php $this->beginBlock('style') ?>
+    <link rel="stylesheet" href="<?= Yii::getAlias('@web/css/admin-styles.css') ?>">
     <style>
         :root {
             --primary-color: #2196F3;
@@ -146,6 +147,14 @@ $intendedAmount = \app\managers\FinanceManager::intendedAmountFromBorrowing($bor
 $refundedAmount = $borrowing->refundedAmount();
 $rest = $intendedAmount - $refundedAmount;
 ?>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="section-title">Détails de l'emprunt</h1>
+        </div>
+    </div>
+</div>
+
 <div class="container">
     <div class="row">
         <div class="col-12">
