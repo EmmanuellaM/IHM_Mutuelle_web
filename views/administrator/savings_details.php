@@ -188,7 +188,7 @@ Détails des Épargnes
         <div class="col-12">
             <div class="member-card">
                 <div class="member-name"><?= Html::encode($memberUser->name . " " . $memberUser->first_name) ?></div>
-                <div class="total-savings"><?= number_format($totalSavings, 0, ',', ' ') ?> XAF</div>
+                <div class="total-savings"><?= number_format((float)$totalSavings, 0, ',', ' ') ?> XAF</div>
                 <div class="text-muted">Total des épargnes pour cette session</div>
             </div>
         </div>
