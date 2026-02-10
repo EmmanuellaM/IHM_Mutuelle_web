@@ -175,13 +175,35 @@ Exercices
                 </div>
             </div>
 
-            <!-- BOUTON IMPRIMER -->
+
+            <!-- BOUTON IMPRIMER & ACTIONS -->
             <div class="col-12 mb-4 text-center">
-                 <a href="<?= Yii::$app->urlManager->createUrl(['administrator/print-report', 'type' => 'exercise']) ?>" 
-                   class="btn btn-primary btn-lg" 
-                   target="_blank">
-                    <i class="fas fa-print"></i> Imprimer le bilan de l'exercice (Fond social)
-                </a>
+                 <div class="d-flex justify-content-center gap-3">
+                    <?php if ($exercise->active): ?>
+                        <?php if ($exercise->canBeClosed()): ?>
+                            <a href="<?= Yii::$app->urlManager->createUrl(['administrator/cloturer-exercice', 'q' => $exercise->id]) ?>"
+                               class="btn btn-danger btn-lg"
+                               data-confirm="Êtes-vous sûr de vouloir clôturer cet exercice ? Cette action est irréversible et générera les renflouements."
+                               style="margin-right: 10px;"
+                               >
+                                <i class="fas fa-lock"></i> Clôturer l'exercice
+                            </a>
+                        <?php endif; ?>
+                    <?php else: ?>
+                         <a href="<?= Yii::$app->urlManager->createUrl(['administrator/renflouements', 'q' => $exercise->id]) ?>"
+                           class="btn btn-warning btn-lg"
+                           style="margin-right: 10px;"
+                           >
+                            <i class="fas fa-money-bill-wave"></i> Voir Renflouements
+                        </a>
+                    <?php endif; ?>
+
+                     <a href="<?= Yii::$app->urlManager->createUrl(['administrator/print-report', 'type' => 'exercise']) ?>" 
+                       class="btn btn-primary btn-lg" 
+                       target="_blank">
+                        <i class="fas fa-print"></i> Imprimer le bilan de l'exercice (Fond social)
+                    </a>
+                 </div>
             </div>
 
             <!-- TABLEAU -->
