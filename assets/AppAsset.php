@@ -12,6 +12,7 @@ class AppAsset extends AssetBundle
         'css/bootstrap/bootstrap.min.css',
         'css/all.min.css',
         'css/mdb.min.css',
+        'css/loader.css',
         'css/main.css',
         ['css/print.css', 'media' => 'print'],
     ];
@@ -21,6 +22,7 @@ class AppAsset extends AssetBundle
         'js/bootstrap/bootstrap.min.js',
         'js/font_awesome/all.min.js',
         'js/mdb/mdb.min.js',
+        'js/loader.js',
         'js/app.js',
         'js/main.js',
         'js/modal-fix.js',

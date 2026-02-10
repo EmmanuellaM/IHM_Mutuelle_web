@@ -211,64 +211,6 @@ $this->title = "Mutuelle - ENSPY";
                 }
             }
 
-            /* --- Loading Overlay Styles --- */
-            #loading-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(15, 23, 42, 0.85);
-                backdrop-filter: blur(8px);
-                -webkit-backdrop-filter: blur(8px);
-                z-index: 9999;
-                display: none;
-                justify-content: center;
-                align-items: center;
-                color: white;
-                font-family: 'Inter', system-ui, -apple-system, sans-serif;
-                overflow: hidden;
-            }
-
-            .loading-content {
-                text-align: center;
-                user-select: none;
-            }
-
-            .loading-text {
-                font-size: 2.5rem;
-                font-weight: 700;
-                letter-spacing: -0.025em;
-                background: linear-gradient(to right, #ffffff, #94a3b8);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-            }
-
-            .loading-dots {
-                font-size: 2.5rem;
-                margin-left: 0.5rem;
-            }
-
-            .dot {
-                display: inline-block;
-                animation: glow 1.5s infinite;
-                opacity: 0.2;
-            }
-
-            .dot:nth-child(2) { animation-delay: 0.2s; }
-            .dot:nth-child(3) { animation-delay: 0.4s; }
-
-            @keyframes glow {
-                0%, 100% {
-                    opacity: 0.2;
-                    transform: scale(1);
-                }
-                50% {
-                    opacity: 1;
-                    transform: scale(1.3);
-                    color: #3b82f6;
-                    text-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
-                }
             }
         </style>
 
@@ -614,57 +556,8 @@ $this->title = "Mutuelle - ENSPY";
             </div>
         </div>
     </div>
-    <script>
-    $(document).ready(function() {
-        // Hide overlay on load (just in case)
-        $('#loading-overlay').fadeOut(100);
-        $('body').removeClass('loading-active');
 
-        // Function to show loading overlay
-        function showLoadingOverlay() {
-            $('body').addClass('loading-active');
-            $('#loading-overlay').css('display', 'flex').hide().fadeIn(300);
-        }
 
-        // Show overlay on form submission
-        $('form').on('submit', function() {
-            if (!$(this).hasClass('no-loader')) {
-                // If the form has native validation and it's invalid, don't show overlay
-                if (this.checkValidity && !this.checkValidity()) {
-                    return;
-                }
-                showLoadingOverlay();
-            }
-        });
-
-        // Show overlay on link clicks (excluding relative hashes, modals, and target blank)
-        $('a').on('click', function() {
-            var href = $(this).attr('href');
-            var target = $(this).attr('target');
-            
-            if (href && href !== '#' && !href.startsWith('javascript:') && !href.startsWith('#') && 
-                !$(this).data('toggle') && !$(this).data('dismiss') && target !== '_blank') {
-                showLoadingOverlay();
-            }
-        });
-
-        // Hide overlay if the page is shown from cache (back button)
-        window.onpageshow = function(event) {
-            if (event.persisted) {
-                $('#loading-overlay').fadeOut(200);
-                $('body').removeClass('loading-active');
-            }
-        };
-
-        // Safety: Hide overlay after 15 seconds (something went wrong)
-        setTimeout(function() {
-            if ($('#loading-overlay').is(':visible')) {
-                $('#loading-overlay').fadeOut(500);
-                $('body').removeClass('loading-active');
-            }
-        }, 15000);
-    });
-    </script>
 <?php $this->endBody(); ?>
     </body>
     </html>
