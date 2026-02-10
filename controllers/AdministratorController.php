@@ -43,10 +43,11 @@ use app\models\forms\UpdateSocialInformationForm;
 use app\models\Help;
 use app\models\HelpType;
 use app\models\Member;
-use app\models\Refund;
+use app\models\Registration;
 use app\models\Renflouement;
 use app\models\forms\FixRenflouementForm;
 use app\models\Saving;
+use app\models\SocialFund;
 use app\models\Session;
 use app\models\Tontine;
 use app\models\TontineType;
@@ -2525,9 +2526,22 @@ public function actionNouvelleEmprunt()
                 $exercise = Exercise::findOne(['active' => true]);
                 
                 if ($member && $exercise && ($member->inscription < $exercise->inscription_amount)) {
-                    $member->inscription += $model->amount;
-                    if ($member->inscription > $exercise->inscription_amount) $member->inscription = $exercise->inscription_amount;
-                    $member->save();
+                    $amountToPay = $model->amount;
+                    if ($member->inscription + $amountToPay > $exercise->inscription_amount) {
+                         $amountToPay = $exercise->inscription_amount - $member->inscription;
+                    }
+                    
+                    $registration = new Registration();
+                    $registration->member_id = $member->id;
+                    $registration->exercise_id = $exercise->id;
+                    $registration->amount = $amountToPay;
+                    
+                    if ($registration->save()) {
+                        Yii::$app->session->setFlash('success', 'Inscription réglée avec succès.');
+                    } else {
+                        Yii::$app->session->setFlash('error', 'Erreur lors de l\'enregistrement de l\'inscription.');
+                    }
+                    
                     return $this->redirect(Yii::$app->request->referrer ?: "@administrator.exercise_debts");
                 } else {
                     Yii::$app->session->setFlash('error', 'Impossible de régler l\'inscription. Vérifiez le montant ou l\'exercice actif.');
@@ -2557,13 +2571,17 @@ public function actionNouvelleEmprunt()
                         return $this->redirect(Yii::$app->request->referrer ?: "@administrator.exercise_debts");
                     }
                     
-                    $member->social_crown += $model->amount;
-                    // Double check (redundant but safe)
-                    if ($member->social_crown > $exercise->social_crown_amount) {
-                         $member->social_crown = $exercise->social_crown_amount;
+                    $social = new SocialFund();
+                    $social->member_id = $member->id;
+                    $social->exercise_id = $exercise->id;
+                    $social->amount = $model->amount;
+                    
+                    if ($social->save()) {
+                        Yii::$app->session->setFlash('success', 'Fond social réglé avec succès.');
+                    } else {
+                        Yii::$app->session->setFlash('error', 'Erreur lors de l\'enregistrement du fond social.');
                     }
                     
-                    $member->save();
                     return $this->redirect(Yii::$app->request->referrer ?: "@administrator.exercise_debts");
                 } else {
                     Yii::$app->session->setFlash('error', 'Impossible de régler le fond social. Vérifiez le montant ou l\'exercice actif.');

@@ -6,13 +6,6 @@
 <?php $this->endBlock() ?>
 
 <div class="container-fluid py-4">
-    <!-- Back Button -->
-    <div class="mb-4">
-        <a href="<?= Yii::getAlias('@administrator.members') ?>" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Retour à la liste des membres
-        </a>
-    </div>
-
     <!-- Member Profile Card -->
     <div class="card shadow-sm border-0">
         <div class="card-body p-4">
@@ -23,5 +16,12 @@
                 'socialModel' => $socialModel
             ]) ?>
         </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-4">
+        <a href="<?= Yii::getAlias('@administrator.members') ?>" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Retour à la liste des membres
+        </a>
     </div>
 </div>

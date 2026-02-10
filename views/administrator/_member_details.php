@@ -40,19 +40,6 @@ $user = $member->user();
                 <div class="info-value"><?= htmlspecialchars($user->address ?: 'Non renseignée') ?></div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="info-item p-3 border rounded h-100">
-                <div class="info-label text-muted small fw-bold text-uppercase">Inscription</div>
-                <div class="info-value">
-                    <?php if ($member->social_crown): ?>
-                        <span class="badge bg-success">
-                            <?= number_format($member->social_crown, 0, ',', ' ') ?> XAF
-                        </span>
-                    <?php else: ?>
-                        <span class="badge bg-warning">Non payé</span>
-                    <?php endif; ?>
-                </div>
-            </div>
         </div>
     </div>
 

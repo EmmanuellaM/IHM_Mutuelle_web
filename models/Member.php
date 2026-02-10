@@ -171,11 +171,10 @@ class Member extends ActiveRecord
             return 0;
         }
         try {
-            $registration = Registration::find()
+            return Registration::find()
                 ->where(['member_id' => $this->id])
                 ->andWhere(['exercise_id' => $exercise->id])
-                ->one();
-            return $registration ? $registration->amount : 0;
+                ->sum('amount') ?: 0;
         } catch (\Exception $e) {
             \Yii::error("Erreur lors de la récupération du montant d'inscription: " . $e->getMessage());
             return 0;
@@ -193,11 +192,10 @@ class Member extends ActiveRecord
             return 0;
         }
         try {
-            $socialFund = SocialFund::find()
+            return SocialFund::find()
                 ->where(['member_id' => $this->id])
                 ->andWhere(['exercise_id' => $exercise->id])
-                ->one();
-            return $socialFund ? $socialFund->amount : 0;
+                ->sum('amount') ?: 0;
         } catch (\Exception $e) {
             \Yii::error("Erreur lors de la récupération du montant du fond social: " . $e->getMessage());
             return 0;
