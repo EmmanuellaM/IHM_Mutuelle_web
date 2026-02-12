@@ -11,7 +11,7 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
  
 
     public function getUser() {
-        return static::findOne($this->getId());
+        return $this;
     }
 
     public function getMember()
@@ -83,6 +83,19 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
         ]);
     }
 
+    public static function findByUsername($username)
+    {
+        return static::findOne(['username' => $username]);
+    }
 
+    public static function isPasswordResetTokenValid($token)
+    {
+        if (empty($token)) {
+            return false;
+        }
 
+        $timestamp = (int) substr($token, strrpos($token, '_') + 1);
+        $expire = Yii::$app->params['user.passwordResetTokenExpire'];
+        return $timestamp + $expire >= time();
+    }
 }
