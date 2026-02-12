@@ -38,6 +38,7 @@ Membres
                         <div class="list-group list-group-flush" id="membersList">
                             <?php foreach ($members as $member):
                                 $user = $member->user();
+                                if (!$user) continue; // Skip if user is missing
                                 $fullName = htmlspecialchars($user->name.' '.$user->first_name);
                             ?>
                                 <a href="<?= Yii::getAlias('@administrator.member') . '?q=' . $member->id ?>" 

@@ -58,12 +58,12 @@ $usersJson = Json::encode(array_values(array_filter(Json::decode($usersJson))));
 
 .mutuelle-chat {
     display: flex;
-    height: calc(100vh - 120px);
+    height: calc(100vh - 160px); /* Increased offset to prevent overflow */
     background-color: var(--white);
     border-radius: 20px;
     box-shadow: var(--shadow);
     overflow: hidden;
-    margin: 20px;
+    margin: 10px;
     transition: var(--transition);
 }
 
@@ -544,14 +544,15 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     chatMessages.innerHTML = '';
+                    console.log('Messages loaded:', data.messages);
                     data.messages.forEach(message => {
                         const isCurrentUser = message.sender_id === currentUserId;
                         const messageElement = document.createElement('div');
-                        messageElement.className = `mutuelle-chat-message \${isCurrentUser ? 'message-sent' : 'message-received'}`;
+                        messageElement.className = `mutuelle-chat-message ${isCurrentUser ? 'message-sent' : 'message-received'}`;
                         messageElement.innerHTML = `
                             <div class="message-content">
-                                \${message.message}
-                                <div class="message-time">\${new Date(message.created_at * 1000).toLocaleTimeString()}</div>
+                                ${message.message}
+                                <div class="message-time">${new Date(message.created_at * 1000).toLocaleTimeString()}</div>
                             </div>
                         `;
                         chatMessages.appendChild(messageElement);

@@ -119,25 +119,20 @@ public function actionAdministratorForm() {
             if ($administrator) {
                 // Récupérer l'utilisateur correspondant
                 $user = User::findOne($administrator->user_id);
-                if ($administrator && $user->validatePassword($administratorModel->password)) {
+                if ($administrator && $user && $user->validatePassword($administratorModel->password)) {
                     if ($administratorModel->remember) {
                         Yii::$app->user->login($user, 3600*24*30);
                     } else {
-                        // DEBUG: Generic error for security usually, but specific here for debugging
-                        // return ['success' => false, 'message' => "Mot de passe incorrect pour l'utilisateur lié (ID: " . $user->id . ")."];
                         Yii::$app->user->login($user);
                     }
                     
-                    // Message de succès
                     Yii::$app->session->setFlash('success', 'Connexion réussie !');
                     
-                    // Si c'est une requête AJAX, retourner JSON
                     if (Yii::$app->request->isAjax) {
                         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
                         return ['success' => true, 'redirect' => Yii::$app->urlManager->createUrl('administrator/accueil')];
                     }
                     
-                    // Sinon, rediriger directement (POST classique)
                     return $this->redirect(['administrator/accueil']);
                 }
             } else {
