@@ -528,7 +528,7 @@ $usersJson = Json::encode(array_values(array_filter(Json::decode($usersJson))));
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const currentUserId = <?= $currentUserId ?>;
+    const currentUserId = <?= Yii::$app->user->id ?>;
     const chatMessages = document.querySelector('.mutuelle-chat-messages');
     const messageInput = document.querySelector('.mutuelle-chat-input input');
     const sendButton = document.querySelector('.mutuelle-chat-input button');
@@ -547,12 +547,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     data.messages.forEach(message => {
                         const isCurrentUser = message.sender_id === currentUserId;
                         const messageElement = document.createElement('div');
-                        messageElement.className = `chat-message ${isCurrentUser ? 'sent' : 'received'}`;
+                        messageElement.className = `mutuelle-chat-message \${isCurrentUser ? 'message-sent' : 'message-received'}`;
                         messageElement.innerHTML = `
                             <div class="message-content">
-                                <div class="message-sender">${message.sender_name}</div>
-                                <div class="message-text">${message.message}</div>
-                                <div class="message-time">${new Date(message.created_at * 1000).toLocaleTimeString()}</div>
+                                \${message.message}
+                                <div class="message-time">\${new Date(message.created_at * 1000).toLocaleTimeString()}</div>
                             </div>
                         `;
                         chatMessages.appendChild(messageElement);
