@@ -447,8 +447,13 @@ $this->title = "Mutuelle - ENSPY";
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <a class="profile-menu" href="#" id="profileDropdown" role="button" data-toggle="dropdown">
-                        <img src="<?= \app\managers\FileManager::loadAvatar($this->params['user']) ?>" alt="<?= $this->params['administrator']->username ?>">
-                        <span class="d-none d-md-inline"><?= $this->params['administrator']->username ?></span>
+                        <?php if (isset($this->params['user']) && isset($this->params['administrator'])): ?>
+                            <img src="<?= \app\managers\FileManager::loadAvatar($this->params['user']) ?>" alt="<?= $this->params['administrator']->username ?>">
+                            <span class="d-none d-md-inline"><?= $this->params['administrator']->username ?></span>
+                        <?php else: ?>
+                            <img src="<?= Yii::getAlias('@web').'/img/administrator.jpg' ?>" alt="Admin">
+                            <span class="d-none d-md-inline">Administrateur</span>
+                        <?php endif; ?>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right">
                         <a class="dropdown-item" href="<?= Yii::getAlias("@administrator.profile") ?>">

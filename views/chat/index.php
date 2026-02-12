@@ -58,12 +58,12 @@ $usersJson = Json::encode(array_values(array_filter(Json::decode($usersJson))));
 
 .mutuelle-chat {
     display: flex;
-    height: calc(100vh - 180px);
+    height: calc(100vh - 120px);
     background-color: var(--white);
     border-radius: 20px;
     box-shadow: var(--shadow);
     overflow: hidden;
-    margin: 80px 20px 20px 20px;
+    margin: 20px;
     transition: var(--transition);
 }
 

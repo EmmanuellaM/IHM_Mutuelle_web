@@ -66,7 +66,11 @@ class FileManager
         }
     }
 
-    public static function loadAvatar(User $user, $format = "256") {
+    public static function loadAvatar($user, $format = "256") {
+        if (!$user) {
+            return Yii::getAlias('@web').'/img/members.png';
+        }
+        
         if ($user->type === 'ADMINISTRATOR') {
             if ($user->avatar)
                 return self::loadImage($user->avatar,Yii::getAlias("@admin_avatar_path"),$format);
