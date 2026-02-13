@@ -18,6 +18,7 @@ class AppAsset extends AssetBundle
     ];
 
     public $js = [
+        'js/jquery/jquery.min.js',  // jQuery must load first
         'js/bootstrap/popper.min.js',
         'js/bootstrap/bootstrap.min.js',
         'js/font_awesome/all.min.js',
