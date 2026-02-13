@@ -67,8 +67,7 @@ class GuestController extends Controller
         $administratorModel = new AdministratorConnectionForm();
 
 
-        // return $this->render('connection',['member' => $memberModel, 'administrator' => $administratorModel]);
-        return "DEBUG: GUEST Controller is working.";
+        return $this->render('connection',['member' => $memberModel, 'administrator' => $administratorModel]);
     }
 
 
