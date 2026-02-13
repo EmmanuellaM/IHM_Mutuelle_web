@@ -111,9 +111,9 @@ class AdministratorController extends Controller
         $model = new NewSessionForm();
         $model->interest = SettingManager::getInterest();
         $model->inscription_amount = SettingManager::getInscription();
-        $model->social_crown_amount = SettingManager::getSocialCrown();
-        // return $this->render('home', compact('session', 'model', 'idModel'));
-        return "DEBUG: Controller is working. User ID: " . $this->user->id . ", Admin ID: " . $this->administrator->id;
+        // $model->social_crown_amount = SettingManager::getSocialCrown();
+        return $this->render('home', compact('session', 'model', 'idModel'));
+        // return "DEBUG: Controller is working. User ID: " . $this->user->id . ", Admin ID: " . $this->administrator->id;
     }
     // Nouvelle Session (ancien)
     // public function actionNouvelleSession()
