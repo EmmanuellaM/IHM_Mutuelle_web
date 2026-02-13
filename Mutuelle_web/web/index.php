@@ -1,12 +1,8 @@
 <?php
-header('X-Side: ROOT');
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+header('X-Side: NESTED');
 
 // comment out the following two lines when deployed to production
 defined('YII_DEBUG') or define('YII_DEBUG', true);
-// die("ROOT INDEX ACTIVE");
 defined('YII_ENV') or define('YII_ENV', 'debug');
 
 require __DIR__ . '/../vendor/autoload.php';

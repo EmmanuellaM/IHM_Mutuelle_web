@@ -1,0 +1,33 @@
+body {
+    height: 100vh;
+
+    background: linear-gradient(rgba(245, 194, 85, 0.34), rgba(245, 194, 85, 0.34)), linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.51)), url("../img/WhatsApp Image 2023-01-11 à 05.05.57.jpg");
+}
+
+#icon {
+    width: 50px;
+    height: 50px;
+}
+
+.nav-link {
+    color: white !important;
+
+    padding-bottom: 15px;
+    padding-top: 15px;
+}
+
+.navbar-brand {
+    padding : 5px
+}
+
+.navbar {
+    padding-bottom: 0px!important;
+}
+
+.nav-item {
+
+}
+
+.nav-item.active {
+    border-bottom: 3px solid rgb(165, 227, 226);
+}
